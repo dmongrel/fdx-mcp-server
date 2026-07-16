@@ -6,11 +6,7 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-  InitializeRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 import { getContextTool, handleGetContext } from "./tools/get-context.ts";
 import { searchActionsTool, handleSearchActions } from "./tools/search-actions.ts";
@@ -208,13 +204,6 @@ const tools: FdxTool[] = [
 /* ------------------------------------------------------------------ */
 /*  Request handlers                                                  */
 /* ------------------------------------------------------------------ */
-
-server.setRequestHandler(InitializeRequestSchema, () => ({
-  protocolVersion: "2025-03-26",
-  capabilities: {
-    tools: {},
-  },
-}));
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools,
