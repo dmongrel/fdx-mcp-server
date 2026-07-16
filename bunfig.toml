@@ -1,0 +1,9 @@
+# bunfig.toml — Bun-specific configuration for fdx-mcp-server
+
+[run]
+# Enable file-read permissions by default (required for MCP server)
+permissions = [
+  "--allow-read",
+  "--allow-write",
+  "--allow-net",
+]
