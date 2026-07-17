@@ -1,91 +1,102 @@
-Below are the complete, step-by-step instructions you can drop directly into your project's `README.md` or share with your users.
+# Final Draft MCP Server
 
-Since your server **must read and write local files**, the Deno configuration includes the necessary security permissions to allow local file access.
+## Description
 
----
+**`fdx-mcp-server`** is a Model Context Protocol (MCP) server that lets AI agents read, analyze, and manipulate [Final Draft](https://www.filedropper.com/finaldraft) screenplay files (`.fdx`). It exposes tools for parsing scene headings, character arcs, dual dialogues, SmartType dictionaries, pagination maps, script breakdowns, and more — effectively giving an LLM the ability to understand and edit screenplay structure.
 
-# Installing & Configuring `fdx-mcp-server`
-
-Because `fdx-mcp-server` is built using modern TypeScript, you can run it securely and instantly on your local machine using **Bun** or **Deno** without needing any compilation or dealing with OS code-signing warnings.
-
-Choose **one** of the setup paths below depending on your preferred runtime environment.
+Written in TypeScript, it runs on **Bun** or **Deno** using the stdio transport protocol, making it suitable for integration with any MCP-compatible client such as Claude Desktop.
 
 ---
 
-## Path A: The Bun Setup (Recommended & Fastest)
+## Table of Contents
 
-Bun offers the fastest startup speeds. If you have Bun installed, you can execute the server directly from GitHub without installing it globally.
-
-### 1. The `.mcp.json` Configuration
-
-Add the following configuration block to your MCP client configuration file (e.g., `claude_desktop_config.json` or `.mcp.json`):
-
-```json
-{
-  "mcpServers": {
-    "fdx-mcp-server": {
-      "command": "bun",
-      "args": [
-        "run",
-        "https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/main/index.ts"
-      ]
-    }
-  }
-}
-
-```
-
-* **How it works:** Bun will automatically download, cache, and execute the server file on startup. It runs natively with access to your local filesystem.
+- [Installation](#installation)
+  - [Prerequisites: Node.js](#prerequisites-nodejs)
+  - [Option A — Direct from GitHub (Bun or Deno)](#option-a--direct-from-github-bun-or-deno)
+  - [Option B — Global NPM Install](#option-b--global-npm-install)
+- [Usage](#usage)
+- [Features](#features)
 
 ---
 
-## Path B: The Deno Setup (Secure & Sandboxed)
+## Installation
 
-Deno runs in a secure-by-default sandbox. Because `fdx-mcp-server` needs to read and write local files, you must explicitly grant it those permissions using flags.
+### Prerequisites: Node.js
 
-### 1. The `.mcp.json` Configuration
+Node.js is required for **Option B** (Global NPM Install). If you plan to use that option, install it first using one of these methods:
 
-Add the following configuration block to your MCP client configuration file:
+- **Windows / macOS**: Download the LTS installer from [nodejs.org](https://nodejs.org/) and run it.
+- **Linux (apt)**: `curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt-get install -y nodejs`
+- **Homebrew (macOS / Linux)**: `brew install node`
 
-```json
-{
-  "mcpServers": {
-    "fdx-mcp-server": {
-      "command": "deno",
-      "args": [
-        "run",
-        "--allow-read",
-        "--allow-write",
-        "--allow-net",
-        "https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/main/index.ts"
-      ]
-    }
-  }
-}
+Verify the installation by running `node --version` and `npm --version` in your terminal.
 
-```
+### Option A — Direct from GitHub (Bun or Deno)
 
-* **`--allow-read` & `--allow-write`:** Required to allow the server to interact with your local files.
-* **`--allow-net`:** Required to let Deno resolve external package dependencies.
+If you have **Bun**, **Deno**, or **both** installed, you can run the server directly from `raw.githubusercontent.com` without installing it locally. No compilation or OS code-signing warnings needed.
 
----
+> ⚠️ **Rate-limit notice:** This path fetches the server from `raw.githubusercontent.com` every time your MCP client starts. GitHub enforces an anonymous usage policy that limits unauthenticated requests to **60 per hour** (across all of `github.com` and its subdomains). If you exceed this limit, requests will be rejected with a `403 Forbidden` error until the window resets. Frequent restarts can trigger this — for heavy use, see [Option B](#option-b--global-npm-install) which caches everything locally.
 
-## Path C: Global NPM Installation (No Bun or Deno Required)
+### Option B — Global NPM Install
 
-If you prefer a traditional Node.js/NPM setup, you can install the package globally directly from GitHub. This downloads all dependencies locally so the server can boot instantly and work 100% offline.
-
-### 1. Install Globally via NPM
-
-Run the following command in your terminal:
+If you prefer a traditional Node.js/NPM setup, install the package globally directly from GitHub. This downloads all dependencies locally so the server boots instantly and works 100% offline.
 
 ```bash
 npm install -g github:dmongrel/fdx-mcp-server
-
 ```
 
-### 2. The `.mcp.json` Configuration
+To update later: `npm update -g fdx-mcp-server`
 
-Once installed, add this block to your configuration file:
+---
+
+## Usage
+
+Add a configuration block to your MCP client's config file (e.g., `claude_desktop_config.json` or `.mcp.json`). Select the entries that apply to you:
+
+**Using Bun only:**
+
+```json
+{
+  "mcpServers": {
+    "fdx-mcp-server-bun": {
+      "command": "bun",
+      "args": ["run", "https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/main/src/index.ts"]
+    }
+  }
+}
+```
+
+**Using Deno only:**
+
+```json
+{
+  "mcpServers": {
+    "fdx-mcp-server-deno": {
+      "command": "deno",
+      "args": ["run", "--allow-env", "--allow-read", "--allow-write", "https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/main/src/index.ts"]
+    }
+  }
+}
+```
+
+**Using both Bun and Deno:**
+
+```json
+{
+  "mcpServers": {
+    "fdx-mcp-server-bun": {
+      "command": "bun",
+      "args": ["run", "https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/main/src/index.ts"]
+    },
+    "fdx-mcp-server-deno": {
+      "command": "deno",
+      "args": ["run", "--allow-env", "--allow-read", "--allow-write", "https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/main/src/index.ts"]
+    }
+  }
+}
+```
+
+**Using global NPM install:**
 
 ```json
 {
@@ -96,11 +107,21 @@ Once installed, add this block to your configuration file:
     }
   }
 }
-
 ```
 
-* **To Update Later:** If updates are pushed to GitHub, you can pull the latest changes anytime by running:
-```bash
-npm update -g fdx-mcp-server
+---
 
-```
+## Features
+
+Key capabilities exposed by `fdx-mcp-server`:
+
+- **Document lifecycle** — open, save, reload, create new `.fdx` files; manage server-side document cache.
+- **Scene analysis** — parse scene headings (INT./EXT., location, time of day), extract scene index and properties, compute script stats and page maps.
+- **Character tracking** — retrieve character lists, extension metadata (V.O., O.S.), per-character scene appearance counts, and arc beats across scenes.
+- **Dual dialogue support** — read and create side-by-side dialogue blocks.
+- **SmartType dictionaries** — manage characters, extensions, locations, transitions, scene intros, times of day, spell-check lists, and paragraph types.
+- **Formatting & styling** — query and edit element settings (fonts, indentation, spacing) for every paragraph type; manage header/footer content.
+- **Title page management** — read and write title, author, contact block, copyright, and based-on credits.
+- **Script breakdowns** — generate full production breakdown reports (props, vehicles, camera, cast) as text or HTML/PDF.
+- **Macro system** — query macro aliases and their activation scopes.
+- **Search & navigation** — find paragraphs by text, list sections and section contents, retrieve revision colors and display board data.
