@@ -3,7 +3,7 @@
  * flag per entry, most-recently-used first). Read-only, no parameters.
  */
 
-import type { FdxTool } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
 import { textResult } from "./shared.ts";
 import { documentCache, MAX_DOCUMENT_CACHE_SIZE } from "../fdx/cache.ts";
 
@@ -14,7 +14,7 @@ export const getCacheStatusTool: FdxTool = {
   inputSchema: { type: "object", properties: {} },
 };
 
-export function handleGetCacheStatus() {
+export function handleGetCacheStatus(): ToolResult {
   const entries = documentCache.entries();
   const status = {
     capacity: MAX_DOCUMENT_CACHE_SIZE,

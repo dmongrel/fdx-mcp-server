@@ -4,8 +4,8 @@
  * tools/find_par.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
 import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
 import { findSectionIndex, findSectionEnd } from "../fdx/sections.ts";
 
@@ -28,14 +28,14 @@ export const findParTool: FdxTool = {
   },
 };
 
-export async function handleFindPar(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
-  const query = args?.textContent as string | undefined;
+export async function handleFindPar(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
+  const query = arg<string>(args, "textContent");
   if (!path) return errResult("path is required");
   if (query === undefined) return errResult("textContent is required");
 
-  const sceneId = args?.id as string | undefined;
-  const parType = args?.parType as string | undefined;
+  const sceneId = arg<string>(args, "id");
+  const parType = arg<string>(args, "parType");
   const caseSensitive = Boolean(args?.caseSensitive);
 
   let doc, warning;
@@ -57,7 +57,7 @@ export async function handleFindPar(args: Record<string, unknown> | undefined) {
     endIndex = findSectionEnd(paragraphs, idx);
   }
 
-  const searchLower = query.toLowerCase();
+  const searchLower = caseSensitive ? "" : query.toLowerCase();
   const results: string[] = [];
   for (let i = startIndex; i < endIndex; i++) {
     const p = paragraphs[i]!;

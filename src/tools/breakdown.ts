@@ -195,10 +195,10 @@ export function buildSceneIndex(doc: FdxDocument): SceneInfo[] {
       text,
       page,
       length: parseSceneLength(sp?.length ?? ""),
-      color: sp?.color || undefined,
-      intro: intro || undefined,
-      location: location || undefined,
-      timeOfDay: timeOfDay || undefined,
+      color: sp?.color ?? undefined,
+      intro: intro ?? undefined,
+      location: location ?? undefined,
+      timeOfDay: timeOfDay ?? undefined,
     });
   }
   return out;
@@ -382,16 +382,16 @@ export function buildArcBeatData(doc: FdxDocument): ArcBeatData[] {
 }
 
 /** Retrieves one paragraph's SceneProperties by id, parsed into the get_scene_properties JSON shape. */
-export function getScenePropertiesById(doc: FdxDocument, id: string): ScenePropertiesResult | undefined | null {
+export function getScenePropertiesById(doc: FdxDocument, id: string): ScenePropertiesResult | null | undefined {
   const p = doc.getParagraphElements().find((el) => getParagraphId(el) === id);
   if (!p) return null; // not found
   const sp = getSceneProperties(p);
   if (!sp) return undefined; // found but no SceneProperties
   return {
-    color: sp.color || undefined,
-    length: sp.length || undefined,
+    color: sp.color ?? undefined,
+    length: sp.length ?? undefined,
     lengthEights: parseSceneLength(sp.length),
     page: parseInt(sp.page, 10) || 0,
-    title: sp.title || undefined,
+    title: sp.title ?? undefined,
   };
 }

@@ -5,13 +5,8 @@
  * matching the Go implementation.
  */
 
+import type { FdxTool } from "./shared.ts";
 import { searchActionsText } from "./context-data.ts";
-
-export interface FdxTool {
-  name: string;
-  description: string;
-  inputSchema: object;
-}
 
 export const searchActionsTool: FdxTool = {
   name: "search_actions",
@@ -28,8 +23,8 @@ export const searchActionsTool: FdxTool = {
   },
 };
 
-export function handleSearchActions() {
+export function handleSearchActions(): { content: Array<{ type: "text"; text: string }> } {
   return {
-    content: [{ type: "text" as const, text: searchActionsText }],
+    content: [{ type: "text", text: searchActionsText }],
   };
 }

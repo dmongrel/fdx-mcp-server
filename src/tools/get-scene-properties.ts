@@ -4,7 +4,7 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
 import { getScenePropertiesById } from "./breakdown.ts";
 
 export const getScenePropertiesTool: FdxTool = {
@@ -22,8 +22,8 @@ export const getScenePropertiesTool: FdxTool = {
 };
 
 export async function handleGetSceneProperties(args: Record<string, unknown> | undefined): Promise<ToolResult> {
-  const path = args?.path as string | undefined;
-  const id = args?.id as string | undefined;
+  const path = arg<string>(args, "path");
+  const id = arg<string>(args, "id");
   if (!path) return errResult("path is required");
   if (!id) return errResult("id is required");
 

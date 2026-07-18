@@ -5,8 +5,8 @@
  * (type validation) and the get_section* tools (section-boundary detection).
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult } from "./shared.ts";
 
 /** Structural / section-heading paragraph types. */
 export const sectionTypes: string[] = [
@@ -101,7 +101,7 @@ export const listTypesTool: FdxTool = {
   },
 };
 
-export function handleListTypes(args: Record<string, unknown> | undefined) {
-  const cls = args?.class as string | undefined;
+export function handleListTypes(args: Record<string, unknown> | undefined): ToolResult {
+  const cls = arg<string>(args, "class");
   return textResult(listTypesText(cls));
 }

@@ -3,8 +3,8 @@
  * unsaved edits unless force=true is passed. Mirrors Go's tools/close_fdx.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 
 export const closeFdxTool: FdxTool = {
@@ -25,10 +25,10 @@ export const closeFdxTool: FdxTool = {
   },
 };
 
-export function handleCloseFdx(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
+export function handleCloseFdx(args: Record<string, unknown> | undefined): ToolResult {
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
-  const force = Boolean(args?.force);
+  const force = Boolean(arg<boolean>(args, "force"));
 
   const { existed, dirty, removed } = documentCache.removeIf(path, force);
   if (!existed) {

@@ -3,8 +3,8 @@
  * for that path. Refuses to discard unsaved edits unless force=true. Mirrors tools/reload_fdx.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, hasFdxExtension } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, hasFdxExtension } from "./shared.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { readTextFile } from "../fdx/runtime.ts";
@@ -27,13 +27,13 @@ export const reloadFdxTool: FdxTool = {
   },
 };
 
-export async function handleReloadFdx(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
+export async function handleReloadFdx(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
   if (!hasFdxExtension(path)) {
     return errResult("invalid file extension: only .fdx files are supported");
   }
-  const force = Boolean(args?.force);
+  const force = Boolean(arg<boolean>(args, "force"));
 
   const { existed, dirty, removed } = documentCache.removeIf(path, force);
   if (existed && !removed) {

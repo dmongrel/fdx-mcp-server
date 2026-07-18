@@ -4,7 +4,7 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
 import { buildCharacterAppearances, rankCharacters } from "./breakdown.ts";
 
 export const getCharacterAppearancesTool: FdxTool = {
@@ -25,7 +25,7 @@ export const getCharacterAppearancesTool: FdxTool = {
 };
 
 export async function handleGetCharacterAppearances(args: Record<string, unknown> | undefined): Promise<ToolResult> {
-  const path = args?.path as string | undefined;
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
 
   let doc, warning;
@@ -38,7 +38,7 @@ export async function handleGetCharacterAppearances(args: Record<string, unknown
   const appearances = buildCharacterAppearances(doc);
   const ranked = rankCharacters(appearances);
 
-  const want = ((args?.character as string | undefined) ?? "").trim();
+  const want = ((arg<string>(args, "character")) ?? "").trim();
   if (want !== "") {
     const hit = ranked.find((r) => r.name.toLowerCase() === want.toLowerCase());
     if (!hit) {

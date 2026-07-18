@@ -8,7 +8,7 @@
 
 import type { FdxDocument } from "../fdx/document.ts";
 import { documentCache } from "../fdx/cache.ts";
-import { getCachedFdx, hasFdxExtension, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import { arg, getCachedFdx, hasFdxExtension, pushCacheWarning, textResult, errResult } from "./shared.ts";
 import type { ToolResult, FdxTool } from "./shared.ts";
 
 /** The tool-agnostic description of one list mutation (create/edit/remove/fix). */
@@ -60,14 +60,7 @@ export function sortListCI(list: string[]): void {
 /** Removes duplicate entries in place (exact, case-sensitive match), keeping the first occurrence. */
 export function dedupList(list: string[]): string[] {
   const seen = new Set<string>();
-  const out: string[] = [];
-  for (const v of list) {
-    if (!seen.has(v)) {
-      seen.add(v);
-      out.push(v);
-    }
-  }
-  return out;
+  return list.filter((v) => { if (seen.has(v)) return false; seen.add(v); return true; });
 }
 
 /** Trims whitespace on every entry in place. */
@@ -249,9 +242,10 @@ export async function runSmartListEdit(
   if (sepUpdated && e.action) msg += " Separator updated.";
   msg += " File updated in cache — call save_fdx to persist changes to disk.";
 
-  let result = textResult(msg);
-  result = pushCacheWarning(result, warning);
-  result = pushCacheWarning(result, dirtyWarning);
+const result = pushCacheWarning(
+    pushCacheWarning(textResult(msg), warning),
+    dirtyWarning,
+  );
   return result;
 }
 
@@ -277,7 +271,7 @@ export function makeSmartListGetTool(name: string, description: string, leaf: st
     },
   };
   async function handler(args: Record<string, unknown> | undefined): Promise<ToolResult> {
-    const path = args?.path as string | undefined;
+    const path = arg<string>(args, "path");
     if (!path) return badPath();
     return runSmartListGet(path, leaf, noun);
   }
@@ -307,16 +301,16 @@ export function makeSmartListEditTool(name: string, description: string, leaf: s
     },
   };
   async function handler(args: Record<string, unknown> | undefined): Promise<ToolResult> {
-    const path = args?.path as string | undefined;
+    const path = arg<string>(args, "path");
     if (!path) return badPath();
     const e: SmartListEdit = {
-      action: args?.action as string | undefined,
-      find: args?.find as string | undefined,
-      replace: args?.replace as string | undefined,
-      value: args?.value as string | undefined,
-      cs: args?.cs as boolean | undefined,
-      uppercase: args?.uppercase as boolean | undefined,
-      dedup: args?.dedup as boolean | undefined,
+      action: arg<string>(args, "action"),
+      find: arg<string>(args, "find"),
+      replace: arg<string>(args, "replace"),
+      value: arg<string>(args, "value"),
+      cs: arg<boolean>(args, "cs"),
+      uppercase: arg<boolean>(args, "uppercase"),
+      dedup: arg<boolean>(args, "dedup"),
     };
     return runSmartListEdit(path, leaf, noun, e, undefined, false);
   }
@@ -345,18 +339,18 @@ export function makeSmartSeparatorEditTool(name: string, description: string, le
     },
   };
   async function handler(args: Record<string, unknown> | undefined): Promise<ToolResult> {
-    const path = args?.path as string | undefined;
+    const path = arg<string>(args, "path");
     if (!path) return badPath();
     const e: SmartListEdit = {
-      action: args?.action as string | undefined,
-      find: args?.find as string | undefined,
-      replace: args?.replace as string | undefined,
-      value: args?.value as string | undefined,
-      cs: args?.cs as boolean | undefined,
-      uppercase: args?.uppercase as boolean | undefined,
-      dedup: args?.dedup as boolean | undefined,
+      action: arg<string>(args, "action"),
+      find: arg<string>(args, "find"),
+      replace: arg<string>(args, "replace"),
+      value: arg<string>(args, "value"),
+      cs: arg<boolean>(args, "cs"),
+      uppercase: arg<boolean>(args, "uppercase"),
+      dedup: arg<boolean>(args, "dedup"),
     };
-    const separator = args?.separator as string | undefined;
+    const separator = arg<string>(args, "separator");
     return runSmartListEdit(path, leaf, noun, e, separator, true);
   }
   return { tool, handler };

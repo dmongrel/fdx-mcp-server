@@ -3,8 +3,8 @@
  * two title-page paragraphs). Mirrors Go's tools/edit_copyright.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { setCopyrightBlock, clearCopyrightBlock, copyrightAllRights } from "../fdx/title-page.ts";
 
@@ -28,9 +28,9 @@ export const editCopyrightTool: FdxTool = {
   },
 };
 
-export async function handleEditCopyright(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
-  const action = args?.action as string | undefined;
+export async function handleEditCopyright(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
+  const action = arg<string>(args, "action");
   if (!path) return errResult("path is required");
   if (!hasFdxExtension(path)) return errResult("only .fdx files are supported");
   if (!action) return errResult("action is required");
@@ -46,10 +46,10 @@ export async function handleEditCopyright(args: Record<string, unknown> | undefi
   const paragraphs = doc.getTitlePageParagraphs();
 
   if (action === "set") {
-    const owner = (args?.owner as string | undefined) ?? "";
-    if (owner.trim() === "") return errResult("set requires an owner");
-    const year = (args?.year as string | undefined) ?? "";
-    const allRightsReserved = copyrightAllRights(args?.allRightsReserved as boolean | undefined);
+    const owner = arg<string>(args, "owner");
+    if (!owner?.trim()) return errResult("set requires an owner");
+    const year = arg<string>(args, "year") ?? "";
+    const allRightsReserved = copyrightAllRights(arg<boolean>(args, "allRightsReserved"));
     doc.setTitlePageParagraphs(setCopyrightBlock(paragraphs, owner, year, allRightsReserved));
   } else if (action === "remove") {
     if (!clearCopyrightBlock(paragraphs)) {
@@ -62,8 +62,9 @@ export async function handleEditCopyright(args: Record<string, unknown> | undefi
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
   const past = action === "remove" ? "removed" : "set";
-  let result = textResult(`Successfully ${past} the copyright. File updated in cache — call save_fdx to persist changes to disk.`);
-  result = pushCacheWarning(result, dirtyWarning);
-  result = pushCacheWarning(result, warning);
+  const result = pushCacheWarning(
+    pushCacheWarning(textResult(`Successfully ${past} the copyright. File updated in cache — call save_fdx to persist changes to disk.`), dirtyWarning),
+    warning,
+  );
   return result;
 }

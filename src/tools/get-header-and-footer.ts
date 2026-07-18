@@ -3,8 +3,8 @@
  * title page. Mirrors Go's tools/get_header_and_footer.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
 import { renderHeaderAndFooter, titlePageHfExists } from "../fdx/header-footer.ts";
 
 export const getHeaderAndFooterTool: FdxTool = {
@@ -22,15 +22,15 @@ export const getHeaderAndFooterTool: FdxTool = {
   },
 };
 
-export async function handleGetHeaderAndFooter(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
+export async function handleGetHeaderAndFooter(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
 
-  const location = ((args?.location as string | undefined) ?? "").toLowerCase() || "all";
+  const location = (arg<string>(args, "location") ?? "").toLowerCase() || "all";
   if (location !== "body" && location !== "title" && location !== "all") {
     return errResult("location must be 'body', 'title', or 'all'");
   }
-  const element = ((args?.element as string | undefined) ?? "").toLowerCase() || "all";
+  const element = (arg<string>(args, "element") ?? "").toLowerCase() || "all";
   if (element !== "header" && element !== "footer" && element !== "all") {
     return errResult("element must be 'header', 'footer', or 'all'");
   }

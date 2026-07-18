@@ -3,8 +3,8 @@
  * title page. Mirrors Go's tools/edit_header_and_footer.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { findChild, cloneNode } from "../fdx/xml.ts";
@@ -75,26 +75,26 @@ async function loadBaselineDoc(): Promise<FdxDocument> {
   return FdxDocument.parse(template);
 }
 
-export async function handleEditHeaderAndFooter(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
-  const action = args?.action as string | undefined;
+export async function handleEditHeaderAndFooter(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
+  const action = arg<string>(args, "action");
   if (!path) return errResult("path is required");
   if (!hasFdxExtension(path)) return errResult("only .fdx files are supported");
   if (!action) return errResult("action is required");
 
-  const location = ((args?.location as string | undefined) ?? "").toLowerCase() || "body";
+  const location = (arg<string>(args, "location") ?? "").toLowerCase() || "body";
   if (location !== "body" && location !== "titlepage") {
     return errResult("location must be 'body' or 'titlePage'");
   }
 
   const req: EditHeaderFooterRequest = {
-    headerParts: args?.headerParts as HeaderFooterPartInput[] | undefined,
-    footerParts: args?.footerParts as HeaderFooterPartInput[] | undefined,
-    footerFirstPage: args?.footerFirstPage as string | undefined,
-    footerVisible: args?.footerVisible as string | undefined,
-    headerFirstPage: args?.headerFirstPage as string | undefined,
-    headerVisible: args?.headerVisible as string | undefined,
-    startingPage: args?.startingPage as string | undefined,
+    headerParts: arg<HeaderFooterPartInput[]>(args, "headerParts"),
+    footerParts: arg<HeaderFooterPartInput[]>(args, "footerParts"),
+    footerFirstPage: arg<string>(args, "footerFirstPage"),
+    footerVisible: arg<string>(args, "footerVisible"),
+    headerFirstPage: arg<string>(args, "headerFirstPage"),
+    headerVisible: arg<string>(args, "headerVisible"),
+    startingPage: arg<string>(args, "startingPage"),
   };
 
   const partsError = validateHeaderFooterParts(req);
@@ -161,8 +161,10 @@ export async function handleEditHeaderAndFooter(args: Record<string, unknown> | 
   }
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
-  let result = textResult(`Successfully ${pastTense(action)} header and footer. File updated in cache — call save_fdx to persist changes to disk.`);
-  result = pushCacheWarning(result, dirtyWarning);
-  result = pushCacheWarning(result, warning);
+  const msg = `Successfully ${pastTense(action)} header and footer. File updated in cache — call save_fdx to persist changes to disk.`;
+  const result = pushCacheWarning(
+    pushCacheWarning(textResult(msg), dirtyWarning),
+    warning,
+  );
   return result;
 }

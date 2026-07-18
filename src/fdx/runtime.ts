@@ -6,6 +6,7 @@
 interface DenoLike {
   readTextFile(path: string | URL): Promise<string>;
   writeTextFile(path: string, content: string): Promise<void>;
+  writeFile(path: string, data: Uint8Array): Promise<void>;
   stat(path: string): Promise<{ isDirectory: boolean; isFile: boolean }>;
 }
 
@@ -30,6 +31,19 @@ export async function writeTextFile(path: string, content: string): Promise<void
   const deno = getDeno();
   if (deno) {
     await deno.writeTextFile(path, content);
+    return;
+  }
+  throw new Error("Unsupported runtime — requires Bun or Deno.");
+}
+
+export async function writeBinaryFile(path: string, data: Uint8Array): Promise<void> {
+  if (typeof Bun !== "undefined") {
+    await Bun.write(path, data);
+    return;
+  }
+  const deno = getDeno();
+  if (deno) {
+    await deno.writeFile(path, data);
     return;
   }
   throw new Error("Unsupported runtime — requires Bun or Deno.");

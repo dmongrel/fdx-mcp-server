@@ -3,8 +3,8 @@
  * tools/edit_title_page.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { findChild, cloneNode } from "../fdx/xml.ts";
@@ -74,28 +74,28 @@ async function loadBaselineTitlePage() {
   return cloneNode(tp);
 }
 
-export async function handleEditTitlePage(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
-  const action = args?.action as string | undefined;
+export async function handleEditTitlePage(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
+  const action = arg<string>(args, "action");
   if (!path) return errResult("path is required");
   if (!hasFdxExtension(path)) return errResult("only .fdx files are supported");
   if (!action) return errResult("action is required");
 
   const req: EditTitlePageRequest = {
-    title: args?.title as string | undefined,
-    subtitle: args?.subtitle as string | undefined,
-    byLine: args?.byLine as string | undefined,
-    author: args?.author as string | undefined,
-    basedOn: args?.basedOn as string | undefined,
-    originalAuthor: args?.originalAuthor as string | undefined,
-    contactName: args?.contactName as string | undefined,
-    contactAddressLine1: args?.contactAddressLine1 as string | undefined,
-    contactAddressLine2: args?.contactAddressLine2 as string | undefined,
-    contactCityStateZip: args?.contactCityStateZip as string | undefined,
-    contactPhone: args?.contactPhone as string | undefined,
-    copyrightOwner: args?.copyrightOwner as string | undefined,
-    copyrightYear: args?.copyrightYear as string | undefined,
-    copyrightAllRightsReserved: args?.copyrightAllRightsReserved as boolean | undefined,
+    title: arg<string>(args, "title"),
+    subtitle: arg<string>(args, "subtitle"),
+    byLine: arg<string>(args, "byLine"),
+    author: arg<string>(args, "author"),
+    basedOn: arg<string>(args, "basedOn"),
+    originalAuthor: arg<string>(args, "originalAuthor"),
+    contactName: arg<string>(args, "contactName"),
+    contactAddressLine1: arg<string>(args, "contactAddressLine1"),
+    contactAddressLine2: arg<string>(args, "contactAddressLine2"),
+    contactCityStateZip: arg<string>(args, "contactCityStateZip"),
+    contactPhone: arg<string>(args, "contactPhone"),
+    copyrightOwner: arg<string>(args, "copyrightOwner"),
+    copyrightYear: arg<string>(args, "copyrightYear"),
+    copyrightAllRightsReserved: arg<boolean>(args, "copyrightAllRightsReserved"),
   };
 
   let doc, warning;
@@ -133,8 +133,9 @@ export async function handleEditTitlePage(args: Record<string, unknown> | undefi
   }
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
-  let result = textResult(`Successfully ${pastTense(action)} title page. File updated in cache — call save_fdx to persist changes to disk.`);
-  result = pushCacheWarning(result, dirtyWarning);
-  result = pushCacheWarning(result, warning);
+  const result = pushCacheWarning(
+    pushCacheWarning(textResult(`Successfully ${pastTense(action)} title page. File updated in cache — call save_fdx to persist changes to disk.`), dirtyWarning),
+    warning,
+  );
   return result;
 }

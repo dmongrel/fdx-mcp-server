@@ -1,35 +1,46 @@
 /**
  * get_fdx_breakdown — Read-Only. Retrieve a combined script-breakdown report in text, html, or pdf
- * form. Mirrors Go's tools/get_fdx_breakdown.go + get_fdx_breakdown_pdf.go.
+ * form. Mirrors Go's tools/get_fdx_breakdown.go + get_fdx_breakdown_pdf.go, but writes the
+ * rendered report to targetPath on disk rather than returning it inline — the pdf/html payloads
+ * are large enough (base64 PDFs in particular) that surfacing them directly in the tool result
+ * bloats the conversation; writing to a file lets the caller open/inspect it separately instead.
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
 import { buildBreakdownData, renderBreakdownHtml, renderBreakdownText } from "./breakdown-report.ts";
 import { renderBreakdownPdf } from "./breakdown-pdf.ts";
+import { writeTextFile, writeBinaryFile } from "../fdx/runtime.ts";
 
 export const getFdxBreakdownTool: FdxTool = {
   name: "get_fdx_breakdown",
   description:
-    "Read-Only. Retrieve a combined script-breakdown report: document overview, paragraph-type breakdown, act structure, full scene catalog, character frequency, pagination map, arc-beat summary, scene-length analysis, and production flags (color-coded scenes, scenes over a page, missing time-of-day, characters without arc beats). Pass asType='text' (default, 80-column plain text for chat), 'html' (standalone styled page), or 'pdf' (base64-encoded printable document). CRITICAL: call read_fdx first.",
+    "Read-Only. Generate a combined script-breakdown report: document overview, paragraph-type breakdown, act structure, full scene catalog, character frequency, pagination map, arc-beat summary, scene-length analysis, and production flags (color-coded scenes, scenes over a page, missing time-of-day, characters without arc beats). Writes the report to targetPath instead of returning it inline — pass asType='text' (default, 80-column plain text), 'html' (standalone styled page), or 'pdf' (printable document). CRITICAL: call read_fdx first.",
   inputSchema: {
     type: "object",
     properties: {
       path: { type: "string", description: "the path to the .fdx file" },
+      targetPath: {
+        type: "string",
+        description: "the file path to write the rendered report to (e.g. a .txt, .html, or .pdf file matching asType)",
+      },
       asType: {
         type: "string",
-        description: "output format: 'text' (default), 'html', or 'pdf' (base64-encoded)",
+        description: "output format: 'text' (default), 'html', or 'pdf'",
       },
     },
-    required: ["path"],
+    required: ["path", "targetPath"],
   },
 };
 
 export async function handleGetFdxBreakdown(args: Record<string, unknown> | undefined): Promise<ToolResult> {
-  const path = args?.path as string | undefined;
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
 
-  const asType = String(args?.asType ?? "").trim().toLowerCase();
+  const targetPath = arg<string>(args, "targetPath");
+  if (!targetPath) return errResult("targetPath is required");
+
+  const asType = (arg<string>(args, "asType") ?? "").trim().toLowerCase();
   if (asType !== "" && asType !== "text" && asType !== "html" && asType !== "pdf") {
     return errResult("asType must be 'text', 'html', or 'pdf'");
   }
@@ -43,28 +54,27 @@ export async function handleGetFdxBreakdown(args: Record<string, unknown> | unde
 
   const data = buildBreakdownData(doc);
 
-  let result: ToolResult;
-  switch (asType) {
-    case "":
-    case "text":
-      result = textResult(renderBreakdownText(data));
-      break;
-    case "html":
-      result = textResult(renderBreakdownHtml(data));
-      break;
-    case "pdf": {
-      let bytes: Uint8Array;
-      try {
-        bytes = await renderBreakdownPdf(data);
-      } catch (err) {
-        return errResult(`pdf render error: ${err instanceof Error ? err.message : String(err)}`);
+  try {
+    switch (asType) {
+      case "":
+      case "text":
+        await writeTextFile(targetPath, renderBreakdownText(data));
+        break;
+      case "html":
+        await writeTextFile(targetPath, renderBreakdownHtml(data));
+        break;
+      case "pdf": {
+        const bytes = await renderBreakdownPdf(data);
+        await writeBinaryFile(targetPath, bytes);
+        break;
       }
-      result = textResult(bytes.toBase64());
-      break;
+      default:
+        return errResult("asType must be 'text', 'html', or 'pdf'");
     }
-    default:
-      return errResult("asType must be 'text', 'html', or 'pdf'");
+  } catch (err) {
+    return errResult(`render/write error: ${err instanceof Error ? err.message : String(err)}`);
   }
 
+  const result = textResult(`Wrote ${asType || "text"} breakdown report to ${targetPath}.`);
   return pushCacheWarning(result, warning);
 }

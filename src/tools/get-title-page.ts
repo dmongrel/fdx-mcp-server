@@ -3,8 +3,8 @@
  * bottom). Mirrors Go's tools/get_title_page.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
 import { paragraphText } from "../fdx/paragraph.ts";
 
 export const getTitlePageTool: FdxTool = {
@@ -19,8 +19,8 @@ export const getTitlePageTool: FdxTool = {
   },
 };
 
-export async function handleGetTitlePage(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
+export async function handleGetTitlePage(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
 
   let doc, warning;

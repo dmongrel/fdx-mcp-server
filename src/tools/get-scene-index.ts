@@ -4,7 +4,7 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
 import { isSectionType } from "../fdx/sections.ts";
 import { buildSceneIndex } from "./breakdown.ts";
 
@@ -27,10 +27,10 @@ export const getSceneIndexTool: FdxTool = {
 };
 
 export async function handleGetSceneIndex(args: Record<string, unknown> | undefined): Promise<ToolResult> {
-  const path = args?.path as string | undefined;
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
 
-  const wantType = ((args?.type as string | undefined) ?? "").trim();
+  const wantType = (arg<string>(args, "type") ?? "").trim();
   if (wantType !== "" && !isSectionType(wantType)) {
     return errResult(`not a section type: ${wantType} (use list_types to see section types)`);
   }

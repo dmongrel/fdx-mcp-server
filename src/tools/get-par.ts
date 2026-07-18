@@ -3,8 +3,8 @@
  * its plain text content (styling stripped). Mirrors Go's tools/get_par.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
 import { getParagraphId, paragraphText } from "../fdx/paragraph.ts";
 
 export const getParTool: FdxTool = {
@@ -20,9 +20,9 @@ export const getParTool: FdxTool = {
   },
 };
 
-export async function handleGetPar(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
-  const id = args?.id as string | undefined;
+export async function handleGetPar(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
+  const id = arg<string>(args, "id");
   if (!path) return errResult("path is required");
   if (!id) return errResult("id is required");
 

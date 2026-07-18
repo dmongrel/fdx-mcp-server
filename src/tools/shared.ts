@@ -19,6 +19,11 @@ export interface ToolResult {
   isError?: boolean;
 }
 
+/** Safely extracts an optional typed value from MCP handler args. */
+export function arg<T>(args: Record<string, unknown> | undefined, key: string): T | undefined {
+  return args?.[key] as T | undefined;
+}
+
 export function textResult(text: string): ToolResult {
   return { content: [{ type: "text", text }] };
 }

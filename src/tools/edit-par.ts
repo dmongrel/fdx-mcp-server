@@ -5,8 +5,8 @@
  * slugline splitter into SceneIntros/Locations/TimesOfDay).
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { generateUuid } from "../fdx/uuid.ts";
@@ -120,22 +120,22 @@ function pastTense(action: string): string {
   return `${action}d`;
 }
 
-export async function handleEditPar(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
-  const action = args?.action as string | undefined;
+export async function handleEditPar(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
+  const action = arg<string>(args, "action");
   if (!path) return errResult("path is required");
   if (!hasFdxExtension(path)) return errResult("only .fdx files are supported");
   if (!action) return errResult("action is required");
 
-  const id = args?.id as string | undefined;
-  const type = (args?.type as string | undefined) ?? "";
-  const alignment = args?.alignment as string | undefined;
-  const textRuns = ((args?.textRuns as TextRunInput[] | undefined) ?? []).map((tr) => ({
+  const id = arg<string>(args, "id");
+  const type = arg<string>(args, "type") ?? "";
+  const alignment = arg<string>(args, "alignment");
+  const textRuns = (arg<TextRunInput[]>(args, "textRuns") ?? []).map((tr) => ({
     content: tr.content,
     style: tr.style,
   }));
-  const beforeParId = args?.beforeParId as string | undefined;
-  const afterParId = args?.afterParId as string | undefined;
+  const beforeParId = arg<string>(args, "beforeParId");
+  const afterParId = arg<string>(args, "afterParId");
 
   if (action !== "remove" && !knownType(type)) {
     return errResult(`invalid paragraph type "${type}"; call list_types to see valid types`);
@@ -202,8 +202,9 @@ export async function handleEditPar(args: Record<string, unknown> | undefined) {
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
   const msg = `Successfully ${pastTense(action)} paragraph in script. File updated in cache — call save_fdx to persist changes to disk.`;
-  let result = textResult(msg);
-  result = pushCacheWarning(result, dirtyWarning);
-  result = pushCacheWarning(result, warning);
+  const result = pushCacheWarning(
+    pushCacheWarning(textResult(msg), dirtyWarning),
+    warning,
+  );
   return result;
 }

@@ -4,8 +4,8 @@
  * Go's tools/get_section_list.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
 import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
 import { findSectionIndex, isSectionType } from "../fdx/sections.ts";
 
@@ -31,11 +31,11 @@ export const getSectionListTool: FdxTool = {
   },
 };
 
-export async function handleGetSectionList(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
+export async function handleGetSectionList(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
-  const sectionId = args?.id as string | undefined;
-  const wantType = ((args?.type as string | undefined) ?? "").trim();
+  const sectionId = arg<string>(args, "id");
+  const wantType = (arg<string>(args, "type") ?? "").trim();
 
   let doc, warning;
   try {

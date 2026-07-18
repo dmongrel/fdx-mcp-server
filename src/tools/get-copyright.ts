@@ -3,8 +3,8 @@
  * paragraphs). Mirrors Go's tools/get_copyright.go.
  */
 
-import type { FdxTool } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxTool, ToolResult } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
 import { copyrightText } from "../fdx/title-page.ts";
 
 export const getCopyrightTool: FdxTool = {
@@ -20,8 +20,8 @@ export const getCopyrightTool: FdxTool = {
   },
 };
 
-export async function handleGetCopyright(args: Record<string, unknown> | undefined) {
-  const path = args?.path as string | undefined;
+export async function handleGetCopyright(args: Record<string, unknown> | undefined): Promise<ToolResult> {
+  const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
 
   let doc, warning;

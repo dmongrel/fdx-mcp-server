@@ -10,7 +10,7 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { generateUuid } from "../fdx/uuid.ts";
 import { getParagraphId } from "../fdx/paragraph.ts";
@@ -43,8 +43,8 @@ export const editDualDialogueTool: FdxTool = {
 };
 
 export async function handleEditDualDialogue(args: Record<string, unknown> | undefined): Promise<ToolResult> {
-  const path = args?.path as string | undefined;
-  const action = (args?.action as string | undefined) ?? "";
+  const path = arg<string>(args, "path");
+  const action = arg<string>(args, "action") ?? "";
   if (!path) return errResult("path is required");
   if (!hasFdxExtension(path)) return errResult("only .fdx files are supported");
 
@@ -58,7 +58,7 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
   const content = doc.getContentElement(true)!;
 
   if (action.toLowerCase() === "create") {
-    const ids = (args?.ids as string[] | undefined) ?? [];
+    const ids = arg<string[]>(args, "ids") ?? [];
     if (ids.length === 0) {
       return errResult("failed to create dual dialogue: create requires ids");
     }
@@ -98,7 +98,7 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
 
     content.children.splice(insertPos, 0, wrapper);
   } else if (action.toLowerCase() === "remove") {
-    const id = args?.id as string | undefined;
+    const id = arg<string>(args, "id");
     if (!id) return errResult("failed to remove dual dialogue: remove requires id");
 
     const idx = content.children.findIndex(
@@ -109,7 +109,7 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
       return errResult(`failed to remove dual dialogue: dual-dialogue wrapper not found: ${id}`);
     }
 
-    const extract = !!args?.extract;
+    const extract = Boolean(arg<boolean>(args, "extract"));
     if (extract) {
       const wrapper = content.children[idx] as XmlElement;
       const dd = findChild(wrapper, "DualDialogue")!;
@@ -123,10 +123,12 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
   }
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
-  let result = textResult(
-    `Successfully ${actionPastTense(action)} dual dialogue. File updated in cache — call save_fdx to persist changes to disk.`,
+  const result = pushCacheWarning(
+    pushCacheWarning(
+      textResult(`Successfully ${actionPastTense(action)} dual dialogue. File updated in cache — call save_fdx to persist changes to disk.`),
+      warning,
+    ),
+    dirtyWarning,
   );
-  result = pushCacheWarning(result, warning);
-  result = pushCacheWarning(result, dirtyWarning);
   return result;
 }

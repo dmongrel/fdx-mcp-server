@@ -93,7 +93,7 @@ export const contextRules: ContextRule[] = [
   {
     title: "Analysis Tools — Combining Them",
     content:
-      "get_script_stats, get_scene_index, get_character_appearances, get_page_map, get_scene_properties, get_scene_arc_beats, and get_fdx_breakdown are all read-only and return JSON (except get_fdx_breakdown's html/pdf modes). Quick scan: call get_script_stats first before deeper inspection. Scene navigation: get_scene_index for the full catalog, then get_scene_properties(id) for one scene's typed metadata, then get_section(id) to read/edit its actual paragraphs. Character tracking: get_character_appearances(character=name) to see where they appear, cross-referenced with get_scene_arc_beats — a character with appearances but no arc beats may be an untracked role. Pagination-aware editing: check get_page_map before an edit_par insert to see whether it would split content across a page boundary. Full report: get_fdx_breakdown(asType='text'|'html'|'pdf') for a single combined document. Production metadata: get_revisions, get_tag_data, and get_display_boards expose Revisions/TagData/DisplayBoards verbatim as JSON; they are informational only — there is no edit_* tool for them.",
+      "get_script_stats, get_scene_index, get_character_appearances, get_page_map, get_scene_properties, and get_scene_arc_beats are all read-only and return JSON; get_fdx_breakdown instead writes a combined report to a targetPath file (text/html/pdf). Quick scan: call get_script_stats first before deeper inspection. Scene navigation: get_scene_index for the full catalog, then get_scene_properties(id) for one scene's typed metadata, then get_section(id) to read/edit its actual paragraphs. Character tracking: get_character_appearances(character=name) to see where they appear, cross-referenced with get_scene_arc_beats — a character with appearances but no arc beats may be an untracked role. Pagination-aware editing: check get_page_map before an edit_par insert to see whether it would split content across a page boundary. Full report: get_fdx_breakdown(targetPath, asType='text'|'html'|'pdf') writes a single combined document to disk instead of returning it inline. Production metadata: get_revisions, get_tag_data, and get_display_boards expose Revisions/TagData/DisplayBoards verbatim as JSON; they are informational only — there is no edit_* tool for them.",
   },
 ];
 
@@ -325,7 +325,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "get_fdx_breakdown",
     description:
-      "Read-Only. Retrieve a combined script-breakdown report — document overview, paragraph-type breakdown, act structure, scene catalog, character frequency, pagination map, arc-beat summary, scene-length analysis, and production flags. Pass asType='text' (default, 80-column plain text), 'html' (standalone styled page), or 'pdf' (base64-encoded document).",
+      "Read-Only. Generate a combined script-breakdown report — document overview, paragraph-type breakdown, act structure, scene catalog, character frequency, pagination map, arc-beat summary, scene-length analysis, and production flags. Writes the report to targetPath rather than returning it inline. Pass asType='text' (default, 80-column plain text), 'html' (standalone styled page), or 'pdf' (printable document).",
   },
   {
     name: "get_revisions",
