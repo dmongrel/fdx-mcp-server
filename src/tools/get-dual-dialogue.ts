@@ -6,6 +6,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { findChild, findChildren } from "../fdx/xml.ts";
 import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
 
@@ -29,7 +30,8 @@ export async function handleGetDualDialogue(args: Record<string, unknown> | unde
   if (!path) return errResult("path is required");
   if (!id) return errResult("id is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

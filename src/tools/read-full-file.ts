@@ -6,6 +6,7 @@
 
 import type { FdxTool } from "./shared.ts";
 import { textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { paragraphText } from "../fdx/paragraph.ts";
 
 export const readFullFileTool: FdxTool = {
@@ -25,7 +26,8 @@ export async function handleReadFullFile(args: Record<string, unknown> | undefin
   if (!path) return errResult("path is required");
   if (!hasFdxExtension(path)) return errResult("only .fdx files are supported");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

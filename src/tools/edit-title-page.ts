@@ -98,7 +98,8 @@ export async function handleEditTitlePage(args: Record<string, unknown> | undefi
     copyrightAllRightsReserved: arg<boolean>(args, "copyrightAllRightsReserved"),
   };
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

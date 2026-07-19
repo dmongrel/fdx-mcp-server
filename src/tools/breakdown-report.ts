@@ -63,12 +63,8 @@ export function buildBreakdownData(doc: FdxDocument): BreakdownData {
   const pageMap = buildPageMap(doc);
   const arcs = buildArcBeatData(doc);
 
-  const scenes: SceneInfo[] = [];
-  const acts: SceneInfo[] = [];
-  for (const s of allScenes) {
-    if (isActType(s.type)) acts.push(s);
-    else scenes.push(s);
-  }
+  const scenes = allScenes.filter((s) => !isActType(s.type));
+  const acts = allScenes.filter((s) => isActType(s.type));
 
   const sortedTypes = Object.keys(stats.byType).sort();
   const rankedChars = rankCharacters(appearances);
@@ -125,17 +121,15 @@ const LINE_WIDTH = 80;
 function wrapJoined(indent: string, s: string, maxWidth: number): string {
   const parts = s.split(", ");
   const lines: string[] = [];
-  let line = indent;
-  let first = true;
-  for (const part of parts) {
-    const candidate = first ? part : `, ${part}`;
-    if (!first && line.length + candidate.length > maxWidth) {
+  let line = indent + (parts[0] ?? "");
+  for (const part of parts.slice(1)) {
+    const candidate = `, ${part}`;
+    if (line.length + candidate.length > maxWidth) {
       lines.push(line);
       line = indent + part;
     } else {
       line += candidate;
     }
-    first = false;
   }
   if (line !== indent) lines.push(line);
   return lines.join("\n") + (lines.length ? "\n" : "");

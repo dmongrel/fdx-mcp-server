@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { findChild, findChildren, getAttr } from "../fdx/xml.ts";
 
 export const getRevisionsTool: FdxTool = {
@@ -28,7 +29,8 @@ export async function handleGetRevisions(args: Record<string, unknown> | undefin
   const path = args?.path as string | undefined;
   if (!path) return errResult("path is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

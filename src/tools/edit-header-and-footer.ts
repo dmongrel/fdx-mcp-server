@@ -100,7 +100,8 @@ export async function handleEditHeaderAndFooter(args: Record<string, unknown> | 
   const partsError = validateHeaderFooterParts(req);
   if (partsError) return errResult(`failed to ${action} header and footer: ${partsError}`);
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

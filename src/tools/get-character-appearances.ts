@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { buildCharacterAppearances, rankCharacters } from "./breakdown.ts";
 
 export const getCharacterAppearancesTool: FdxTool = {
@@ -28,7 +29,8 @@ export async function handleGetCharacterAppearances(args: Record<string, unknown
   const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

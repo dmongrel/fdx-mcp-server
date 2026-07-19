@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { getMacros, formatMacro } from "./macro-data.ts";
 
 export const getMacroAliasListTool: FdxTool = {
@@ -24,7 +25,8 @@ export async function handleGetMacroAliasList(args: Record<string, unknown> | un
   const path = args?.path as string | undefined;
   if (!path) return errResult("path is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

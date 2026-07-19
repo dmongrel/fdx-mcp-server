@@ -6,6 +6,7 @@
 import type { FdxTool } from "./shared.ts";
 import { textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import {
   applyElementSettingsFields,
   buildElementSettingsElement,
@@ -69,7 +70,8 @@ export async function handleEditElementSettings(args: Record<string, unknown> | 
     return errResult(`failed to ${action} element settings: invalid element settings type: ${type}`);
   }
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

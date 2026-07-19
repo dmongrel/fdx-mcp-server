@@ -5,6 +5,7 @@
 
 import type { FdxTool } from "./shared.ts";
 import { textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { serializeNodeStandalone } from "../fdx/xml.ts";
 
 export const getElementSettingsTool: FdxTool = {
@@ -27,7 +28,8 @@ export async function handleGetElementSettings(args: Record<string, unknown> | u
   if (!path) return errResult("path is required");
   if (!type) return errResult("type is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

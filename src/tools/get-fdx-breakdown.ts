@@ -8,6 +8,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { buildBreakdownData, renderBreakdownHtml, renderBreakdownText } from "./breakdown-report.ts";
 import { renderBreakdownPdf } from "./breakdown-pdf.ts";
 import { writeTextFile, writeBinaryFile } from "../fdx/runtime.ts";
@@ -45,7 +46,8 @@ export async function handleGetFdxBreakdown(args: Record<string, unknown> | unde
     return errResult("asType must be 'text', 'html', or 'pdf'");
   }
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

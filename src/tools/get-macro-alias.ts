@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { getMacros, formatMacro, type MacroInfo } from "./macro-data.ts";
 
 export const getMacroAliasTool: FdxTool = {
@@ -46,7 +47,8 @@ export async function handleGetMacroAlias(args: Record<string, unknown> | undefi
     transition: args?.transition as string | undefined,
   };
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

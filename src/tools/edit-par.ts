@@ -141,7 +141,8 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
     return errResult(`invalid paragraph type "${type}"; call list_types to see valid types`);
   }
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

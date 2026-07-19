@@ -343,7 +343,7 @@ export function cloneNode<T extends XmlNode>(node: T): T {
   return {
     type: "element",
     name: node.name,
-    attrs: node.attrs.map(([k, v]) => [k, v] as [string, string]),
+    attrs: node.attrs.map(([k, v]) => [k, v]),
     children: node.children.map((c) => cloneNode(c)),
   } as T;
 }

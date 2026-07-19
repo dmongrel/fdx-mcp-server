@@ -12,6 +12,7 @@
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { generateUuid } from "../fdx/uuid.ts";
 import { getParagraphId } from "../fdx/paragraph.ts";
 import { createElement, findChild, type XmlElement } from "../fdx/xml.ts";
@@ -48,7 +49,8 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
   if (!path) return errResult("path is required");
   if (!hasFdxExtension(path)) return errResult("only .fdx files are supported");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

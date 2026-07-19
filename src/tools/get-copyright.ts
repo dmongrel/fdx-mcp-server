@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { copyrightText } from "../fdx/title-page.ts";
 
 export const getCopyrightTool: FdxTool = {
@@ -24,7 +25,8 @@ export async function handleGetCopyright(args: Record<string, unknown> | undefin
   const path = arg<string>(args, "path");
   if (!path) return errResult("path is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

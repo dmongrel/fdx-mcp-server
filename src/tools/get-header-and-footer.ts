@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { renderHeaderAndFooter, titlePageHfExists } from "../fdx/header-footer.ts";
 
 export const getHeaderAndFooterTool: FdxTool = {
@@ -35,7 +36,8 @@ export async function handleGetHeaderAndFooter(args: Record<string, unknown> | u
     return errResult("element must be 'header', 'footer', or 'all'");
   }
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

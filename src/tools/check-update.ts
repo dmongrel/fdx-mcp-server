@@ -57,10 +57,8 @@ async function getLatestGitHubTag(): Promise<string | null> {
 
 /** Parse a version string "X.Y.Z" into [major, minor, patch]. */
 function parseVersion(v: string): [number, number, number] {
-  const parts = v.split(".").map(Number);
-  // Pad missing segments to zero
-  while (parts.length < 3) parts.push(0);
-  return parts as [number, number, number];
+  const [major = 0, minor = 0, patch = 0] = v.split(".").map(Number);
+  return [major, minor, patch];
 }
 
 /** Return true if `remote` is strictly greater than `local`. */

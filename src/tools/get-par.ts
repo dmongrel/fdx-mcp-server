@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId, paragraphText } from "../fdx/paragraph.ts";
 
 export const getParTool: FdxTool = {
@@ -26,7 +27,8 @@ export async function handleGetPar(args: Record<string, unknown> | undefined): P
   if (!path) return errResult("path is required");
   if (!id) return errResult("id is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

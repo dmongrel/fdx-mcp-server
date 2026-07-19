@@ -17,18 +17,13 @@ export { isSectionType };
  * Returns the zero-based index, or -1 when no match exists.
  */
 export function findSectionIndex(paragraphs: XmlElement[], id: string): number {
-  for (let i = 0; i < paragraphs.length; i++) {
-    const p = paragraphs[i]!;
-    if (!isSectionType(getParagraphType(p))) continue;
-    if (id === "" || getParagraphId(p) === id) return i;
-  }
-  return -1;
+  return paragraphs.findIndex(
+    (p) => isSectionType(getParagraphType(p)) && (id === "" || getParagraphId(p) === id),
+  );
 }
 
 /** The exclusive end index of the section starting at `startIndex` (next section heading, or length). */
 export function findSectionEnd(paragraphs: XmlElement[], startIndex: number): number {
-  for (let i = startIndex + 1; i < paragraphs.length; i++) {
-    if (isSectionType(getParagraphType(paragraphs[i]!))) return i;
-  }
-  return paragraphs.length;
+  const idx = paragraphs.slice(startIndex + 1).findIndex((p) => isSectionType(getParagraphType(p)));
+  return idx === -1 ? paragraphs.length : startIndex + 1 + idx;
 }

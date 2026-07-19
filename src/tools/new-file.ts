@@ -30,9 +30,8 @@ function mintFreshIds(source: string): string {
 /** Returns a fresh copy of the embedded template with a stamped DocumentRef and re-minted ids. */
 export async function newFileBytes(): Promise<string> {
   const template = await readTextFile(TEMPLATE_URL);
-  let s = template.replace(RE_DOCUMENT_REF_DATETIME, `$1${fdxDateTimeNow()}$3`);
-  s = mintFreshIds(s);
-  return s;
+  const step = template.replace(RE_DOCUMENT_REF_DATETIME, `$1${fdxDateTimeNow()}$3`);
+  return mintFreshIds(step);
 }
 
 /** Resolves the path new_file will write to, searching upward from _v1 when versioned. */

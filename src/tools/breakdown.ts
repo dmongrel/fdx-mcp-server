@@ -302,11 +302,11 @@ function compareNamesCI(a: string, b: string): number {
  * breaking case-insensitively by name. Mirrors Go's rankCharacters.
  */
 export function rankCharacters(appearances: Map<string, CharacterAppearance[]>): RankedCharacter[] {
-  const ranked: RankedCharacter[] = [];
-  for (const [name, list] of appearances) {
-    const total = list.reduce((sum, a) => sum + a.count, 0);
-    ranked.push({ name, total, sceneCount: list.length });
-  }
+  const ranked = [...appearances].map(([name, list]) => ({
+    name,
+    total: list.reduce((sum, a) => sum + a.count, 0),
+    sceneCount: list.length,
+  }));
   ranked.sort((a, b) => (a.total !== b.total ? b.total - a.total : compareNamesCI(a.name, b.name)));
   return ranked;
 }

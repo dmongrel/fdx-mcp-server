@@ -6,6 +6,7 @@
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { setCopyrightBlock, clearCopyrightBlock, copyrightAllRights } from "../fdx/title-page.ts";
 
 export const editCopyrightTool: FdxTool = {
@@ -35,7 +36,8 @@ export async function handleEditCopyright(args: Record<string, unknown> | undefi
   if (!hasFdxExtension(path)) return errResult("only .fdx files are supported");
   if (!action) return errResult("action is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

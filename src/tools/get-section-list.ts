@@ -6,6 +6,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
 import { findSectionIndex, isSectionType } from "../fdx/sections.ts";
 
@@ -37,7 +38,8 @@ export async function handleGetSectionList(args: Record<string, unknown> | undef
   const sectionId = arg<string>(args, "id");
   const wantType = (arg<string>(args, "type") ?? "").trim();
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

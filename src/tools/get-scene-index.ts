@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { isSectionType } from "../fdx/sections.ts";
 import { buildSceneIndex } from "./breakdown.ts";
 
@@ -35,7 +36,8 @@ export async function handleGetSceneIndex(args: Record<string, unknown> | undefi
     return errResult(`not a section type: ${wantType} (use list_types to see section types)`);
   }
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {

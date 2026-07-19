@@ -5,6 +5,7 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import type { FdxDocument } from "../fdx/document.ts";
 import { getScenePropertiesById } from "./breakdown.ts";
 
 export const getScenePropertiesTool: FdxTool = {
@@ -27,7 +28,8 @@ export async function handleGetSceneProperties(args: Record<string, unknown> | u
   if (!path) return errResult("path is required");
   if (!id) return errResult("id is required");
 
-  let doc, warning;
+  let doc: FdxDocument;
+  let warning: string;
   try {
     ({ doc, warning } = await getCachedFdx(path));
   } catch (err) {
