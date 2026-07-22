@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.0] - 2026-07-22
+
+Version bump to 1.0.0 — the 0.1.0 release already shipped a full, working tool set and a verified install path; this marks it as the stable baseline going forward. No functional changes from 0.1.0.
+
 ## [0.1.0] - 2026-07-22
 
 Initial versioned release.

@@ -50,7 +50,7 @@ To update later: `npm update -g fdx-mcp-server`
 > ⚠️ **Windows users:** `npm install -g github:...` clones the repo and repacks it locally before installing, and on some Windows machines this can hit a known npm/node-tar race (often triggered by antivirus real-time scanning) that silently drops files during extraction — `npm` reports success, but the installed package is missing `dist/index.js`. If `fdx-mcp-server` isn't found after installing, or errors with `Cannot find module '...dist\index.js'`, install directly from the release tarball instead — it skips the git-clone step entirely and has been verified reliable on Windows:
 >
 > ```bash
-> npm install -g https://github.com/dmongrel/fdx-mcp-server/releases/download/v0.1.0/fdx-mcp-server-0.1.0.tgz
+> npm install -g https://github.com/dmongrel/fdx-mcp-server/releases/download/v1.0.0/fdx-mcp-server-1.0.0.tgz
 > ```
 >
 > Grab the current tarball URL from the [Releases page](https://github.com/dmongrel/fdx-mcp-server/releases) if a newer version is out.
