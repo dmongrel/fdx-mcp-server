@@ -79,7 +79,7 @@ const server = new Server(
   },
 );
 
-// Portable file I/O that works in both Bun and Deno
+// Portable file I/O that works in Bun, Deno, and Node
 async function readFile(path: string): Promise<string> {
   if (typeof Bun !== "undefined") {
     return await Bun.file(path).text();
@@ -91,7 +91,8 @@ async function readFile(path: string): Promise<string> {
   if (deno) {
     return deno.readTextFileSync(path);
   }
-  throw new Error("Unsupported runtime — requires Bun or Deno.");
+  const { readFile: readFileNode } = await import("node:fs/promises");
+  return await readFileNode(path, "utf8");
 }
 
 async function writeFile(path: string, content: string): Promise<void> {
@@ -106,7 +107,8 @@ async function writeFile(path: string, content: string): Promise<void> {
     await deno.writeTextFile(path, content);
     return;
   }
-  throw new Error("Unsupported runtime — requires Bun or Deno.");
+  const { writeFile: writeFileNode } = await import("node:fs/promises");
+  await writeFileNode(path, content, "utf8");
 }
 
 /* ------------------------------------------------------------------ */

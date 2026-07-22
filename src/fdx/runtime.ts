@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * Portable filesystem helpers that work under both Bun and Deno without relying on Node-only
- * APIs. Mirrors the pattern already used in src/index.ts for read_file/write_file.
+ * Portable filesystem helpers that work under Bun, Deno, and Node. Mirrors the pattern already
+ * used in src/index.ts for read_file/write_file.
  */
 
 interface DenoLike {
@@ -23,7 +23,8 @@ export async function readTextFile(path: string | URL): Promise<string> {
   }
   const deno = getDeno();
   if (deno) return await deno.readTextFile(path);
-  throw new Error("Unsupported runtime — requires Bun or Deno.");
+  const { readFile } = await import("node:fs/promises");
+  return await readFile(path, "utf8");
 }
 
 export async function writeTextFile(path: string, content: string): Promise<void> {
@@ -36,7 +37,8 @@ export async function writeTextFile(path: string, content: string): Promise<void
     await deno.writeTextFile(path, content);
     return;
   }
-  throw new Error("Unsupported runtime — requires Bun or Deno.");
+  const { writeFile } = await import("node:fs/promises");
+  await writeFile(path, content, "utf8");
 }
 
 export async function writeBinaryFile(path: string, data: Uint8Array): Promise<void> {
@@ -49,7 +51,8 @@ export async function writeBinaryFile(path: string, data: Uint8Array): Promise<v
     await deno.writeFile(path, data);
     return;
   }
-  throw new Error("Unsupported runtime — requires Bun or Deno.");
+  const { writeFile } = await import("node:fs/promises");
+  await writeFile(path, data);
 }
 
 export async function fileExists(path: string): Promise<boolean> {
@@ -65,7 +68,13 @@ export async function fileExists(path: string): Promise<boolean> {
       return false;
     }
   }
-  throw new Error("Unsupported runtime — requires Bun or Deno.");
+  const { stat } = await import("node:fs/promises");
+  try {
+    const info = await stat(path);
+    return info.isFile();
+  } catch {
+    return false;
+  }
 }
 
 /** Rejects with an error if `path` refers to a directory rather than a regular file. */
@@ -78,7 +87,7 @@ export async function assertIsFile(path: string): Promise<void> {
     }
     return;
   }
-  // Bun: attempting to read a directory's contents as text throws EISDIR, which readTextFile
-  // will surface directly — no separate stat check needed on this runtime.
+  // Bun/Node: attempting to read a directory's contents as text throws EISDIR, which
+  // readTextFile will surface directly — no separate stat check needed on these runtimes.
 }
 
