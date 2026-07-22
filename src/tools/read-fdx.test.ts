@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
 import { documentCache } from "../fdx/cache.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("read_fdx", () => {
   test("rejects non-.fdx paths", async () => {

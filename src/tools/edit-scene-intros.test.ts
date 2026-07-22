@@ -9,7 +9,7 @@ import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetSceneIntros } from "./get-scene-intros.ts";
 import { handleEditSceneIntros } from "./edit-scene-intros.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 function freshCopy(): string {
   const dir = mkdtempSync(join(tmpdir(), "fdx-edit-scene-intros-"));

@@ -4,9 +4,10 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { getCachedFdx } from "./shared.ts";
+import { FdxDocument } from "../fdx/document.ts";
 import { buildBreakdownData, renderBreakdownHtml, renderBreakdownText } from "./breakdown-report.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("buildBreakdownData", () => {
   test("splits act-type headings out of the scene list", async () => {
@@ -32,8 +33,23 @@ describe("buildBreakdownData", () => {
     }
   });
 
-  test("computes scene-length extremes and totals", async () => {
-    const { doc } = await getCachedFdx(FIXTURE_PATH);
+  test("computes scene-length extremes and totals", () => {
+    // The shared fixture has no SceneProperties.Length data (no edit_* tool writes it), so
+    // exercise the extremes/total computation against a handcrafted document that has some.
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1">
+      <Text>EXT. BRIDGE - DAY</Text>
+      <SceneProperties Length="2/8"/>
+    </Paragraph>
+    <Paragraph Type="Scene Heading" id="sh2">
+      <Text>INT. BRIDGE - NIGHT</Text>
+      <SceneProperties Length="6/8"/>
+    </Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
     const data = buildBreakdownData(doc);
 
     expect(data.shortestIdx).toBeGreaterThanOrEqual(0);

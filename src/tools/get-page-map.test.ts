@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetPageMap } from "./get-page-map.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("get_page_map", () => {
   test("path is required", async () => {
@@ -19,7 +19,7 @@ describe("get_page_map", () => {
     const pageMap = JSON.parse(result.content[0]!.text);
     expect(Array.isArray(pageMap)).toBe(true);
     expect(pageMap[0].startIndex).toBe(0);
-    expect(pageMap[pageMap.length - 1].page).toBe(95);
+    expect(pageMap[pageMap.length - 1].page).toBe(1);
   });
 });
 

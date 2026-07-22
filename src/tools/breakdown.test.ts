@@ -17,7 +17,7 @@ import {
   getScenePropertiesById,
 } from "./breakdown.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 async function loadFixture(): Promise<FdxDocument> {
   const source = await readTextFile(FIXTURE_PATH);
@@ -60,14 +60,35 @@ describe("buildSceneIndex", () => {
   test("includes every Scene Heading with parsed metadata", async () => {
     const doc = await loadFixture();
     const scenes = buildSceneIndex(doc);
-    expect(scenes.length).toBeGreaterThan(80);
-    const first = scenes.find((s) => s.id === "3c4f7ca7-60ba-4af1-bf97-19c7c36151c5");
+    expect(scenes.length).toBe(7);
+    const first = scenes.find((s) => s.id === "6e39d99f-6972-42f8-bdc8-3f0dbe546280");
     expect(first).toBeDefined();
     expect(first!.type).toBe("Scene Heading");
-    expect(first!.page).toBe(1);
-    expect(first!.length).toBe(0.5);
     expect(first!.intro).toBe("EXT");
-    expect(first!.text).toContain("GIMAN-DOL");
+    expect(first!.text).toContain("PREHISTORIC VALLEY");
+  });
+
+  test("parses page/length/color from SceneProperties when present", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1">
+      <Text>EXT. BRIDGE - DAY</Text>
+      <SceneProperties Color="#C0C0C0C0C0C0" Length="4/8" Page="3" Title="1"/>
+    </Paragraph>
+  </Content>
+  <SmartType>
+    <TimesOfDay>
+      <TimeOfDay>DAY</TimeOfDay>
+    </TimesOfDay>
+  </SmartType>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const scenes = buildSceneIndex(doc);
+    expect(scenes).toHaveLength(1);
+    expect(scenes[0]!.page).toBe(3);
+    expect(scenes[0]!.length).toBe(0.5);
+    expect(scenes[0]!.color).toBe("#C0C0C0C0C0C0");
   });
 });
 
@@ -75,22 +96,46 @@ describe("buildScriptStats", () => {
   test("computes totals across the whole document", async () => {
     const doc = await loadFixture();
     const stats = buildScriptStats(doc);
-    expect(stats.paragraphCount).toBe(1755);
-    expect(stats.sceneCount).toBe(89);
-    expect(stats.totalPages).toBe(95);
-    expect(stats.byType["Scene Heading"]).toBe(89);
+    expect(stats.paragraphCount).toBe(53);
+    expect(stats.sceneCount).toBe(6);
+    expect(stats.totalPages).toBe(0);
+    expect(stats.byType["Scene Heading"]).toBe(6);
   });
 });
 
 describe("buildPageMap", () => {
-  test("covers every paragraph and ends at the last page", async () => {
+  test("covers every paragraph in a single page when no SceneProperties.Page is set", async () => {
     const doc = await loadFixture();
     const pageMap = buildPageMap(doc);
-    expect(pageMap.length).toBeGreaterThan(0);
+    expect(pageMap.length).toBe(1);
     expect(pageMap[0]!.startIndex).toBe(0);
     const last = pageMap[pageMap.length - 1]!;
     expect(last.endIndex).toBe(doc.getParagraphElements().length - 1);
-    expect(last.page).toBe(95);
+    expect(last.page).toBe(1);
+  });
+
+  test("splits into multiple entries when SceneProperties.Page changes", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1">
+      <Text>EXT. BRIDGE - DAY</Text>
+      <SceneProperties Page="1"/>
+    </Paragraph>
+    <Paragraph Type="Action" id="a1"><Text>Beat one.</Text></Paragraph>
+    <Paragraph Type="Scene Heading" id="sh2">
+      <Text>INT. BRIDGE - DAY</Text>
+      <SceneProperties Page="2"/>
+    </Paragraph>
+    <Paragraph Type="Action" id="a2"><Text>Beat two.</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const pageMap = buildPageMap(doc);
+    expect(pageMap).toEqual([
+      { page: 1, startIndex: 0, endIndex: 1 },
+      { page: 2, startIndex: 2, endIndex: 3 },
+    ]);
   });
 });
 
@@ -115,20 +160,53 @@ describe("buildCharacterAppearances / rankCharacters", () => {
 describe("buildArcBeatData", () => {
   test("only includes scenes with at least one beat", async () => {
     const doc = await loadFixture();
+    // The shared fixture has no SceneProperties/arc-beat data — no edit_* tool writes it, so
+    // there's nothing for buildArcBeatData to find on a document built purely through the MCP
+    // tools.
+    expect(buildArcBeatData(doc)).toEqual([]);
+  });
+
+  test("returns one entry per scene with beats, skipping scenes with none", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1">
+      <Text>EXT. BRIDGE - DAY</Text>
+      <SceneProperties>
+        <SceneArcBeats>
+          <CharacterArcBeat Name="TALPEK">
+            <Paragraph Type="General" id="n1"><Text>note one</Text></Paragraph>
+          </CharacterArcBeat>
+        </SceneArcBeats>
+      </SceneProperties>
+    </Paragraph>
+    <Paragraph Type="Scene Heading" id="sh2">
+      <Text>INT. BRIDGE - NIGHT</Text>
+      <SceneProperties/>
+    </Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
     const arcs = buildArcBeatData(doc);
-    expect(arcs.length).toBeGreaterThan(0);
-    for (const a of arcs) {
-      expect(a.beats.length).toBeGreaterThan(0);
-    }
-    const talpekScene = arcs.find((a) => a.beats.some((b) => b.name === "TALPEK"));
-    expect(talpekScene).toBeDefined();
+    expect(arcs).toHaveLength(1);
+    expect(arcs[0]!.sceneId).toBe("sh1");
+    expect(arcs[0]!.beats).toEqual([{ name: "TALPEK", noteCount: 1 }]);
   });
 });
 
 describe("getScenePropertiesById", () => {
-  test("returns parsed properties for a known Scene Heading", async () => {
-    const doc = await loadFixture();
-    const result = getScenePropertiesById(doc, "3c4f7ca7-60ba-4af1-bf97-19c7c36151c5");
+  test("returns parsed properties for a known Scene Heading", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1">
+      <Text>EXT. BRIDGE - DAY</Text>
+      <SceneProperties Color="#C0C0C0C0C0C0" Length="4/8" Page="1"/>
+    </Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const result = getScenePropertiesById(doc, "sh1");
     expect(result).toBeTruthy();
     expect(result!.page).toBe(1);
     expect(result!.lengthEights).toBe(0.5);
@@ -143,7 +221,7 @@ describe("getScenePropertiesById", () => {
   test("returns undefined for a paragraph with no SceneProperties", async () => {
     const doc = await loadFixture();
     // The Action paragraph right after the first Scene Heading has no SceneProperties.
-    const result = getScenePropertiesById(doc, "bfcd8edf-24c1-4f38-9b48-4f5f8f06757c");
+    const result = getScenePropertiesById(doc, "f2a08a18-1655-41ec-8597-c744149ffcee");
     expect(result).toBeUndefined();
   });
 });

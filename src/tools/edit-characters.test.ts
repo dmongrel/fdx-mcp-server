@@ -9,7 +9,7 @@ import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetCharacters } from "./get-characters.ts";
 import { handleEditCharacters } from "./edit-characters.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 function freshCopy(): string {
   const dir = mkdtempSync(join(tmpdir(), "fdx-edit-characters-"));
@@ -38,10 +38,10 @@ describe("edit_characters", () => {
   test("remove deletes an existing entry", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditCharacters({ path, action: "remove", find: "talpek" });
+    const result = await handleEditCharacters({ path, action: "remove", find: "ook" });
     expect(result.isError).toBeFalsy();
     const after = await handleGetCharacters({ path });
-    expect(after.content[0]!.text).not.toContain("TALPEK");
+    expect(after.content[0]!.text).not.toContain("OOK");
   });
 
   test("remove fails when the entry does not exist", async () => {

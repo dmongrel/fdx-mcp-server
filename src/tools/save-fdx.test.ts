@@ -10,7 +10,7 @@ import { handleSaveFdx } from "./save-fdx.ts";
 import { bumpFilenameVersion } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("save_fdx", () => {
   test("bumpFilenameVersion increments or inserts _v#", () => {

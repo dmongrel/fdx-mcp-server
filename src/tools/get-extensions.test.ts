@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetExtensions } from "./get-extensions.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("get_extensions", () => {
   test("path is required", async () => {

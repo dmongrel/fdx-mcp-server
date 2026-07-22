@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetRevisions } from "./get-revisions.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("get_revisions", () => {
   test("path is required", async () => {
@@ -19,8 +19,8 @@ describe("get_revisions", () => {
     const parsed = JSON.parse(result.content[0]!.text);
     expect(parsed.activeSet).toBe("1");
     expect(Array.isArray(parsed.revision)).toBe(true);
-    expect(parsed.revision.length).toBe(4);
-    expect(parsed.revision[0].name).toBe("First Revision");
+    expect(parsed.revision.length).toBe(19);
+    expect(parsed.revision[0].name).toBe("Blue Rev. (mm/dd/yy)");
   });
 });
 

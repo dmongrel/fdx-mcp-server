@@ -9,7 +9,7 @@ import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetTransitions } from "./get-transitions.ts";
 import { handleEditTransitions } from "./edit-transitions.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 function freshCopy(): string {
   const dir = mkdtempSync(join(tmpdir(), "fdx-edit-transitions-"));

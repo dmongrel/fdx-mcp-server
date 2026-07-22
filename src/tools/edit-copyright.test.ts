@@ -9,7 +9,7 @@ import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { paragraphText } from "../fdx/paragraph.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 const FIXTURE_SOURCE = readFileSync(FIXTURE_PATH, "utf-8");
 
 function freshDoc(key: string): { path: string; doc: FdxDocument } {
@@ -60,7 +60,7 @@ describe("edit_copyright", () => {
     const { path, doc } = freshDoc("set-preserves");
     await handleEditCopyright({ path, action: "set", owner: "Jane Doe" });
     const joined = doc.getTitlePageParagraphs().map(paragraphText).join("\n");
-    expect(joined).toContain("STAR TREK:  EMPIRES");
+    expect(joined).toContain("GROG THE CAVEMAN");
     expect(joined).toContain("Joel L. Caesar");
   });
 

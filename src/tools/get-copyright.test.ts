@@ -9,7 +9,7 @@ import { FdxDocument } from "../fdx/document.ts";
 import { setCopyrightBlock } from "../fdx/title-page.ts";
 import { readFileSync } from "node:fs";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 const FIXTURE_SOURCE = readFileSync(FIXTURE_PATH, "utf-8");
 
 function allText(result: { content: Array<{ text: string }> }): string {

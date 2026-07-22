@@ -5,7 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleGetElementSettings } from "./get-element-settings.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 function allText(result: { content: Array<{ text: string }> }): string {
   return result.content.map((c) => c.text).join("\n");

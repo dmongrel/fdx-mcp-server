@@ -10,7 +10,7 @@ import { FdxDocument } from "../fdx/document.ts";
 import { paragraphText } from "../fdx/paragraph.ts";
 import { STANDARD_TITLE_PAGE_LINES } from "../fdx/title-page.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 const FIXTURE_SOURCE = readFileSync(FIXTURE_PATH, "utf-8");
 
 function freshDoc(key: string): { path: string; doc: FdxDocument } {
@@ -106,7 +106,7 @@ describe("edit_title_page", () => {
     expect(result.content[0]!.text).toContain("no title page exists");
   });
 
-  test("edit overwrites title/author in place and preserves the contact/based-on blocks", async () => {
+  test("edit overwrites title/author in place and preserves the contact block", async () => {
     const { path, doc } = freshDoc("edit-inplace");
     const result = await handleEditTitlePage({ path, action: "edit", title: "NEW TITLE", author: "New Author" });
     expect(result.isError).toBeFalsy();
@@ -114,7 +114,40 @@ describe("edit_title_page", () => {
     const joined = doc.getTitlePageParagraphs().map(paragraphText).join("\n");
     expect(joined).toContain("NEW TITLE");
     expect(joined).toContain("New Author");
-    // The based-on block ("Star Trek" / "Gene Roddenberry") must survive untouched.
+    // The contact block must survive untouched.
+    expect(joined).toContain("123 Example Street");
+  });
+
+  test("edit overwrites title/author in place and preserves an existing based-on block", async () => {
+    // editExistingTitlePage only rebuilds the based-on region when it can already locate
+    // non-blank based-on paragraphs — action=create is the only path that can add one from
+    // nothing, and it refuses once any title page (even a blank one) exists. So this needs a
+    // handcrafted document that already carries a based-on block, rather than the shared fixture.
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <TitlePage>
+    <Content>
+      <Paragraph Alignment="Center"><Text>OLD TITLE</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>Written by</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>Old Author</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>Based on</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>Star Trek</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>By</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>Gene Roddenberry</Text></Paragraph>
+    </Content>
+  </TitlePage>
+  <Content/>
+</FinalDraft>`;
+    const path = join(import.meta.dir, "edit-title-page-edit-inplace-basedon.fdx");
+    const doc = FdxDocument.parse(source, path);
+    documentCache.set(path, doc);
+
+    const result = await handleEditTitlePage({ path, action: "edit", title: "NEW TITLE", author: "New Author" });
+    expect(result.isError).toBeFalsy();
+
+    const joined = doc.getTitlePageParagraphs().map(paragraphText).join("\n");
+    expect(joined).toContain("NEW TITLE");
+    expect(joined).toContain("New Author");
     expect(joined).toContain("Star Trek");
     expect(joined).toContain("Roddenberry");
   });
@@ -148,13 +181,13 @@ describe("edit_title_page", () => {
     expect(paragraphText(paras[1]!)).toBe("All Rights Reserved.");
     // Title/author still present.
     const joined = paras.map(paragraphText).join("\n");
-    expect(joined).toContain("STAR TREK:  EMPIRES");
+    expect(joined).toContain("GROG THE CAVEMAN");
   });
 
   test("remove resets the title page to the blank-document baseline", async () => {
     const { path, doc } = freshDoc("remove");
     const before = doc.getTitlePageParagraphs().map(paragraphText).join("\n");
-    expect(before).toContain("STAR TREK:  EMPIRES");
+    expect(before).toContain("GROG THE CAVEMAN");
 
     const result = await handleEditTitlePage({ path, action: "remove" });
     expect(result.isError).toBeFalsy();
@@ -162,7 +195,7 @@ describe("edit_title_page", () => {
     const after = doc.getTitlePageParagraphs();
     expect(after.length).toBeGreaterThan(0);
     const afterText = after.map(paragraphText).join("\n");
-    expect(afterText).not.toContain("STAR TREK:  EMPIRES");
+    expect(afterText).not.toContain("GROG THE CAVEMAN");
   });
 
   test("remove fails when there is no title page to remove", async () => {

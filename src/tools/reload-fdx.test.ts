@@ -7,7 +7,7 @@ import { handleReloadFdx } from "./reload-fdx.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("reload_fdx", () => {
   test("rejects non-.fdx paths", async () => {

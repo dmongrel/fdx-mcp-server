@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetCharacterAppearances } from "./get-character-appearances.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("get_character_appearances", () => {
   test("path is required", async () => {
@@ -26,9 +26,9 @@ describe("get_character_appearances", () => {
 
   test("filters to one character case-insensitively", async () => {
     await handleReadFdx({ path: FIXTURE_PATH });
-    const result = await handleGetCharacterAppearances({ path: FIXTURE_PATH, character: "talpek" });
+    const result = await handleGetCharacterAppearances({ path: FIXTURE_PATH, character: "ook" });
     const entry = JSON.parse(result.content[0]!.text);
-    expect(entry.character).toBe("TALPEK");
+    expect(entry.character).toBe("OOK");
     expect(entry.total).toBeGreaterThan(0);
     expect(Array.isArray(entry.appearances)).toBe(true);
   });

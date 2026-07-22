@@ -5,8 +5,8 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleGetSectionParList } from "./get-section-par-list.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
-const SCENE_HEADING_ID = "3c4f7ca7-60ba-4af1-bf97-19c7c36151c5";
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
+const SCENE_HEADING_ID = "6e39d99f-6972-42f8-bdc8-3f0dbe546280";
 
 function allText(result: { content: Array<{ text: string }> }): string {
   return result.content.map((c) => c.text).join("\n");
@@ -29,7 +29,7 @@ describe("get_section_par_list", () => {
   test("omitting id starts at the first section", async () => {
     const result = await handleGetSectionParList({ path: FIXTURE_PATH });
     expect(result.isError).toBeFalsy();
-    expect(allText(result)).toContain("8b13e7dc-34b7-4879-8398-aca9f18b90ce");
+    expect(allText(result)).toContain("6e39d99f-6972-42f8-bdc8-3f0dbe546280");
   });
 
   test("errors on an unknown section id", async () => {

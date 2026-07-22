@@ -11,10 +11,10 @@ import { handleEditDualDialogue } from "./edit-dual-dialogue.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { getParagraphId } from "../fdx/paragraph.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
-const CHARACTER_ID = "2c0ad4bd-c43e-4bd1-b424-1f8c6b19137d"; // "THIRUL" Character paragraph
-const PARENTHETICAL_ID = "4765b765-8b5b-4a18-bc10-4aa9b5998015"; // "(calmly)"
-const DIALOGUE_ID = "d0e9d110-f33a-485f-b222-566dace382b8"; // "As a matter of convenience."
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
+const CHARACTER_ID = "a3049b85-f812-4aaa-9532-9f53f774f758"; // "GROG" Character paragraph
+const PARENTHETICAL_ID = "bbee1c41-6ca4-4ae2-bb0e-4c2769f23a16"; // "(shouting)"
+const DIALOGUE_ID = "b5437965-e39f-4236-a0c0-641860dcfb96"; // "Ook, move!"
 
 function freshCopy(): string {
   const dir = mkdtempSync(join(tmpdir(), "fdx-edit-dual-dialogue-"));
@@ -57,12 +57,12 @@ describe("edit_dual_dialogue / get_dual_dialogue", () => {
     const getResult = await handleGetDualDialogue({ path, id: wrapperId });
     expect(getResult.isError).toBeFalsy();
     const text = getResult.content[0]!.text;
-    expect(text).toContain("THIRUL");
-    expect(text).toContain("(calmly)");
-    expect(text).toContain("As a matter of convenience.");
+    expect(text).toContain("GROG");
+    expect(text).toContain("(shouting)");
+    expect(text).toContain("Ook, move!");
     // Order preserved: Character, then Parenthetical, then Dialogue.
-    expect(text.indexOf("THIRUL")).toBeLessThan(text.indexOf("(calmly)"));
-    expect(text.indexOf("(calmly)")).toBeLessThan(text.indexOf("As a matter of convenience."));
+    expect(text.indexOf("GROG")).toBeLessThan(text.indexOf("(shouting)"));
+    expect(text.indexOf("(shouting)")).toBeLessThan(text.indexOf("Ook, move!"));
   });
 
   test("create fails for a nonexistent paragraph id", async () => {

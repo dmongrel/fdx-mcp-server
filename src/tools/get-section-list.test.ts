@@ -5,7 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleGetSectionList } from "./get-section-list.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 function allText(result: { content: Array<{ text: string }> }): string {
   return result.content.map((c) => c.text).join("\n");
@@ -45,7 +45,7 @@ describe("get_section_list", () => {
   });
 
   test("start id may be any section type", async () => {
-    const result = await handleGetSectionList({ path: FIXTURE_PATH, id: "8b13e7dc-34b7-4879-8398-aca9f18b90ce" });
+    const result = await handleGetSectionList({ path: FIXTURE_PATH, id: "89e6c679-e1be-447e-88f5-589f1b3325e7" });
     expect(result.isError).toBeFalsy();
   });
 

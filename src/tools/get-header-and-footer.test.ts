@@ -5,7 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleGetHeaderAndFooter } from "./get-header-and-footer.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 function allText(result: { content: Array<{ text: string }> }): string {
   return result.content.map((c) => c.text).join("\n");
@@ -25,7 +25,7 @@ describe("get_header_and_footer", () => {
     const result = await handleGetHeaderAndFooter({ path: FIXTURE_PATH, location: "body" });
     expect(result.isError).toBeFalsy();
     const text = allText(result);
-    const iText = text.indexOf("EMPIRES");
+    const iText = text.indexOf("GROG THE CAVEMAN");
     const iDate = text.indexOf("[Date]");
     const iPage = text.indexOf("[Page #]");
     expect(iText).toBeGreaterThanOrEqual(0);

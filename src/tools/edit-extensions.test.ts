@@ -9,7 +9,7 @@ import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetExtensions } from "./get-extensions.ts";
 import { handleEditExtensions } from "./edit-extensions.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 function freshCopy(): string {
   const dir = mkdtempSync(join(tmpdir(), "fdx-edit-extensions-"));
@@ -31,11 +31,11 @@ describe("edit_extensions", () => {
   test("edit replaces a matching entry case-insensitively", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditExtensions({ path, action: "edit", find: "(male)", replace: "(MAN)" });
+    const result = await handleEditExtensions({ path, action: "edit", find: "(o.c.)", replace: "(OFFSCREEN)" });
     expect(result.isError).toBeFalsy();
     const after = await handleGetExtensions({ path });
-    expect(after.content[0]!.text).toContain("(MAN)");
-    expect(after.content[0]!.text).not.toContain("(MALE)");
+    expect(after.content[0]!.text).toContain("(OFFSCREEN)");
+    expect(after.content[0]!.text).not.toContain("(O.C.)");
   });
 });
 

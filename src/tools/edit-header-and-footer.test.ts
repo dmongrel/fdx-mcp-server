@@ -10,7 +10,7 @@ import { FdxDocument } from "../fdx/document.ts";
 import { renderHeaderAndFooter, titlePageHfExists } from "../fdx/header-footer.ts";
 import { getAttr } from "../fdx/xml.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 const FIXTURE_SOURCE = readFileSync(FIXTURE_PATH, "utf-8");
 
 function freshDoc(key: string): { path: string; doc: FdxDocument } {
@@ -41,7 +41,7 @@ describe("edit_header_and_footer", () => {
     const out = renderHeaderAndFooter(hf, "all");
     expect(out.indexOf("MY SCRIPT - ")).toBeGreaterThanOrEqual(0);
     expect(out.indexOf("[Page #]")).toBeGreaterThan(out.indexOf("MY SCRIPT - "));
-    expect(out).not.toContain("EMPIRES");
+    expect(out).not.toContain("GROG THE CAVEMAN");
     expect(getAttr(hf, "HeaderVisible")).toBe("No");
   });
 
@@ -107,13 +107,13 @@ describe("edit_header_and_footer", () => {
   test("remove resets the body HeaderAndFooter to the blank-document baseline", async () => {
     const { path, doc } = freshDoc("remove-body");
     const before = renderHeaderAndFooter(doc.getBodyHeaderAndFooterElement()!, "all");
-    expect(before).toContain("EMPIRES");
+    expect(before).toContain("GROG THE CAVEMAN");
 
     const result = await handleEditHeaderAndFooter({ path, action: "remove", location: "body" });
     expect(result.isError).toBeFalsy();
 
     const after = renderHeaderAndFooter(doc.getBodyHeaderAndFooterElement()!, "all");
-    expect(after).not.toContain("EMPIRES");
+    expect(after).not.toContain("GROG THE CAVEMAN");
   });
 
   test("remove resets the title page HeaderAndFooter to the blank-document baseline", async () => {

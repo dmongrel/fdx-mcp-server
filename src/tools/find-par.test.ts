@@ -5,7 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleFindPar } from "./find-par.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 /**
  * Joins every content part's text. The shared 4-slot document cache is process-wide, so a
@@ -23,22 +23,22 @@ describe("find_par", () => {
   });
 
   test("finds a paragraph containing the query, case-insensitively by default", async () => {
-    const result = await handleFindPar({ path: FIXTURE_PATH, textContent: "romulan troop transport" });
+    const result = await handleFindPar({ path: FIXTURE_PATH, textContent: "wooly mammoth grazing" });
     expect(result.isError).toBeFalsy();
-    expect(allText(result)).toContain("Romulan troop transport");
+    expect(allText(result)).toContain("wooly mammoth grazing");
   });
 
   test("case-sensitive search misses a differently-cased query", async () => {
     const result = await handleFindPar({
       path: FIXTURE_PATH,
-      textContent: "ROMULAN TROOP TRANSPORT",
+      textContent: "WOOLY MAMMOTH GRAZING",
       caseSensitive: true,
     });
     expect(allText(result)).toContain("No paragraph found");
   });
 
   test("filters by paragraph type", async () => {
-    const result = await handleFindPar({ path: FIXTURE_PATH, textContent: "Romulan", parType: "Character" });
+    const result = await handleFindPar({ path: FIXTURE_PATH, textContent: "OOK", parType: "Character" });
     expect(result.isError).toBeFalsy();
     const text = result.content[result.content.length - 1]!.text;
     for (const line of text.split("\n---\n")) {

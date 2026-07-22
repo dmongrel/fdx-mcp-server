@@ -8,7 +8,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetFdxBreakdown } from "./get-fdx-breakdown.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 let tmpDirs: string[] = [];
 async function makeTmpDir(): Promise<string> {
@@ -56,9 +56,9 @@ describe("get_fdx_breakdown", () => {
     const text = await Bun.file(targetPath).text();
     expect(text).toContain("SCRIPT BREAKDOWN");
     expect(text).toContain("DOCUMENT OVERVIEW");
-    expect(text).toContain("Total Pages:        95");
-    expect(text).toContain("Total Paragraphs:   1755");
-    expect(text).toContain("Scenes:             89");
+    expect(text).toContain("Total Pages:        0");
+    expect(text).toContain("Total Paragraphs:   53");
+    expect(text).toContain("Scenes:             6");
     expect(text).toContain("PARAGRAPH BREAKDOWN");
     expect(text).toContain("SCENE CATALOG");
     expect(text).toContain("CHARACTER FREQUENCY");

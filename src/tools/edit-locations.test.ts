@@ -9,7 +9,7 @@ import { handleReadFdx } from "./read-fdx.ts";
 import { handleGetLocations } from "./get-locations.ts";
 import { handleEditLocations } from "./edit-locations.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 function freshCopy(): string {
   const dir = mkdtempSync(join(tmpdir(), "fdx-edit-locations-"));
@@ -31,12 +31,11 @@ describe("edit_locations", () => {
   test("remove deletes an existing location", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditLocations({ path, action: "remove", find: "vriha thrai" });
+    const result = await handleEditLocations({ path, action: "remove", find: "cave" });
     expect(result.isError).toBeFalsy();
     const after = await handleGetLocations({ path });
-    // The exact "VRIHA THRAI" entry is removed; longer entries like "VRIHA THRAI - BRIDGE" remain.
-    expect(after.content[0]!.text.split("\n")).not.toContain("VRIHA THRAI");
-    expect(after.content[0]!.text).toContain("VRIHA THRAI - BRIDGE");
+    expect(after.content[0]!.text.split("\n")).not.toContain("CAVE");
+    expect(after.content[0]!.text).toContain("PREHISTORIC VALLEY");
   });
 });
 

@@ -5,7 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleReadFullFile } from "./read-full-file.ts";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
 describe("read_full_file", () => {
   test("path is required", async () => {
@@ -22,8 +22,8 @@ describe("read_full_file", () => {
     expect(result.isError).toBeFalsy();
     // The shared 4-slot cache may prepend a "[cache warning]" content part; check every part.
     const text = result.content.map((c) => c.text).join("\n");
-    expect(text).toContain("PROLOGUE");
-    expect(text).toContain("Romulan troop transport");
+    expect(text).toContain("GROG THE CAVEMAN");
+    expect(text).toContain("wooly mammoth grazing");
   });
 });
 

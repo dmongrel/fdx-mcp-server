@@ -8,8 +8,8 @@ import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { readFileSync } from "node:fs";
 
-const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Star Trek Empires Pilot.fdx");
-const SCENE_HEADING_ID = "3c4f7ca7-60ba-4af1-bf97-19c7c36151c5";
+const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
+const SCENE_HEADING_ID = "6e39d99f-6972-42f8-bdc8-3f0dbe546280";
 
 /** See find-par.test.ts: the shared 4-slot cache may or may not prepend a warning content part. */
 function allText(result: { content: Array<{ text: string }> }): string {
@@ -30,7 +30,7 @@ describe("get_par", () => {
   test("retrieves a paragraph by id", async () => {
     const result = await handleGetPar({ path: FIXTURE_PATH, id: SCENE_HEADING_ID });
     expect(result.isError).toBeFalsy();
-    expect(allText(result)).toContain("EXT. SPACE, ON PLANET GIMAN-DOL IV");
+    expect(allText(result)).toContain("EXT. PREHISTORIC VALLEY - DAY");
   });
 
   test("errors on unknown id", async () => {
