@@ -52,4 +52,6 @@ Thumbs.db
 /test_fdx/
 /tests/
 /.artifacts/
-/examples/
+
+# examples/ is intentionally tracked — it holds the freely-distributable
+# fixture (Grog The Caveman.fdx) used by the test suite and as a sample file.
