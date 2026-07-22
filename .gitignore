@@ -40,6 +40,9 @@ logs/
 .env
 .env.*
 
+# Local MCP configuration
+.mcp.json
+
 
 # OS generated files
 .DS_Store
