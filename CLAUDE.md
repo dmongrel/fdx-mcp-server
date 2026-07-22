@@ -14,9 +14,9 @@ The Go implementation of this project lives at `/g/_GoProjects/fdx-mcp-server`.
 
 | Runtime | Command in `.mcp.json` | Notes |
 |---------|----------------------|-------|
-| **Bun** (recommended) | `bun run https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/main/index.ts` | Fastest startup; Bun auto-caches the file. |
-| **Deno** | `deno run --allow-read --allow-write --allow-net https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/main/index.ts` | Sandboxed by default; flags grant filesystem + network access. |
-| **Node/NPM** (global) | Install with `npm install -g github:dmongrel/fdx-mcp-server`, then run as `fdx-mcp-server` | Full offline support after one-time install. |
+| **Bun** (recommended) | `bun run https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/master/index.ts` | Fastest startup; Bun auto-caches the file. |
+| **Deno** | `deno run --allow-read --allow-write --allow-net https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/master/index.ts` | Sandboxed by default; flags grant filesystem + network access. |
+| **Node/NPM** (global) | Install with `npm install -g fdx-mcp-server`, then run as `fdx-mcp-server` | Full offline support after one-time install. |
 
 ## Key files
 

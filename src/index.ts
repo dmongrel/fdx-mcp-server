@@ -72,7 +72,7 @@ import { setUpdateNotice } from "./tools/get-context.ts";
 /* ------------------------------------------------------------------ */
 
 const server = new Server(
-  { name: "fdx-mcp-server", version: "1.0.0" },
+  { name: "fdx-mcp-server", version: "0.0.1" },
   {
     capabilities: {
       tools: {},
