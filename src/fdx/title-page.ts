@@ -341,13 +341,26 @@ export function editExistingTitlePage(paragraphs: XmlElement[], req: EditTitlePa
     result = [...result.slice(0, contactStart), ...buildContactParagraphs(alignment, req)];
   }
 
+  const basedOnSupplied = (req.basedOn ?? "").trim() !== "" || (req.originalAuthor ?? "").trim() !== "";
   if (basedOnStart >= 0) {
-    const supplied = (req.basedOn ?? "").trim() !== "" || (req.originalAuthor ?? "").trim() !== "";
     const placeholder = basedOnStart === basedOnEnd && isBasedOnPlaceholder(paragraphText(paragraphs[basedOnStart]!));
-    if (supplied || placeholder) {
+    if (basedOnSupplied || placeholder) {
       const alignment = getAttr(paragraphs[basedOnStart]!, "Alignment") ?? "Center";
       result = [...result.slice(0, basedOnStart), ...buildBasedOnParagraphs(alignment, req), ...result.slice(basedOnEnd + 1)];
     }
+  } else if (basedOnSupplied) {
+    // No existing based-on region to rewrite in place — this title page has never had one (the
+    // scan above only finds non-blank paragraphs, and a page without a based-on block has nothing
+    // but blank spacers in that gap). Insert one instead of silently dropping the fields. Consumes
+    // up to BASED_ON_REGION_SLOTS blank paragraphs immediately before the insertion point, mirroring
+    // the space buildTitlePage reserves for it, so the page doesn't grow unbounded.
+    let insertAt = contactStart >= 0 ? contactStart : result.length;
+    let consumed = 0;
+    while (consumed < BASED_ON_REGION_SLOTS && insertAt > 0 && paragraphText(result[insertAt - 1]!) === "") {
+      insertAt--;
+      consumed++;
+    }
+    result = [...result.slice(0, insertAt), ...buildBasedOnParagraphs("Center", req), ...result.slice(insertAt + consumed)];
   }
 
   if ((req.copyrightOwner ?? "").trim() !== "") {

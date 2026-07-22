@@ -119,10 +119,8 @@ describe("edit_title_page", () => {
   });
 
   test("edit overwrites title/author in place and preserves an existing based-on block", async () => {
-    // editExistingTitlePage only rebuilds the based-on region when it can already locate
-    // non-blank based-on paragraphs — action=create is the only path that can add one from
-    // nothing, and it refuses once any title page (even a blank one) exists. So this needs a
-    // handcrafted document that already carries a based-on block, rather than the shared fixture.
+    // A document that already carries a based-on block, since the shared fixture doesn't have
+    // one — needed to exercise the "rewrite an existing region in place" path specifically.
     const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <FinalDraft Version="6">
   <TitlePage>
@@ -150,6 +148,29 @@ describe("edit_title_page", () => {
     expect(joined).toContain("New Author");
     expect(joined).toContain("Star Trek");
     expect(joined).toContain("Roddenberry");
+  });
+
+  test("edit adds a based-on block to a title page that never had one", async () => {
+    // The shared fixture's title page has no based-on region at all (just blank spacers) — edit
+    // must insert one rather than silently dropping basedOn/originalAuthor.
+    const { path, doc } = freshDoc("edit-basedon-new");
+    const result = await handleEditTitlePage({
+      path,
+      action: "edit",
+      basedOn: "an old campfire story",
+      originalAuthor: "Anonymous",
+    });
+    expect(result.isError).toBeFalsy();
+
+    const paras = doc.getTitlePageParagraphs();
+    const joined = paras.map(paragraphText).join("\n");
+    expect(joined).toContain("Based on");
+    expect(joined).toContain("an old campfire story");
+    expect(joined).toContain("Anonymous");
+    // Title, author, and contact block must all survive untouched.
+    expect(joined).toContain("GROG THE CAVEMAN");
+    expect(joined).toContain("Joel L. Caesar");
+    expect(joined).toContain("123 Example Street");
   });
 
   test("edit rebuilds the contact block wholesale when any contact field is supplied", async () => {
