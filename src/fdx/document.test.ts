@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -94,3 +97,4 @@ describe("FdxDocument", () => {
     expect(doc.consolidateSpellCheckWords()).toBe(0);
   });
 });
+

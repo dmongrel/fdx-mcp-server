@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -52,3 +55,4 @@ describe("save_fdx", () => {
     expect(readFileSync(path, "utf-8")).toContain('Version="6"');
   });
 });
+

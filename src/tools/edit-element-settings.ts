@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_element_settings — create, edit, or remove the ElementSettings (formatting style) record
  * for a paragraph type. Mirrors Go's tools/edit_element_settings.go.
@@ -133,3 +136,4 @@ export async function handleEditElementSettings(args: Record<string, unknown> | 
   result = pushCacheWarning(result, warning);
   return result;
 }
+

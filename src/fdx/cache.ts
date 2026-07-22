@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * In-memory LRU cache of parsed FdxDocuments, keyed by absolute file path. Mirrors the Go
  * implementation's tools/cache.go: fixed 4-slot capacity, dirty-flag tracking per entry, and an
@@ -100,3 +103,4 @@ export class LruCache {
 
 /** The single shared document cache used by every tool handler. */
 export const documentCache = new LruCache();
+

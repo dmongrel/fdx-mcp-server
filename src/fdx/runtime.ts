@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Portable filesystem helpers that work under both Bun and Deno without relying on Node-only
  * APIs. Mirrors the pattern already used in src/index.ts for read_file/write_file.
@@ -78,3 +81,4 @@ export async function assertIsFile(path: string): Promise<void> {
   // Bun: attempting to read a directory's contents as text throws EISDIR, which readTextFile
   // will surface directly — no separate stat check needed on this runtime.
 }
+

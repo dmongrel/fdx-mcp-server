@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared machinery behind the six dedicated SmartType tool pairs (Characters, Extensions,
  * SceneIntros, Locations, TimesOfDay, Transitions) plus the spell-check ignore-words list, which
@@ -355,3 +358,4 @@ export function makeSmartSeparatorEditTool(name: string, description: string, le
   }
   return { tool, handler };
 }
+

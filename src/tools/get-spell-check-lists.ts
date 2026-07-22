@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_spell_check_lists — Read-Only. Retrieve the document's spell-check ignore words (the single
  * <IgnoredWords> list), in document order, with a note of how many ignore-ranges are preserved.
@@ -45,3 +48,4 @@ export async function handleGetSpellCheckLists(args: Record<string, unknown> | u
 
   return pushCacheWarning(textResult(text), warning);
 }
+

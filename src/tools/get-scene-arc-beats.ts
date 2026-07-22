@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_scene_arc_beats — Read-Only. Retrieve the CharacterArcBeat data tracked in each Scene
  * Heading's SceneProperties, as JSON. Mirrors Go's tools/get_scene_arc_beats.go.
@@ -36,3 +39,4 @@ export async function handleGetSceneArcBeats(args: Record<string, unknown> | und
   const arcs = buildArcBeatData(doc);
   return pushCacheWarning(textResult(JSON.stringify(arcs)), warning);
 }
+

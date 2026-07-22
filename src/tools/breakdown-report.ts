@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared data aggregation + text/HTML renderers for get_fdx_breakdown. Mirrors Go's
  * tools/get_fdx_breakdown.go: buildBreakdownData runs every analysis builder once and derives the
@@ -324,3 +327,4 @@ th,td{border-color:#333}
   parts.push(`</body></html>`);
   return parts.join("");
 }
+

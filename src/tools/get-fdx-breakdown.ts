@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_fdx_breakdown — Read-Only. Retrieve a combined script-breakdown report in text, html, or pdf
  * form. Mirrors Go's tools/get_fdx_breakdown.go + get_fdx_breakdown_pdf.go, but writes the
@@ -80,3 +83,4 @@ export async function handleGetFdxBreakdown(args: Record<string, unknown> | unde
   const result = textResult(`Wrote ${asType || "text"} breakdown report to ${targetPath}.`);
   return pushCacheWarning(result, warning);
 }
+

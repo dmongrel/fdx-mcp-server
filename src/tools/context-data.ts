@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Static data backing get_context and search_actions: the formatting rules
  * and the full tool catalog, ported verbatim from the Go implementation's
@@ -376,3 +379,4 @@ function buildGetContextText(): string {
 export const getContextText = buildGetContextText();
 
 export const searchActionsText = `Available tools: ${contextTools.map((t) => t.name).join(", ")}`;
+

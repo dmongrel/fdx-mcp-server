@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -134,3 +137,4 @@ describe("edit_header_and_footer", () => {
     expect(result.isError).toBe(true);
   });
 });
+

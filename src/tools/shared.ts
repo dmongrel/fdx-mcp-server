@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared helpers used across fdx-mcp-server tool handlers: MCP result builders, the document
  * cache accessor, and filename-versioning logic (mirrors Go's tools/util.go + tools/cache.go
@@ -74,3 +77,4 @@ export async function getCachedFdx(path: string): Promise<{ doc: FdxDocument; wa
 export function hasFdxExtension(path: string): boolean {
   return path.toLowerCase().endsWith(".fdx");
 }
+

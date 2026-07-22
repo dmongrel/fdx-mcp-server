@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleGetTitlePage } from "./get-title-page.ts";
@@ -22,3 +25,4 @@ describe("get_title_page", () => {
     expect(text).toContain("Star Trek");
   });
 });
+

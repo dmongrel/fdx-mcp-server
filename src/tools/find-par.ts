@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * find_par — searches top-level body paragraphs by text content, optionally scoped to a section
  * (via id) and/or filtered by paragraph type, with optional case sensitivity. Mirrors Go's
@@ -73,3 +76,4 @@ export async function handleFindPar(args: Record<string, unknown> | undefined): 
   const out = results.length === 0 ? "No paragraph found" : results.join("\n---\n");
   return pushCacheWarning(textResult(out), warning);
 }
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_spell_check — Add, change, remove, or fix entries in the spell-check ignore-words list.
  * Mirrors Go's tools/edit_spell_check.go.
@@ -71,3 +74,4 @@ export async function handleEditSpellCheck(args: Record<string, unknown> | undef
   out = pushCacheWarning(out, dirtyWarning);
   return out;
 }
+

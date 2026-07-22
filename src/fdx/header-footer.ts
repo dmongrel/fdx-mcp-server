@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared HeaderAndFooter machinery: paragraph builders/renderers and the create/edit/remove logic
  * for both get_header_and_footer and edit_header_and_footer. Mirrors Go's
@@ -178,3 +181,4 @@ export function validateHeaderFooterParts(req: EditHeaderFooterRequest): string 
   }
   return undefined;
 }
+

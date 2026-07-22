@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_transitions — Add, change, remove, or fix entries in the SmartType Transitions list.
  * Mirrors Go's tools/edit_transitions.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartListEditTool(
 
 export const editTransitionsTool = tool;
 export const handleEditTransitions = handler;
+

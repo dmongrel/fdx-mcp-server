@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared "what is a section" helpers used by find_par and the get_section* tools (Phase 3): a
  * section starts at any section-type paragraph (per list_types' sectionTypes catalog) and extends
@@ -27,3 +30,4 @@ export function findSectionEnd(paragraphs: XmlElement[], startIndex: number): nu
   const idx = paragraphs.slice(startIndex + 1).findIndex((p) => isSectionType(getParagraphType(p)));
   return idx === -1 ? paragraphs.length : startIndex + 1 + idx;
 }
+

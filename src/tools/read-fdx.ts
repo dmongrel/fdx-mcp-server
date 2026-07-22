@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * read_fdx — reads, parses, and caches a FinalDraft .fdx file for later tool calls. Always
  * re-reads from disk (unlike get_cached lookups used by read-oriented tools), matching Go's
@@ -52,3 +55,4 @@ export async function handleReadFdx(args: Record<string, unknown> | undefined) {
   if (warning) msg = `[cache warning] ${warning}\n\n${msg}`;
   return textResult(msg);
 }
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_copyright — retrieves the title page's copyright block (the first two title-page
  * paragraphs). Mirrors Go's tools/get_copyright.go.
@@ -38,3 +41,4 @@ export async function handleGetCopyright(args: Record<string, unknown> | undefin
   if (!found) return pushCacheWarning(textResult("No copyright statement was found."), warning);
   return pushCacheWarning(textResult(text), warning);
 }
+

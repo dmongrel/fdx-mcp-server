@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_scene_properties — Read-Only. Retrieve one paragraph's SceneProperties as JSON. Mirrors
  * Go's tools/get_scene_properties.go.
@@ -42,3 +45,4 @@ export async function handleGetSceneProperties(args: Record<string, unknown> | u
 
   return pushCacheWarning(textResult(JSON.stringify(result)), warning);
 }
+

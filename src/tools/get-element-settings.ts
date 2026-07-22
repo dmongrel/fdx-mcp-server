@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_element_settings — retrieves the ElementSettings (formatting style) record for a paragraph
  * type. Mirrors Go's tools/get_element_settings.go.
@@ -42,3 +45,4 @@ export async function handleGetElementSettings(args: Record<string, unknown> | u
 
   return pushCacheWarning(textResult(serializeNodeStandalone(es)), warning);
 }
+

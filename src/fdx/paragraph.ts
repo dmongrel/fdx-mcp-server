@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared helpers for reading/building <Paragraph> XmlElements — the top-level body paragraph
  * shape modeled by fdx.go's Paragraph struct. Used by get_par/edit_par/find_par/read_full_file
@@ -59,3 +62,4 @@ export function setParagraphType(el: XmlElement, type: string): void {
 export function setParagraphAlignment(el: XmlElement, alignment: string): void {
   setAttr(el, "Alignment", alignment);
 }
+

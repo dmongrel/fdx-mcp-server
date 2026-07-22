@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { LruCache, MAX_DOCUMENT_CACHE_SIZE } from "./cache.ts";
 import { FdxDocument } from "./document.ts";
@@ -87,3 +90,4 @@ describe("LruCache", () => {
     expect(c.entries().map((e) => e.path)).toEqual(["a.fdx", "c.fdx", "b.fdx"]);
   });
 });
+

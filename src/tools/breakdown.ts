@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared analysis engine behind get_script_stats, get_scene_index, get_character_appearances,
  * get_page_map, get_scene_arc_beats, get_scene_properties, and get_fdx_breakdown. Mirrors Go's
@@ -395,3 +398,4 @@ export function getScenePropertiesById(doc: FdxDocument, id: string): ScenePrope
     title: sp.title ?? undefined,
   };
 }
+

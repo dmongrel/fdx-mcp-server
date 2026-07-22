@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleGetSectionList } from "./get-section-list.ts";
@@ -51,3 +54,4 @@ describe("get_section_list", () => {
     expect(result.isError).toBe(true);
   });
 });
+

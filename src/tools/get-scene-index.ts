@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_scene_index — Read-Only. Retrieve the full scene catalog as JSON. Mirrors Go's
  * tools/get_scene_index.go.
@@ -51,3 +54,4 @@ export async function handleGetSceneIndex(args: Record<string, unknown> | undefi
 
   return pushCacheWarning(textResult(JSON.stringify(scenes)), warning);
 }
+

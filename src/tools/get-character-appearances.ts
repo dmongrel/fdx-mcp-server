@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_character_appearances — Read-Only. Retrieve per-scene appearance counts for one or all
  * characters, as JSON. Mirrors Go's tools/get_character_appearances.go.
@@ -57,3 +60,4 @@ export async function handleGetCharacterAppearances(args: Record<string, unknown
   }));
   return pushCacheWarning(textResult(JSON.stringify(ordered)), warning);
 }
+

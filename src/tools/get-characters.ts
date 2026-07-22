@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_characters — Read-Only. Retrieve the SmartType Characters list (character names known to
  * the document), in document order. Mirrors Go's tools/get_characters.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartListGetTool(
 
 export const getCharactersTool = tool;
 export const handleGetCharacters = handler;
+

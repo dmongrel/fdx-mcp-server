@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_script_stats — Read-Only. Retrieve high-level document metrics as JSON. Mirrors Go's
  * tools/get_script_stats.go.
@@ -36,3 +39,4 @@ export async function handleGetScriptStats(args: Record<string, unknown> | undef
   const stats = buildScriptStats(doc);
   return pushCacheWarning(textResult(JSON.stringify(stats)), warning);
 }
+

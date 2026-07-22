@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_par — retrieves a single top-level body paragraph by id from a loaded screenplay, returning
  * its plain text content (styling stripped). Mirrors Go's tools/get_par.go.
@@ -41,3 +44,4 @@ export async function handleGetPar(args: Record<string, unknown> | undefined): P
 
   return pushCacheWarning(textResult(paragraphText(para)), warning);
 }
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_macro_alias — Read-Only. Retrieve a specific macro by matching one or more of its
  * attributes. Mirrors Go's tools/get_macro_alias.go.
@@ -72,3 +75,4 @@ export async function handleGetMacroAlias(args: Record<string, unknown> | undefi
   const text = matches.map((m) => formatMacro(m) + "\n").join("\n---\n");
   return pushCacheWarning(textResult(text), warning);
 }
+

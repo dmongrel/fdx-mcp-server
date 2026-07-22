@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
@@ -29,3 +32,4 @@ describe("read_fdx", () => {
     expect(result.content[0]!.text).toContain("read error");
   });
 });
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { normalizeEntry, dedupList, sortListCI, applyCleanups, editSmartList, actionPastTense } from "./smart-type-ops.ts";
 
@@ -84,3 +87,4 @@ describe("actionPastTense", () => {
     expect(actionPastTense("fix")).toBe("fixd");
   });
 });
+

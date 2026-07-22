@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_extensions — Read-Only. Retrieve the SmartType Extensions list (character extensions such
  * as (V.O.), (O.S.)). Mirrors Go's tools/get_extensions.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartListGetTool(
 
 export const getExtensionsTool = tool;
 export const handleGetExtensions = handler;
+

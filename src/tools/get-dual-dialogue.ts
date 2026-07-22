@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_dual_dialogue — Read-Only. Retrieve the contents of a dual-dialogue block, including its
  * nested paragraphs (each speaker's Character/Dialogue column). Mirrors Go's
@@ -53,3 +56,4 @@ export async function handleGetDualDialogue(args: Record<string, unknown> | unde
   const lines = nested.map((np) => `${getParagraphType(np)} [${getParagraphId(np)}]: ${paragraphText(np)}`);
   return pushCacheWarning(textResult(lines.join("\n")), warning);
 }
+

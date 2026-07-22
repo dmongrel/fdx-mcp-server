@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_section — retrieves a section: its heading paragraph (any section type) plus all following
  * paragraphs up to the next section heading of any type (exclusive). Mirrors Go's
@@ -58,3 +61,4 @@ export async function handleGetSection(args: Record<string, unknown> | undefined
 
   return pushCacheWarning(textResult(lines.join("\n\n")), warning);
 }
+

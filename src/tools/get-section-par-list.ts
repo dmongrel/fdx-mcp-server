@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_section_par_list — retrieves all paragraph ids/types/text within a section, starting from a
  * given section id (the heading itself included); omit id to start at the first section. Mirrors
@@ -64,3 +67,4 @@ export async function handleGetSectionParList(args: Record<string, unknown> | un
 
   return pushCacheWarning(textResult(lines.join("\n")), warning);
 }
+

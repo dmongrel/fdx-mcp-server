@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * new_file — creates a brand-new blank FinalDraft screenplay from the embedded NewFile.fdx
  * template, re-minting every id="..." attribute to a fresh UUID (so no two generated documents
@@ -84,3 +87,4 @@ export async function handleNewFile(args: Record<string, unknown> | undefined) {
     return errResult(`write error: ${message}`);
   }
 }
+

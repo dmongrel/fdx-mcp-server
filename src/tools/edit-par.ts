@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_par — create, edit, or remove a top-level body paragraph in a loaded screenplay. Mirrors
  * Go's tools/edit_par.go, including its SmartType-dictionary refresh on successful create/edit
@@ -209,3 +212,4 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   );
   return result;
 }
+

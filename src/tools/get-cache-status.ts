@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_cache_status — reports the document cache's capacity and current contents (path + dirty
  * flag per entry, most-recently-used first). Read-only, no parameters.
@@ -23,3 +26,4 @@ export function handleGetCacheStatus(): ToolResult {
   };
   return textResult(JSON.stringify(status));
 }
+

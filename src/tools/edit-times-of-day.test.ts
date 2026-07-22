@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { mkdtempSync, copyFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -43,3 +46,4 @@ describe("edit_times_of_day", () => {
     expect(text).toContain("DAYTIME");
   });
 });
+

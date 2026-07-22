@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * PDF renderer for get_fdx_breakdown, using pdf-lib (pure JS, no native bindings — works unmodified
  * under Bun and Deno). Lays out the same BreakdownData the text/HTML renderers consume as a
@@ -185,3 +188,4 @@ export async function renderBreakdownPdf(d: BreakdownData): Promise<Uint8Array> 
 
   return doc.save();
 }
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_locations — Read-Only. Retrieve the SmartType Locations list (location names known to the
  * document). Mirrors Go's tools/get_locations.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartListGetTool(
 
 export const getLocationsTool = tool;
 export const handleGetLocations = handler;
+

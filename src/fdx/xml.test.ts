@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { parseXml, serializeXml, getAttr, setAttr, findChild, findChildren, textContent } from "./xml.ts";
 
@@ -75,3 +78,4 @@ describe("xml parser/serializer", () => {
     expect(out.startsWith('<?xml version="1.0" encoding="UTF-8" standalone="no" ?>')).toBe(true);
   });
 });
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_times_of_day — Read-Only. Retrieve the SmartType TimesOfDay list (times of day such as
  * DAY, NIGHT), plus the container Separator (default " - "). Mirrors Go's
@@ -15,3 +18,4 @@ const { tool, handler } = makeSmartListGetTool(
 
 export const getTimesOfDayTool = tool;
 export const handleGetTimesOfDay = handler;
+

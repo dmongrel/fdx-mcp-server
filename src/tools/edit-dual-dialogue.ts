@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_dual_dialogue — restructure dual dialogue (side-by-side speech). Mirrors Go's
  * tools/edit_dual_dialogue.go. Only restructures the document; paragraph text/content is edited
@@ -134,3 +137,4 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
   );
   return result;
 }
+

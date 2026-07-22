@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { handleSearchActions } from "./search-actions.ts";
 import { contextTools } from "./context-data.ts";
@@ -18,3 +21,4 @@ describe("search_actions", () => {
     expect(result.content[0]?.text).toContain("search_actions");
   });
 });
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * list_types — curated catalog of known FinalDraft paragraph types, grouped by class (section /
  * other) and alphabetized within each class. Reads no document. Mirrors Go's tools/list_types.go;
@@ -105,3 +108,4 @@ export function handleListTypes(args: Record<string, unknown> | undefined): Tool
   const cls = arg<string>(args, "class");
   return textResult(listTypesText(cls));
 }
+

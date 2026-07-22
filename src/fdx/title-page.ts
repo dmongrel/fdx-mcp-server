@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared title-page / copyright-block machinery: paragraph builders matching FinalDraft's
  * standard title-page layout, plus the create/edit/remove logic for both edit_title_page and
@@ -114,7 +117,6 @@ export function setParagraphText(p: XmlElement, content: string): void {
 }
 
 /* ---------------------------------------------------------------- */
-/*  Copyright block                                                  */
 /* ---------------------------------------------------------------- */
 
 function capitalizeWords(s: string): string {
@@ -354,3 +356,4 @@ export function editExistingTitlePage(paragraphs: XmlElement[], req: EditTitlePa
 
   return enforceTitlePageLength(result);
 }
+

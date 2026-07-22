@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleGetElementSettings } from "./get-element-settings.ts";
@@ -28,3 +31,4 @@ describe("get_element_settings", () => {
     expect(result.content[0]!.text).toContain("not found");
   });
 });
+

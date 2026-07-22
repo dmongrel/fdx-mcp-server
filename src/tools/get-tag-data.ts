@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_tag_data — Read-Only. Retrieve the document's <TagData> block as JSON. Mirrors Go's
  * tools/get_tag_data.go (fdx.TagData/TagCategories/TagCategory struct shape).
@@ -62,3 +65,4 @@ export async function handleGetTagData(args: Record<string, unknown> | undefined
 
   return pushCacheWarning(textResult(JSON.stringify(result)), warning);
 }
+

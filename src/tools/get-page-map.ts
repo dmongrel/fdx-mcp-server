@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_page_map — Read-Only. Retrieve the pagination map as JSON. Mirrors Go's
  * tools/get_page_map.go.
@@ -36,3 +39,4 @@ export async function handleGetPageMap(args: Record<string, unknown> | undefined
   const pageMap = buildPageMap(doc);
   return pushCacheWarning(textResult(JSON.stringify(pageMap)), warning);
 }
+

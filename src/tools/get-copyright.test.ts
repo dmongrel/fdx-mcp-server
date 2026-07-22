@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleGetCopyright } from "./get-copyright.ts";
@@ -37,3 +40,4 @@ describe("get_copyright", () => {
     expect(text).toContain("All Rights Reserved.");
   });
 });
+

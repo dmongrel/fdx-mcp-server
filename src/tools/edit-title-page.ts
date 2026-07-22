@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_title_page — create, edit, or remove a screenplay's title page. Mirrors Go's
  * tools/edit_title_page.go.
@@ -140,3 +143,4 @@ export async function handleEditTitlePage(args: Record<string, unknown> | undefi
   );
   return result;
 }
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { handleCloseFdx } from "./close-fdx.ts";
 import { documentCache } from "../fdx/cache.ts";
@@ -38,3 +41,4 @@ describe("close_fdx", () => {
     expect(documentCache.get("close-dirty-force.fdx")).toBeUndefined();
   });
 });
+

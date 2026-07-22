@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_revisions — Read-Only. Retrieve the document's <Revisions> block as JSON. Mirrors Go's
  * tools/get_revisions.go (fdx.Revisions/Revision struct shape, camelCased field names).
@@ -74,3 +77,4 @@ export async function handleGetRevisions(args: Record<string, unknown> | undefin
 
   return pushCacheWarning(textResult(JSON.stringify(result)), warning);
 }
+

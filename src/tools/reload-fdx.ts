@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * reload_fdx — forces a fresh re-parse of an .fdx file from disk, replacing whatever is cached
  * for that path. Refuses to discard unsaved edits unless force=true. Mirrors tools/reload_fdx.go.
@@ -58,3 +61,4 @@ export async function handleReloadFdx(args: Record<string, unknown> | undefined)
   if (warning) msg = `[cache warning] ${warning}\n\n${msg}`;
   return textResult(msg);
 }
+

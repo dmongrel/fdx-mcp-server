@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test, afterEach } from "bun:test";
 import { handleGetContext, getContextTool, setUpdateNotice } from "./get-context.ts";
 import { contextTools } from "./context-data.ts";
@@ -81,3 +84,4 @@ describe("get_context with update notice", () => {
     expect(text).not.toContain("[SYSTEM NOTICE:");
   });
 });
+

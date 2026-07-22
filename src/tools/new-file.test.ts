@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { mkdtempSync, existsSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -75,3 +78,4 @@ describe("new_file", () => {
     expect(result.content[0]!.text).toContain(join(dir, "script_v1.fdx"));
   });
 });
+

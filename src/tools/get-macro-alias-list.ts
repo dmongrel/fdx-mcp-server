@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_macro_alias_list — Read-Only. Retrieve the list of all macros defined in a loaded
  * screenplay. Mirrors Go's tools/get_macro_alias_list.go.
@@ -41,3 +44,4 @@ export async function handleGetMacroAliasList(args: Record<string, unknown> | un
   const text = macros.map((m) => formatMacro(m) + "\n").join("");
   return pushCacheWarning(textResult(text), warning);
 }
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Small shared helpers for identifiers and timestamps in the shape FinalDraft expects.
  */
@@ -18,3 +21,4 @@ export function fdxDateTimeNow(date: Date = new Date()): string {
   const s = pad(date.getSeconds());
   return `${y}${mo}${d}T${h}${mi}${s}`;
 }
+

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { handleGetCacheStatus } from "./get-cache-status.ts";
 import { documentCache, MAX_DOCUMENT_CACHE_SIZE } from "../fdx/cache.ts";
@@ -16,3 +19,4 @@ describe("get_cache_status", () => {
     expect(status.count).toBe(status.entries.length);
   });
 });
+

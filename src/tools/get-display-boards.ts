@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_display_boards — Read-Only. Retrieve the document's <DisplayBoards> block as JSON. Mirrors
  * Go's tools/get_display_boards.go (fdx.DisplayBoards/DisplayBoard/Lanes/Lane struct shape).
@@ -80,3 +83,4 @@ export async function handleGetDisplayBoards(args: Record<string, unknown> | und
 
   return pushCacheWarning(textResult(JSON.stringify(result)), warning);
 }
+

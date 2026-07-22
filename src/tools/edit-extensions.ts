@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_extensions — Add, change, remove, or fix entries in the SmartType Extensions list.
  * Mirrors Go's tools/edit_extensions.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartListEditTool(
 
 export const editExtensionsTool = tool;
 export const handleEditExtensions = handler;
+

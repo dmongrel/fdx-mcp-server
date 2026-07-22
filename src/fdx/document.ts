@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * FdxDocument wraps a parsed FinalDraft .fdx XML tree (see xml.ts) and provides the small set of
  * typed operations Phase 0/1 tooling needs: round-trip parse/serialize, SmartType dictionary
@@ -363,3 +366,4 @@ export class FdxDocument {
     return harvested.length;
   }
 }
+

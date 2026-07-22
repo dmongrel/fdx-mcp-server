@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Minimal, dependency-free XML parser/serializer tuned for FinalDraft .fdx documents.
  *
@@ -347,3 +350,4 @@ export function cloneNode<T extends XmlNode>(node: T): T {
     children: node.children.map((c) => cloneNode(c)),
   } as T;
 }
+

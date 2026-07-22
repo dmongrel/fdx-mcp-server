@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_title_page — retrieves the title page as plain text (all paragraphs concatenated top to
  * bottom). Mirrors Go's tools/get_title_page.go.
@@ -39,3 +42,4 @@ export async function handleGetTitlePage(args: Record<string, unknown> | undefin
   const text = paragraphs.map((p) => `${paragraphText(p)}\n`).join("");
   return pushCacheWarning(textResult(text), warning);
 }
+

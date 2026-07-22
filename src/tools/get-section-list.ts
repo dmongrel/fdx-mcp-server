@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_section_list — lists all section-type headings (or, with `type`, only paragraphs of that
  * exact section type) in document order, optionally starting from a given section id. Mirrors
@@ -69,3 +72,4 @@ export async function handleGetSectionList(args: Record<string, unknown> | undef
 
   return pushCacheWarning(textResult(lines.join("\n")), warning);
 }
+

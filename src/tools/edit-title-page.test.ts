@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -176,3 +179,4 @@ describe("edit_title_page", () => {
     expect(result.content[0]!.text).toContain("must be 'create', 'edit', or 'remove'");
   });
 });
+

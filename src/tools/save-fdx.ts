@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * save_fdx — writes the cached (in-memory, possibly edited) document for a path back to disk,
  * with filename-based versioning on by default (script.fdx -> script_v1.fdx -> script_v2.fdx).
@@ -62,3 +65,4 @@ export async function handleSaveFdx(args: Record<string, unknown> | undefined) {
   if (warning) msg = `[cache warning] ${warning}\n\n${msg}`;
   return textResult(msg);
 }
+

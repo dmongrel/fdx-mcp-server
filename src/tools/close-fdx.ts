@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * close_fdx — deliberately evicts a document from the cache, freeing a slot. Refuses to discard
  * unsaved edits unless force=true is passed. Mirrors Go's tools/close_fdx.go.
@@ -43,3 +46,4 @@ export function handleCloseFdx(args: Record<string, unknown> | undefined): ToolR
   if (dirty) msg += " Unsaved edits were discarded (force=true).";
   return textResult(msg);
 }
+

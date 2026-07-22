@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { isNewer } from "./check-update.ts";
 
@@ -29,3 +32,4 @@ describe("isNewer", () => {
     expect(isNewer("2", "1")).toBe(false);
   });
 });
+

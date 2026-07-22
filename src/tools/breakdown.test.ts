@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { FdxDocument } from "../fdx/document.ts";
@@ -144,3 +147,4 @@ describe("getScenePropertiesById", () => {
     expect(result).toBeUndefined();
   });
 });
+

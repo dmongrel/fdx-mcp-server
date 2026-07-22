@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_transitions — Read-Only. Retrieve the SmartType Transitions list (transition strings such
  * as CUT TO:, FADE IN:). Mirrors Go's tools/get_transitions.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartListGetTool(
 
 export const getTransitionsTool = tool;
 export const handleGetTransitions = handler;
+

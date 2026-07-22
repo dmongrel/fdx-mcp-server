@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared read helpers for the <Macros> block, used by get_macro_alias_list and get_macro_alias.
  * Mirrors the Macro/Alias/ActivateIn shape modeled in Go's fdx/fdx.go (fdx-mcp-server side reads
@@ -64,3 +67,4 @@ export function formatMacro(m: MacroInfo): string {
   }
   return out;
 }
+

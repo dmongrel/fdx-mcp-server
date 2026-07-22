@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_copyright — add, replace, or remove the title page's copyright block (always the first
  * two title-page paragraphs). Mirrors Go's tools/edit_copyright.go.
@@ -70,3 +73,4 @@ export async function handleEditCopyright(args: Record<string, unknown> | undefi
   );
   return result;
 }
+

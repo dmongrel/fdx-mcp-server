@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * read_full_file — concatenates the title page and all body paragraphs of a loaded screenplay
  * into plain text (one paragraph per line), preserving order but not formatting. Mirrors Go's
@@ -41,3 +44,4 @@ export async function handleReadFullFile(args: Record<string, unknown> | undefin
 
   return pushCacheWarning(textResult(lines.join("\n") + "\n"), warning);
 }
+

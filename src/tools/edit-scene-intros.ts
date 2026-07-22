@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_scene_intros — Add, change, remove, or fix entries in the SmartType SceneIntros list, and
  * optionally set its container Separator attribute. Mirrors Go's tools/edit_scene_intros.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartSeparatorEditTool(
 
 export const editSceneIntrosTool = tool;
 export const handleEditSceneIntros = handler;
+

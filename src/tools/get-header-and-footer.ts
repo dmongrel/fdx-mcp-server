@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * get_header_and_footer — retrieves header and/or footer content from the script body and/or
  * title page. Mirrors Go's tools/get_header_and_footer.go.
@@ -60,3 +63,4 @@ export async function handleGetHeaderAndFooter(args: Record<string, unknown> | u
 
   return pushCacheWarning(textResult(out), warning);
 }
+

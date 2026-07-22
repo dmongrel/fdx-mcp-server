@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_locations — Add, change, remove, or fix entries in the SmartType Locations list.
  * Mirrors Go's tools/edit_locations.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartListEditTool(
 
 export const editLocationsTool = tool;
 export const handleEditLocations = handler;
+

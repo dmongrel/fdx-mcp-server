@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared ElementSettings (paragraph-type formatting style) machinery: the type catalog and the
  * create/edit field-application logic used by edit_element_settings. Mirrors Go's
@@ -126,3 +129,4 @@ export function applyElementSettingsFields(es: XmlElement, req: EditElementSetti
 export function getElementSettingsType(es: XmlElement): string {
   return getAttr(es, "Type") ?? "";
 }
+

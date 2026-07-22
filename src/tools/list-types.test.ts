@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { handleListTypes, knownType, isSectionType, listTypesText } from "./list-types.ts";
 
@@ -54,3 +57,4 @@ describe("list_types", () => {
     expect(result.content[0]!.text).toBe(listTypesText());
   });
 });
+

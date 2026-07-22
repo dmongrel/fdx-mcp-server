@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_times_of_day — Add, change, remove, or fix entries in the SmartType TimesOfDay list, and
  * optionally set its container Separator attribute. Mirrors Go's tools/edit_times_of_day.go.
@@ -14,3 +17,4 @@ const { tool, handler } = makeSmartSeparatorEditTool(
 
 export const editTimesOfDayTool = tool;
 export const handleEditTimesOfDay = handler;
+

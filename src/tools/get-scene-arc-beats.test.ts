@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
@@ -20,3 +23,4 @@ describe("get_scene_arc_beats", () => {
     expect(arcs.some((a: any) => a.beats.some((b: any) => b.name === "TALPEK"))).toBe(true);
   });
 });
+

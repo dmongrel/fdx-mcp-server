@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Joel L. Caesar
+// SPDX-License-Identifier: MIT
+
 /**
  * edit_header_and_footer — create, edit, or remove a HeaderAndFooter in the script body or the
  * title page. Mirrors Go's tools/edit_header_and_footer.go.
@@ -169,3 +172,4 @@ export async function handleEditHeaderAndFooter(args: Record<string, unknown> | 
   );
   return result;
 }
+
