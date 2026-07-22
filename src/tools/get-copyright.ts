@@ -14,7 +14,7 @@ import { copyrightText } from "../fdx/title-page.ts";
 export const getCopyrightTool: FdxTool = {
   name: "get_copyright",
   description:
-    "Read-Only. Retrieve the title page's copyright block (the first two title-page paragraphs). Returns the 'Copyright © <year> <owner>.' line, plus 'All Rights Reserved.' when present; if there is no copyright, reports that none was found.",
+    "Read-Only. Retrieve the title page's copyright/rights block (the first two title-page paragraphs). Returns either the standard 'Copyright © <year> <owner>.' line plus 'All Rights Reserved.' when present, or a custom rights statement (e.g. 'Placed into Public Domain.') set via edit_copyright's statement field; if there is nothing there, reports that none was found.",
   inputSchema: {
     type: "object",
     properties: {

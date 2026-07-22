@@ -132,6 +132,16 @@ export function isCopyrightText(s: string): boolean {
   return s.trim().toLowerCase().startsWith("copyright");
 }
 
+/**
+ * Whether the copyright region (the first title-page paragraph) holds any statement at all —
+ * either the standard "Copyright (c) ..." line or an arbitrary custom one set via
+ * setCopyrightStatement (e.g. "Placed into Public Domain."). Unlike isCopyrightText this isn't
+ * prefix-based, since a custom statement has no fixed wording to match.
+ */
+export function hasCopyrightRegionContent(paras: XmlElement[]): boolean {
+  return paras.length > 0 && paragraphText(paras[0]!).trim() !== "";
+}
+
 /** Renders "Copyright © <year> <owner>." title-cased with a single trailing period; "" if owner is blank. */
 export function buildCopyrightLine(owner: string, year: string): string {
   owner = owner.trim();
@@ -168,9 +178,22 @@ export function setCopyrightBlock(paras: XmlElement[], owner: string, year: stri
   return out;
 }
 
+/**
+ * Writes an arbitrary rights statement (e.g. "Placed into Public Domain.") into the first
+ * title-page paragraph, blanking the second — the alternative to setCopyrightBlock for text that
+ * doesn't fit the fixed "Copyright (c) <year> <owner>." template.
+ */
+export function setCopyrightStatement(paras: XmlElement[], statement: string): XmlElement[] {
+  const out = [...paras];
+  while (out.length < COPYRIGHT_REGION_SLOTS) out.unshift(tpParagraph("Left"));
+  setParagraphText(out[0]!, statement.trim());
+  setParagraphText(out[1]!, "");
+  return out;
+}
+
 /** Blanks the copyright block (first two paragraphs) if present. Returns whether one was found/cleared. */
 export function clearCopyrightBlock(paras: XmlElement[]): boolean {
-  if (paras.length === 0 || !isCopyrightText(paragraphText(paras[0]!))) return false;
+  if (!hasCopyrightRegionContent(paras)) return false;
   setParagraphText(paras[0]!, "");
   if (paras.length > 1) setParagraphText(paras[1]!, "");
   return true;
@@ -178,7 +201,7 @@ export function clearCopyrightBlock(paras: XmlElement[]): boolean {
 
 /** Returns the copyright block as text (line1 + optional line2) and whether one was found. */
 export function copyrightText(paras: XmlElement[]): { text: string; found: boolean } {
-  if (paras.length === 0 || !isCopyrightText(paragraphText(paras[0]!))) return { text: "", found: false };
+  if (!hasCopyrightRegionContent(paras)) return { text: "", found: false };
   const line1 = paragraphText(paras[0]!);
   if (paras.length > 1) {
     const line2 = paragraphText(paras[1]!);

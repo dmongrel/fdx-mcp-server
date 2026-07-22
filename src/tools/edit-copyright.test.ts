@@ -73,8 +73,10 @@ describe("edit_copyright", () => {
     expect(paragraphText(paras[0]!)).toBe("");
     expect(paragraphText(paras[1]!)).toBe("");
 
-    // The fixture itself never had a copyright, so removing on a fresh copy reports "not found".
+    // Blank the region first — the shared fixture itself now ships a custom statement, so a fresh
+    // copy of it would find something to remove; only a genuinely blank region reports "not found".
     const { path: path2 } = freshDoc("remove-none");
+    await handleEditCopyright({ path: path2, action: "remove" });
     const result2 = await handleEditCopyright({ path: path2, action: "remove" });
     expect(result2.content[0]!.text).toContain("No copyright statement was found.");
   });
@@ -84,6 +86,39 @@ describe("edit_copyright", () => {
     const result = await handleEditCopyright({ path, action: "bogus" });
     expect(result.isError).toBe(true);
     expect(result.content[0]!.text).toContain("must be 'set' or 'remove'");
+  });
+
+  test("set with statement writes the verbatim text and blanks the second line", async () => {
+    const { path, doc } = freshDoc("set-statement");
+    const result = await handleEditCopyright({ path, action: "set", statement: "Placed into Public Domain." });
+    expect(result.isError).toBeFalsy();
+    const paras = doc.getTitlePageParagraphs();
+    expect(paragraphText(paras[0]!)).toBe("Placed into Public Domain.");
+    expect(paragraphText(paras[1]!)).toBe("");
+  });
+
+  test("set with statement replaces the fixture's existing custom statement", async () => {
+    const { path, doc } = freshDoc("set-statement-replace");
+    const result = await handleEditCopyright({ path, action: "set", statement: "All rights reserved by the estate." });
+    expect(result.isError).toBeFalsy();
+    const paras = doc.getTitlePageParagraphs();
+    expect(paragraphText(paras[0]!)).toBe("All rights reserved by the estate.");
+  });
+
+  test("set rejects both owner and statement together", async () => {
+    const { path } = freshDoc("set-both");
+    const result = await handleEditCopyright({ path, action: "set", owner: "Jane Doe", statement: "Placed into Public Domain." });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]!.text).toContain("not both");
+  });
+
+  test("remove clears a custom statement set via statement", async () => {
+    const { path, doc } = freshDoc("remove-statement");
+    await handleEditCopyright({ path, action: "set", statement: "Placed into Public Domain." });
+    const result = await handleEditCopyright({ path, action: "remove" });
+    expect(result.isError).toBeFalsy();
+    const paras = doc.getTitlePageParagraphs();
+    expect(paragraphText(paras[0]!)).toBe("");
   });
 });
 

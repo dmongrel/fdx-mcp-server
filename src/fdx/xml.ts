@@ -217,7 +217,23 @@ function parseElement(cursor: Cursor): XmlElement {
     children.push({ type: "text", value: decodeEntities(raw) });
   }
 
-  return { type: "element", name, attrs, children };
+  return { type: "element", name, attrs, children: pruneInsignificantWhitespace(children) };
+}
+
+/**
+ * Drops whitespace-only text nodes from an element's children when it also has element children.
+ * Such text is pure indentation/formatting from the source file, not meaningful content — and
+ * serializeElement's own pretty-printer (see below) generates fresh indentation/newlines for that
+ * exact case. Keeping the original whitespace nodes around made serialize() non-idempotent: each
+ * parse -> serialize cycle would print the pretty-printer's own newline *and* the preserved
+ * original whitespace, so the file grew a little on every read/edit/save round trip. Text-only
+ * (leaf) elements are untouched, so real content — including a lone space inside a <Text> run —
+ * still round-trips exactly.
+ */
+function pruneInsignificantWhitespace(children: XmlNode[]): XmlNode[] {
+  const hasElementChild = children.some((c) => c.type === "element");
+  if (!hasElementChild) return children;
+  return children.filter((c) => !(c.type === "text" && /^\s*$/.test(c.value)));
 }
 
 /** Serializes a parsed document back to an XML string, preserving the original declaration. */

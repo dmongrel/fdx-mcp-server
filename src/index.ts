@@ -63,6 +63,7 @@ import { getRevisionsTool, handleGetRevisions } from "./tools/get-revisions.ts";
 import { getTagDataTool, handleGetTagData } from "./tools/get-tag-data.ts";
 import { getDisplayBoardsTool, handleGetDisplayBoards } from "./tools/get-display-boards.ts";
 import { getFdxBreakdownTool, handleGetFdxBreakdown } from "./tools/get-fdx-breakdown.ts";
+import { convertToPdfTool, handleConvertToPdf } from "./tools/convert-to-pdf.ts";
 import { checkForUpdate } from "./tools/check-update.ts";
 import { setUpdateNotice } from "./tools/get-context.ts";
 
@@ -174,6 +175,7 @@ const tools: FdxTool[] = [
   getTagDataTool,
   getDisplayBoardsTool,
   getFdxBreakdownTool,
+  convertToPdfTool,
   {
     name: "read_file",
     description: "Read the contents of a file at the given path.",
@@ -279,6 +281,7 @@ const toolHandlers: Record<
   get_tag_data: (args) => handleGetTagData(args),
   get_display_boards: (args) => handleGetDisplayBoards(args),
   get_fdx_breakdown: (args) => handleGetFdxBreakdown(args),
+  convert_to_pdf: (args) => handleConvertToPdf(args),
 };
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {

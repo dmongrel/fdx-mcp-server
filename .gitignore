@@ -55,3 +55,6 @@ Thumbs.db
 
 # examples/ is intentionally tracked — it holds the freely-distributable
 # fixture (Grog The Caveman.fdx) used by the test suite and as a sample file.
+
+# Generated PDF output (e.g. from manual convert_to_pdf/get_fdx_breakdown testing) shouldn't be tracked.
+*.pdf
