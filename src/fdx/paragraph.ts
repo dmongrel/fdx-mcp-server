@@ -76,6 +76,19 @@ export function getParagraphId(el: XmlElement): string {
   return getAttr(el, "id") ?? "";
 }
 
+/**
+ * Finds a paragraph's id attribute by case-insensitive name match, returning both its exact
+ * attribute name and value. FinalDraft's own UI has been observed to write `id`, `Id`, and `ID`
+ * on different paragraphs within the same document after repeated editing sessions, so a repair
+ * that assumes lowercase `id` misses those paragraphs entirely. Callers that write a new value
+ * back must reuse the returned name verbatim — XML attribute names are case-sensitive, and
+ * writing a hardcoded `id` would silently rename the attribute.
+ */
+export function findParagraphIdAttr(el: XmlElement): { name: string; value: string } | undefined {
+  const found = el.attrs.find(([k]) => k.toLowerCase() === "id");
+  return found ? { name: found[0], value: found[1] } : undefined;
+}
+
 export function getParagraphType(el: XmlElement): string {
   return getAttr(el, "Type") ?? "";
 }

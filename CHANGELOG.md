@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.5] - 2026-07-31
+
+### Added
+
+- **`find_duplicate_ids`/`fix_duplicate_ids`** tools — detect and repair top-level body paragraphs that share the same id. FinalDraft's copy/paste sometimes duplicates a paragraph's id instead of minting a new one, and every id-addressed tool (`get_par`, `edit_par`, `edit_scene_arc_beats`, `get_section_par_list`) silently resolves a duplicated id to its first match, so a caller addressing a later paragraph edits the wrong one without any error. `find_duplicate_ids` reports the groups; `fix_duplicate_ids` (`action=report` to preview, `action=fix` to apply) keeps each group's first occurrence (document order) untouched and mints fresh uuids for the rest, preserving each paragraph's original `id`/`Id`/`ID` attribute-name casing.
+- **`get_par`/`edit_par`** now warn (without blocking) when the id they resolve matches more than one paragraph, pointing the caller at `find_duplicate_ids`/`fix_duplicate_ids`.
+
 ## [0.0.4] - 2026-08-01
 
 ### Added

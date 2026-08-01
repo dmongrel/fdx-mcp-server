@@ -223,6 +223,36 @@ describe("edit_par", () => {
     expect(result.content[0]!.text).toContain("not found");
   });
 
+  test("edit warns when the id is duplicated, and still edits the first match", async () => {
+    const { path, doc } = freshDoc("edit-duplicate-id");
+    const paragraphs = doc.getParagraphElements();
+    const id = getParagraphId(paragraphs[0]!);
+    doc.getContentElement(true)!.children.push(
+      // Duplicate id on a second paragraph, mirroring FinalDraft's copy/paste bug.
+      { type: "element", name: "Paragraph", attrs: [["Type", "Action"], ["id", id]], children: [{ type: "text", value: "" }] },
+    );
+
+    const result = await handleEditPar({ path, action: "edit", id, type: "Action", textRuns: [{ content: "edited" }] });
+    expect(result.isError).toBeFalsy();
+    expect(result.content.map((c) => c.text).join("\n")).toContain("this id matches 2 paragraphs");
+  });
+
+  test("remove warns when the id is duplicated, and only removes the first match", async () => {
+    const { path, doc } = freshDoc("remove-duplicate-id");
+    const paragraphs = doc.getParagraphElements();
+    const id = getParagraphId(paragraphs[0]!);
+    const before = doc.getParagraphElements().length;
+    doc.getContentElement(true)!.children.push(
+      { type: "element", name: "Paragraph", attrs: [["Type", "Action"], ["id", id]], children: [{ type: "text", value: "" }] },
+    );
+
+    const result = await handleEditPar({ path, action: "remove", id });
+    expect(result.isError).toBeFalsy();
+    expect(result.content.map((c) => c.text).join("\n")).toContain("this id matches 2 paragraphs");
+    // One of the two duplicate-id paragraphs remains (the second one, never removed).
+    expect(doc.getParagraphElements().length).toBe(before);
+  });
+
   test("unknown action does not mutate the document", async () => {
     const { path, doc } = freshDoc("bogus-action");
     const before = doc.getParagraphElements().length;

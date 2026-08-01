@@ -9,7 +9,8 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, pushWarning, hasFdxExtension } from "./shared.ts";
+import { duplicateIdWarning } from "../fdx/duplicate-ids.ts";
 import { documentCache } from "../fdx/cache.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { generateUuid } from "../fdx/uuid.ts";
@@ -170,11 +171,14 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   let modifiedText = "";
   let modifiedType = "";
   let touched = false;
+  let dupWarning = "";
 
   if (action === "edit") {
     if (!id) return errResult("failed to edit paragraph: id is required");
-    const para = paragraphs.find((p) => getParagraphId(p) === id);
-    if (!para) return errResult("failed to edit paragraph: paragraph not found");
+    const matches = paragraphs.filter((p) => getParagraphId(p) === id);
+    if (matches.length === 0) return errResult("failed to edit paragraph: paragraph not found");
+    const para = matches[0]!;
+    dupWarning = duplicateIdWarning(matches.length);
     const type = typeArg ?? getParagraphType(para);
     if (typeArg !== undefined && !knownType(type)) {
       return errResult(`invalid paragraph type "${type}"; call list_types to see valid types`);
@@ -187,10 +191,12 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
     touched = true;
   } else if (action === "remove") {
     if (!id) return errResult("failed to remove paragraph: id is required");
+    const matchCount = paragraphs.filter((p) => getParagraphId(p) === id).length;
+    if (matchCount === 0) return errResult("failed to remove paragraph: paragraph not found");
+    dupWarning = duplicateIdWarning(matchCount);
     const idx = content.children.findIndex(
       (c): c is XmlElement => c.type === "element" && c.name === "Paragraph" && getParagraphId(c) === id,
     );
-    if (idx === -1) return errResult("failed to remove paragraph: paragraph not found");
     content.children.splice(idx, 1);
     touched = true;
   } else if (action === "create") {
@@ -223,7 +229,7 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   const dirtyWarning = documentCache.touchDirty(path, doc);
   const msg = `Successfully ${pastTense(action)} paragraph in script. File updated in cache — call save_fdx to persist changes to disk.`;
   const result = pushCacheWarning(
-    pushCacheWarning(textResult(msg), dirtyWarning),
+    pushCacheWarning(pushWarning(textResult(msg), dupWarning), dirtyWarning),
     warning,
   );
   return result;

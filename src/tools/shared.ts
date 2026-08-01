@@ -44,6 +44,15 @@ export function pushCacheWarning(result: ToolResult, warning: string): ToolResul
   };
 }
 
+/** Prepends an arbitrary warning line to a result's text verbatim, if warning is non-empty. */
+export function pushWarning(result: ToolResult, warning: string): ToolResult {
+  if (!warning) return result;
+  return {
+    ...result,
+    content: [{ type: "text", text: warning }, ...result.content],
+  };
+}
+
 export const RE_VERSION = /_v(\d+)\.fdx$/i;
 export const RE_DOT_FDX = /\.fdx$/i;
 

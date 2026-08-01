@@ -7,9 +7,10 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, pushWarning } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId, paragraphText } from "../fdx/paragraph.ts";
+import { duplicateIdWarning } from "../fdx/duplicate-ids.ts";
 
 export const getParTool: FdxTool = {
   name: "get_par",
@@ -39,9 +40,12 @@ export async function handleGetPar(args: Record<string, unknown> | undefined): P
     return errResult(`read error: ${message}`);
   }
 
-  const para = doc.getParagraphElements().find((p) => getParagraphId(p) === id);
-  if (!para) return errResult(`paragraph id not found: ${id}`);
+  const paragraphs = doc.getParagraphElements();
+  const matches = paragraphs.filter((p) => getParagraphId(p) === id);
+  if (matches.length === 0) return errResult(`paragraph id not found: ${id}`);
+  const para = matches[0]!;
 
-  return pushCacheWarning(textResult(paragraphText(para)), warning);
+  const result = pushWarning(textResult(paragraphText(para)), duplicateIdWarning(matches.length));
+  return pushCacheWarning(result, warning);
 }
 

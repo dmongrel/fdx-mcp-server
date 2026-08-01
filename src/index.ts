@@ -20,6 +20,8 @@ import { getCacheStatusTool, handleGetCacheStatus } from "./tools/get-cache-stat
 import { closeFdxTool, handleCloseFdx } from "./tools/close-fdx.ts";
 import { reloadFdxTool, handleReloadFdx } from "./tools/reload-fdx.ts";
 import { getParTool, handleGetPar } from "./tools/get-par.ts";
+import { findDuplicateIdsTool, handleFindDuplicateIds } from "./tools/find-duplicate-ids.ts";
+import { fixDuplicateIdsTool, handleFixDuplicateIds } from "./tools/fix-duplicate-ids.ts";
 import { getParRunsTool, handleGetParRuns } from "./tools/get-par-runs.ts";
 import { editParTool, handleEditPar } from "./tools/edit-par.ts";
 import { findParTool, handleFindPar } from "./tools/find-par.ts";
@@ -137,6 +139,8 @@ const tools: FdxTool[] = [
   closeFdxTool,
   reloadFdxTool,
   getParTool,
+  findDuplicateIdsTool,
+  fixDuplicateIdsTool,
   getParRunsTool,
   editParTool,
   findParTool,
@@ -248,6 +252,8 @@ const toolHandlers: Record<
   close_fdx: (args) => handleCloseFdx(args),
   reload_fdx: (args) => handleReloadFdx(args),
   get_par: (args) => handleGetPar(args),
+  find_duplicate_ids: (args) => handleFindDuplicateIds(args),
+  fix_duplicate_ids: (args) => handleFixDuplicateIds(args),
   get_par_runs: (args) => handleGetParRuns(args),
   edit_par: (args) => handleEditPar(args),
   find_par: (args) => handleFindPar(args),

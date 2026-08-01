@@ -46,5 +46,24 @@ describe("get_par", () => {
     const result = await handleGetPar({ path, id: SCENE_HEADING_ID });
     expect(result.isError).toBeFalsy();
   });
+
+  test("warns and returns the first match when the id is duplicated", async () => {
+    const path = join(import.meta.dir, "get-par-duplicate-id.fdx");
+    const doc = FdxDocument.parse(
+      `<?xml version="1.0"?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Action" id="dup"><Text>first</Text></Paragraph>
+    <Paragraph Type="Action" id="dup"><Text>second</Text></Paragraph>
+  </Content>
+</FinalDraft>`,
+      path,
+    );
+    documentCache.set(path, doc);
+    const result = await handleGetPar({ path, id: "dup" });
+    expect(result.isError).toBeFalsy();
+    expect(allText(result)).toContain("this id matches 2 paragraphs");
+    expect(allText(result)).toContain("first");
+  });
 });
 
