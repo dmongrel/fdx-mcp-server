@@ -15,6 +15,7 @@ import { documentCache } from "../fdx/cache.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { generateUuid } from "../fdx/uuid.ts";
 import { knownType } from "./list-types.ts";
+import { parseSlugline } from "./breakdown.ts";
 import {
   buildParagraphElement,
   getParagraphId,
@@ -72,43 +73,6 @@ export function addSmartTypeValue(doc: FdxDocument, leaf: string, value: string)
   if (v === "" || list.values.includes(v)) return;
   const merged = [...list.values, v].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()) || a.localeCompare(b));
   doc.setSmartTypeList(leaf, merged);
-}
-
-const ALPHA_OR_SLASH = /^[a-zA-Z/]$/;
-
-/** Splits Scene Heading text into intro ("INT./EXT."), location, and time-of-day, mirroring Go's parseSlugline. */
-function parseSlugline(doc: FdxDocument, text: string): { intro: string; location: string; timeOfDay: string } {
-  const trimmed = text.trim();
-  if (trimmed === "") return { intro: "", location: "", timeOfDay: "" };
-
-  let intro = "";
-  let locAndTime = trimmed;
-  for (let i = 0; i < trimmed.length; i++) {
-    const ch = trimmed[i]!;
-    if (ALPHA_OR_SLASH.test(ch)) continue;
-    intro = trimmed.slice(0, i).replace(/\/+$/, "");
-    locAndTime = trimmed.slice(i).trim();
-    break;
-  }
-
-  locAndTime = locAndTime.replace(/^[./ ]+/, "").trim();
-  if (locAndTime === "") return { intro, location: "", timeOfDay: "" };
-
-  let location = locAndTime;
-  let timeOfDay = "";
-  const todList = doc.getSmartTypeList("TimeOfDay");
-  if (todList) {
-    const words = locAndTime.split(/\s+/).filter(Boolean);
-    for (let end = words.length; end > 0; end--) {
-      const candidate = words.slice(end - 1).join(" ");
-      if (todList.values.some((v) => v.toLowerCase() === candidate.toLowerCase())) {
-        timeOfDay = candidate;
-        location = words.slice(0, end - 1).join(" ");
-        break;
-      }
-    }
-  }
-  return { intro, location, timeOfDay };
 }
 
 /** Keeps the SmartType dictionaries in sync with a created/edited paragraph's type and text. */

@@ -50,12 +50,44 @@ describe("parseSlugline", () => {
     expect(parseSlugline(doc, "   ")).toEqual({ intro: "", location: "", timeOfDay: "" });
   });
 
-  test("matches a trailing TimeOfDay entry exactly", async () => {
+  test("splits on the declared separator regardless of TimesOfDay dictionary membership", async () => {
     const doc = await loadFixture();
     const { intro, location, timeOfDay } = parseSlugline(doc, "INT. BRIDGE - DAY");
     expect(intro).toBe("INT");
     expect(timeOfDay).toBe("DAY");
-    expect(location).toBe("BRIDGE -");
+    expect(location).toBe("BRIDGE");
+  });
+
+  test("splits structurally even when the tail is not a known TimesOfDay entry", async () => {
+    const doc = await loadFixture();
+    const { location, timeOfDay } = parseSlugline(doc, "INT. VRIHA THRAI BRIDGE - ALERT");
+    // "ALERT" need not be in the document's TimesOfDay dictionary — the declared separator is
+    // what marks the split point, not dictionary membership. This is what collapses a room that
+    // splits three ways under word-based dictionary matching into one consistent location.
+    expect(location).toBe("VRIHA THRAI BRIDGE");
+    expect(timeOfDay).toBe("ALERT");
+  });
+
+  test("no declared separator means the entire remainder is the location", async () => {
+    const doc = await loadFixture();
+    const { intro, location, timeOfDay } = parseSlugline(doc, "INT. U.S.S. YAMATO BRIDGE");
+    expect(intro).toBe("INT");
+    expect(location).toBe("U.S.S. YAMATO BRIDGE");
+    expect(timeOfDay).toBe("");
+  });
+
+  test("a hyphen inside the location without the declared spacing is not treated as a separator", async () => {
+    const doc = await loadFixture();
+    const { location, timeOfDay } = parseSlugline(doc, "INT. GIMAN-DOL COMMAND SICKBAY");
+    expect(location).toBe("GIMAN-DOL COMMAND SICKBAY");
+    expect(timeOfDay).toBe("");
+  });
+
+  test("splits on the last occurrence of the separator when location itself contains ' - '", async () => {
+    const doc = await loadFixture();
+    const { location, timeOfDay } = parseSlugline(doc, "INT. STAR TREK - THE BRIDGE - NIGHT");
+    expect(location).toBe("STAR TREK - THE BRIDGE");
+    expect(timeOfDay).toBe("NIGHT");
   });
 });
 

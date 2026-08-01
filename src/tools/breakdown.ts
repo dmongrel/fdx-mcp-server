@@ -138,11 +138,25 @@ export function parseSceneLength(s: string): number {
 
 const ALPHA_OR_SLASH = /^[a-zA-Z/]$/;
 
+/** Default TimesOfDay separator, matching SEPARATOR_DEFAULTS.timeofday in smart-type-ops.ts. */
+const DEFAULT_TIME_OF_DAY_SEPARATOR = " - ";
+
 /**
  * Parses a scene-heading (or similar) text into an intro token (e.g. "INT", "EXT", "I/E"), a
- * location, and — when the trailing words match a known TimesOfDay entry exactly (case-
- * sensitively, mirroring Go's `findEntry(list, candidate, cs=true)` call in breakdown.go) — a time
- * of day. Mirrors Go's parseSlugline.
+ * location, and a time of day.
+ *
+ * The time of day is whatever follows the *last* occurrence of the document's declared TimesOfDay
+ * separator (its SmartType Separator attribute, defaulting to " - ") — structural, not dictionary-
+ * gated. The TimesOfDay SmartType dictionary is an autocomplete history, not a description of the
+ * document: FinalDraft never prunes it, so it accumulates stale entries (including ones that are
+ * actually room names) and can equally be missing genuine time-of-day words the script uses. Matching
+ * against it produced two failure modes: real times of day like "ALERT" or "MONTAGE" that never
+ * made it into the dictionary stayed glued to the location, fragmenting one room into several
+ * differently-keyed locations; and stale dictionary entries that happened to equal a location's
+ * last word (e.g. a room called "BRIDGE" sitting in the dictionary from an old draft) got sliced
+ * off the location entirely, inventing a phantom location out of what remained. If the separator
+ * is absent from the heading, the entire remainder after the intro is the location and timeOfDay
+ * is empty. Diverges from Go's parseSlugline, which matched dictionary-gated and had both defects.
  */
 export function parseSlugline(doc: FdxDocument, text: string): { intro: string; location: string; timeOfDay: string } {
   const trimmed = text.trim();
@@ -161,20 +175,13 @@ export function parseSlugline(doc: FdxDocument, text: string): { intro: string; 
   locAndTime = locAndTime.replace(/^[./ ]+/, "").trim();
   if (locAndTime === "") return { intro, location: "", timeOfDay: "" };
 
-  let location = locAndTime;
-  let timeOfDay = "";
-  const todList = doc.getSmartTypeList("TimeOfDay");
-  if (todList) {
-    const words = locAndTime.split(/\s+/).filter(Boolean);
-    for (let end = words.length; end > 0; end--) {
-      const candidate = words.slice(end - 1).join(" ");
-      if (todList.values.includes(candidate)) {
-        timeOfDay = candidate;
-        location = words.slice(0, end - 1).join(" ");
-        break;
-      }
-    }
-  }
+  const separator = doc.getSmartTypeSeparator("TimesOfDay") || DEFAULT_TIME_OF_DAY_SEPARATOR;
+  const sepIndex = locAndTime.lastIndexOf(separator);
+  if (sepIndex === -1) return { intro, location: locAndTime, timeOfDay: "" };
+
+  const location = locAndTime.slice(0, sepIndex).trim();
+  const timeOfDay = locAndTime.slice(sepIndex + separator.length).trim();
+  if (timeOfDay === "") return { intro, location: locAndTime, timeOfDay: "" };
   return { intro, location, timeOfDay };
 }
 
@@ -193,17 +200,11 @@ export interface SluglineLocation {
  * intro token, separators, or time-of-day around it.
  */
 export function locateSluglineLocation(doc: FdxDocument, text: string): SluglineLocation | undefined {
-  const { intro, location: rawLocation, timeOfDay } = parseSlugline(doc, text);
-  if (rawLocation === "") return undefined;
-  const searchFrom = intro ? text.indexOf(intro) + intro.length : 0;
-  const start = text.indexOf(rawLocation, Math.max(searchFrom, 0));
-  if (start === -1) return undefined;
-  // parseSlugline's word-based time-of-day split leaves the separator's "-" token attached to the
-  // end of location whenever a time-of-day follows (e.g. "CAVE -" for "INT. CAVE - NIGHT") — that
-  // dash isn't part of the location name itself, so trim it back off.
-  let location = rawLocation;
-  if (timeOfDay !== "") location = location.replace(/\s*-$/, "");
+  const { intro, location, timeOfDay } = parseSlugline(doc, text);
   if (location === "") return undefined;
+  const searchFrom = intro ? text.indexOf(intro) + intro.length : 0;
+  const start = text.indexOf(location, Math.max(searchFrom, 0));
+  if (start === -1) return undefined;
   return { intro, location, timeOfDay, start, end: start + location.length };
 }
 
