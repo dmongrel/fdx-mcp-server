@@ -107,7 +107,7 @@ export const contextTools: ToolInfo[] = [
       'Add, replace, or remove the title page\'s copyright block — always the first two title-page paragraphs. action=set adds a copyright when none exists and replaces it when one does; provide owner (required), and optionally year (defaults to the current year) and allRightsReserved (defaults to true). The tool emits exactly "Copyright © <year> <owner>." and, when allRightsReserved, "All Rights Reserved." — the owner is title-cased and the fixed wording/format cannot be overridden. action=remove blanks the block. After editing, call save_fdx to persist changes to disk.',
   },
   {
-    name: "edit_characters",
+    name: "edit_smarttype_characters",
     description:
       "Add, change, remove, or fix entries in the SmartType Characters list (character names). action=create appends value; action=edit replaces the first entry equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively after any change. After editing, call save_fdx to persist changes to disk.",
   },
@@ -142,27 +142,32 @@ export const contextTools: ToolInfo[] = [
       "Create, edit, or remove the title page of a screenplay. Use action=create only when no title page exists (requires title and author); it builds the full standard layout. Use action=edit to update an existing title page (a brand-new file from new_file already ships one, so use edit there). Use action=remove to reset the title page to a blank (new-document) title page. After editing, call save_fdx to persist changes to disk.",
   },
   {
-    name: "edit_extensions",
+    name: "edit_smarttype_extensions",
     description:
       "Add, change, remove, or fix entries in the SmartType Extensions list (character extensions like '(V.O.)', '(O.S.)').action=create appends value; action=edit replaces the first entry equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively after any change. After editing, call save_fdx to persist changes to disk.",
   },
   {
     name: "edit_locations",
     description:
+      "Rename a location across every Scene Heading that uses it, editing the actual script text (not the SmartType Locations dictionary — see edit_smarttype_locations for that). Matches find against each Scene Heading's parsed location (case-insensitive unless cs=true) and splices replace into just that segment, preserving the intro token, separators, and time-of-day around it. Adds replace to the SmartType Locations list if missing, and warns (without blocking) when find is left orphaned there. After editing, call save_fdx to persist changes to disk.",
+  },
+  {
+    name: "edit_smarttype_locations",
+    description:
       "Add, change, remove, or fix entries in the SmartType Locations list (scene locations).action=create appends value; action=edit replaces the first entry equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively after any change. After editing, call save_fdx to persist changes to disk.",
   },
   {
-    name: "edit_scene_intros",
+    name: "edit_smarttype_scene_intros",
     description:
       "Add, change, remove, or fix entries in the SmartType SceneIntros list (scene heading prefixes like 'INT.', 'EXT.', 'INT./EXT.'). Pass separator to set the single container Separator attribute (may be sent alone).action=create appends value; action=edit replaces the first entry equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively after any change. After editing, call save_fdx to persist changes to disk.",
   },
   {
-    name: "edit_times_of_day",
+    name: "edit_smarttype_times_of_day",
     description:
       "Add, change, remove, or fix entries in the SmartType TimesOfDay list (time-of-day suffixes like 'DAY', 'NIGHT', 'DAWN - LATER'). Pass separator to set the single container Separator attribute (may be sent alone).action=create appends value; action=edit replaces the first entry equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively after any change. After editing, call save_fdx to persist changes to disk.",
   },
   {
-    name: "edit_transitions",
+    name: "edit_smarttype_transitions",
     description:
       "Add, change, remove, or fix entries in the SmartType Transitions list (transitions like 'CUT TO:', 'FADE IN:', 'SMASH CUT TO:').action=create appends value; action=edit replaces the first entry equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively after any change. After editing, call save_fdx to persist changes to disk.",
   },
@@ -171,7 +176,7 @@ export const contextTools: ToolInfo[] = [
     description: "Read-Only. Search for a paragraph by text content.",
   },
   {
-    name: "get_characters",
+    name: "get_smarttype_characters",
     description:
       "Read-Only. Retrieve the SmartType Characters list (character names) as newline-joined entries in document order, or an empty message if none exist.",
   },
@@ -196,7 +201,7 @@ export const contextTools: ToolInfo[] = [
       "Read-Only. Retrieve the ElementSettings (formatting style) for a given paragraph type — font, alignment, indentation, spacing, behavior, and outline settings. Returns an error if the type does not exist.",
   },
   {
-    name: "get_extensions",
+    name: "get_smarttype_extensions",
     description:
       "Read-Only. Retrieve the SmartType Extensions list (character extensions like '(V.O.)', '(O.S.)') as newline-joined entries in document order, or an empty message if none exist.",
   },
@@ -208,6 +213,11 @@ export const contextTools: ToolInfo[] = [
   {
     name: "get_locations",
     description:
+      "Read-Only. Retrieve, as JSON, actual location usage parsed from every Scene Heading's slugline (not the SmartType Locations dictionary — see get_smarttype_locations for that). Each entry is { location, count, scenes: [{ id, text, page }] }, sorted by scene count descending. Pass location to filter to one location (case-insensitive); omit for every location.",
+  },
+  {
+    name: "get_smarttype_locations",
+    description:
       "Read-Only. Retrieve the SmartType Locations list (scene locations) as newline-joined entries in document order, or an empty message if none exist.",
   },
   {
@@ -216,7 +226,7 @@ export const contextTools: ToolInfo[] = [
       "Read-Only. Retrieve a single paragraph by its id from a loaded screenplay — returns type, alignment, text content, and all formatting attributes.",
   },
   {
-    name: "get_scene_intros",
+    name: "get_smarttype_scene_intros",
     description:
       "Read-Only. Retrieve the SmartType SceneIntros list (scene heading prefixes like 'INT.', 'EXT.') as newline-joined entries in document order, or an empty message if none exist. Reports the effective separator on a leading line when present.",
   },
@@ -241,7 +251,7 @@ export const contextTools: ToolInfo[] = [
       "Read-Only. Retrieve the spell-check ignore-words list as newline-joined entries in document order, or an empty message if none exist. Ignore-ranges are not included — only the word list.",
   },
   {
-    name: "get_times_of_day",
+    name: "get_smarttype_times_of_day",
     description:
       "Read-Only. Retrieve the SmartType TimesOfDay list (time-of-day suffixes like 'DAY', 'NIGHT') as newline-joined entries in document order, or an empty message if none exist. Reports the effective separator on a leading line when present.",
   },
@@ -251,7 +261,7 @@ export const contextTools: ToolInfo[] = [
       "Read-Only. Retrieve the title page as plain text — concatenates all paragraphs from top to bottom, including copyright (if any), title, author, contact block, and spacing.",
   },
   {
-    name: "get_transitions",
+    name: "get_smarttype_transitions",
     description:
       "Read-Only. Retrieve the SmartType Transitions list (transitions like 'CUT TO:', 'FADE IN:') as newline-joined entries in document order, or an empty message if none exist.",
   },
