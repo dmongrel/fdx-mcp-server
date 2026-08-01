@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.7] - 2026-07-31
+
+### Fixed
+
+- **`parseSlugline` (used by `get_scene_index`, `get_locations`, `edit_locations`, and `edit_par`'s SmartType refresh) no longer matches time-of-day against the TimesOfDay SmartType dictionary.** The dictionary is an autocomplete history FinalDraft never prunes, so a stale entry that happened to equal a location's last word (e.g. a room literally named "BRIDGE") got sliced off as a phantom time-of-day, inventing a fake location out of what remained — while a genuine time of day missing from the dictionary (e.g. "ALERT") stayed glued to the location, fragmenting one room into several differently-keyed locations. The split is now structural: whatever follows the last occurrence of the document's declared TimesOfDay separator (default `" - "`) is the time of day, dictionary membership or not.
+- **`get_scene_index`'s `location` no longer carries a trailing separator** (e.g. `"BRIDGE -"` for `"INT. BRIDGE - DAY"`), matching what `get_locations` already returned. Both now go through the same `parseSlugline` — previously `edit-par.ts` carried its own near-duplicate copy (which also matched the dictionary case-insensitively, one more way the two could silently disagree).
+
 ## [0.0.6] - 2026-07-31
 
 ### Changed
