@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.6] - 2026-07-31
+
+### Changed
+
+- **Renamed the six SmartType dictionary tool pairs** for clarity: `get_characters`/`edit_characters`, `get_extensions`/`edit_extensions`, `get_locations`/`edit_locations`, `get_scene_intros`/`edit_scene_intros`, `get_times_of_day`/`edit_times_of_day`, and `get_transitions`/`edit_transitions` are now `get_smarttype_*`/`edit_smarttype_*`. Same behavior — these tools only ever read/wrote FinalDraft's autocomplete dictionary, never the actual script, and the old names didn't make that clear.
+
+### Added
+
+- **`get_locations`/`edit_locations`** (new tools, taking over the names freed by the rename above) — report actual location usage parsed from Scene Heading text (scene ids, page, count per location) and rename a location across every Scene Heading that uses it, splicing just the location segment of each slugline while preserving intro token, separators, time-of-day, and run styling. Keeps the SmartType Locations list in sync on rename, and warns (without blocking) when the old name is left orphaned there.
+
 ## [0.0.5] - 2026-07-31
 
 ### Added
