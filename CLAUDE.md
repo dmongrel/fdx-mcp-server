@@ -21,6 +21,7 @@ The Go implementation of this project lives at `/g/_GoProjects/fdx-mcp-server`.
 ## Key files
 
 - `README.md` — Setup and configuration instructions for all three runtime paths
+- `CHANGELOG.md` — Per-version release notes; update alongside a version bump in `package.json`
 - `.idea/` — IntelliJ IDEA project metadata (the repo is TypeScript, not a native JetBrains project)
 
 
