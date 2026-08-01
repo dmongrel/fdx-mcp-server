@@ -124,7 +124,8 @@ Key capabilities exposed by `fdx-mcp-server`:
 - **Scene analysis** — parse scene headings (INT./EXT., location, time of day), extract scene index and properties, compute script stats and page maps.
 - **Character tracking** — retrieve character lists, extension metadata (V.O., O.S.), per-character scene appearance counts, and arc beats across scenes.
 - **Dual dialogue support** — read and create side-by-side dialogue blocks.
-- **SmartType dictionaries** — manage characters, extensions, locations, transitions, scene intros, times of day, spell-check lists, and paragraph types.
+- **SmartType dictionaries** — manage the FinalDraft autocomplete lists: characters, extensions, transitions, scene intros, times of day, spell-check lists, and paragraph types.
+- **Location usage** — see actual location usage parsed from Scene Heading text (not just the autocomplete dictionary) and rename a location across every scene that uses it in one call.
 - **Formatting & styling** — query and edit element settings (fonts, indentation, spacing) for every paragraph type; manage header/footer content.
 - **Title page management** — read and write title, author, contact block, copyright, and based-on credits.
 - **Script breakdowns** — generate full production breakdown reports (props, vehicles, camera, cast) as text or HTML/PDF.
