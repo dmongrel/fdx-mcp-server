@@ -34,6 +34,11 @@ export const contextRules: ContextRule[] = [
       "After any edit operation (edit_par, edit_copyright, edit_smarttype_characters, etc.), call 'save_fdx' to persist changes to disk. Edits are applied in cache only until then.",
   },
   {
+    title: "Versioned Saves and the Cache",
+    content:
+      "A versioned save (save_fdx with the default version bump) writes a NEW path, re-caches the document there clean, and leaves the previous path cached and dirty. This is expected: the old path's in-memory copy genuinely differs from the file on disk at that path, and the server never writes back to it. Under versioning every superseded path stays dirty for the rest of the session. Track the dirty flag on your CURRENT path only — a dirty flag on a superseded version is normal and means nothing was lost; the content is on disk under the newer name. Because each versioned save mints a new path, a sequence of saves on one document fills the 4-slot cache by the fourth save and begins evicting. Eviction warnings naming a superseded version are expected noise. To avoid them, call close_fdx on the previous path after a versioned save; it will require force=true, which is safe precisely because the content was written to the new path.",
+  },
+  {
     title: "Paragraph Structure",
     content:
       "A paragraph has a Type (e.g., Scene Heading, Action, Dialogue), an Id (UUID), and optional Text runs with styling. Paragraphs are ordered sequentially in the document.",
