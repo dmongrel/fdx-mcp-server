@@ -6,6 +6,8 @@
 
 Written in TypeScript, it runs on **Bun** or **Deno** using the stdio transport protocol, making it suitable for integration with any MCP-compatible client such as Claude Desktop.
 
+**Repository:** [github.com/dmongrel/fdx-mcp-server](https://github.com/dmongrel/fdx-mcp-server) · **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+
 ---
 
 ## Table of Contents
