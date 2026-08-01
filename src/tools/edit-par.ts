@@ -17,6 +17,7 @@ import { knownType } from "./list-types.ts";
 import {
   buildParagraphElement,
   getParagraphId,
+  getParagraphType,
   paragraphText,
   setParagraphAlignment,
   setParagraphTextRuns,
@@ -39,12 +40,18 @@ export const editParTool: FdxTool = {
       alignment: { type: "string", description: "alignment setting" },
       textRuns: {
         type: "array",
-        description: "array of text runs with content and optional style",
+        description:
+          "array of text runs with content and optional style/attrs. To preserve existing run styling (AdornmentStyle, Font, Color, Size, RevisionID, ...), call get_par_runs first and pass each run's attrs back unchanged alongside the edited content.",
         items: {
           type: "object",
           properties: {
             content: { type: "string", description: "the text content" },
-            style: { type: "string", description: "text style such as Bold, Italic, or Underline" },
+            style: { type: "string", description: "text style such as Bold, Italic, or Underline (shorthand for attrs.Style)" },
+            attrs: {
+              type: "object",
+              description: "arbitrary passthrough <Text> attributes (e.g. AdornmentStyle, Font, Color, Size, RevisionID), written verbatim",
+              additionalProperties: { type: "string" },
+            },
           },
           required: ["content"],
         },
@@ -131,17 +138,21 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   if (!action) return errResult("action is required");
 
   const id = arg<string>(args, "id");
-  const type = arg<string>(args, "type") ?? "";
+  const typeArg = arg<string>(args, "type");
   const alignment = arg<string>(args, "alignment");
   const textRuns = (arg<TextRunInput[]>(args, "textRuns") ?? []).map((tr) => ({
     content: tr.content,
     style: tr.style,
+    attrs: tr.attrs,
   }));
   const beforeParId = arg<string>(args, "beforeParId");
   const afterParId = arg<string>(args, "afterParId");
 
-  if (action !== "remove" && !knownType(type)) {
-    return errResult(`invalid paragraph type "${type}"; call list_types to see valid types`);
+  // For create, type must be an explicit known type — there's no existing paragraph to infer it
+  // from. For edit, an omitted type defaults to the paragraph's current type (resolved after the
+  // paragraph lookup below); an explicit type is still validated. remove doesn't use type at all.
+  if (action === "create" && !knownType(typeArg ?? "")) {
+    return errResult(`invalid paragraph type "${typeArg ?? ""}"; call list_types to see valid types`);
   }
 
   let doc: FdxDocument;
@@ -164,6 +175,10 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
     if (!id) return errResult("failed to edit paragraph: id is required");
     const para = paragraphs.find((p) => getParagraphId(p) === id);
     if (!para) return errResult("failed to edit paragraph: paragraph not found");
+    const type = typeArg ?? getParagraphType(para);
+    if (typeArg !== undefined && !knownType(type)) {
+      return errResult(`invalid paragraph type "${type}"; call list_types to see valid types`);
+    }
     setParagraphType(para, type);
     if (alignment) setParagraphAlignment(para, alignment);
     setParagraphTextRuns(para, textRuns);
@@ -179,6 +194,7 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
     content.children.splice(idx, 1);
     touched = true;
   } else if (action === "create") {
+    const type = typeArg ?? "";
     const newPara = buildParagraphElement(type, generateUuid(), alignment, textRuns);
     if (beforeParId) {
       const idx = paragraphs.findIndex((p) => getParagraphId(p) === beforeParId);

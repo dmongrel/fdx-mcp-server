@@ -20,8 +20,10 @@ import { getCacheStatusTool, handleGetCacheStatus } from "./tools/get-cache-stat
 import { closeFdxTool, handleCloseFdx } from "./tools/close-fdx.ts";
 import { reloadFdxTool, handleReloadFdx } from "./tools/reload-fdx.ts";
 import { getParTool, handleGetPar } from "./tools/get-par.ts";
+import { getParRunsTool, handleGetParRuns } from "./tools/get-par-runs.ts";
 import { editParTool, handleEditPar } from "./tools/edit-par.ts";
 import { findParTool, handleFindPar } from "./tools/find-par.ts";
+import { replaceTextTool, handleReplaceText } from "./tools/replace-text.ts";
 import { readFullFileTool, handleReadFullFile } from "./tools/read-full-file.ts";
 import { listTypesTool, handleListTypes } from "./tools/list-types.ts";
 import { getCharactersTool, handleGetCharacters } from "./tools/get-characters.ts";
@@ -132,8 +134,10 @@ const tools: FdxTool[] = [
   closeFdxTool,
   reloadFdxTool,
   getParTool,
+  getParRunsTool,
   editParTool,
   findParTool,
+  replaceTextTool,
   readFullFileTool,
   listTypesTool,
   getCharactersTool,
@@ -238,8 +242,10 @@ const toolHandlers: Record<
   close_fdx: (args) => handleCloseFdx(args),
   reload_fdx: (args) => handleReloadFdx(args),
   get_par: (args) => handleGetPar(args),
+  get_par_runs: (args) => handleGetParRuns(args),
   edit_par: (args) => handleEditPar(args),
   find_par: (args) => handleFindPar(args),
+  replace_text: (args) => handleReplaceText(args),
   read_full_file: (args) => handleReadFullFile(args),
   list_types: (args) => handleListTypes(args),
   get_characters: (args) => handleGetCharacters(args),

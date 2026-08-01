@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.3] - 2026-07-31
+
+### Added
+
+- **`get_par_runs`** tool — reads a paragraph's `<Text>` runs with their full attribute sets (`AdornmentStyle`, `Font`, `Color`, `Size`, `RevisionID`, ...) intact, instead of the flattened plain text `get_par` returns.
+- **`replace_text`** tool — run-preserving find/replace across paragraphs, substituting inside each `<Text>` run's own content so run boundaries and attributes are never lost. Matches that only exist by spanning a run boundary are left alone and reported as skipped rather than silently merged. Scoping mirrors `find_par` (`parType`, `id`, `caseSensitive`).
+
+### Changed
+
+- **`edit_par`**'s `textRuns[].attrs` now accepts arbitrary passthrough `<Text>` attributes (not just `style`), so a paragraph with styled runs can be edited without destroying that styling.
+
+### Fixed
+
+- **`edit_par` no longer requires `type` on `action=edit`.** Omitting it now defaults to the paragraph's existing type instead of erroring; `action=create` still requires an explicit, valid type.
+
 ## [0.0.2] - 2026-07-23
 
 ### Fixed

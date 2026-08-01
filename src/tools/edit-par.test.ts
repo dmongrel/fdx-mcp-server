@@ -132,6 +132,61 @@ describe("edit_par", () => {
     expect(updated.attrs.find(([k]) => k === "Alignment")?.[1]).toBe("Center");
   });
 
+  test("edit preserves and round-trips arbitrary textRuns attrs", async () => {
+    const { path, doc } = freshDoc("edit-attrs-roundtrip");
+    const target = doc.getParagraphElements()[0]!;
+    const id = getParagraphId(target);
+
+    const result = await handleEditPar({
+      path,
+      action: "edit",
+      id,
+      type: "Action",
+      textRuns: [
+        { content: "The " },
+        { content: "Shur", attrs: { AdornmentStyle: "-1" } },
+        { content: " remainder" },
+      ],
+    });
+    expect(result.isError).toBeFalsy();
+
+    const updated = doc.getParagraphElements().find((p) => getParagraphId(p) === id)!;
+    const textRuns = updated.children.filter((c) => c.type === "element" && c.name === "Text") as Array<
+      { attrs: Array<[string, string]> }
+    >;
+    expect(textRuns.length).toBe(3);
+    expect(Object.fromEntries(textRuns[1]!.attrs)).toEqual({ AdornmentStyle: "-1" });
+    expect(textRuns[0]!.attrs).toEqual([]);
+  });
+
+  test("edit with no type keeps the paragraph's existing type", async () => {
+    const { path, doc } = freshDoc("edit-default-type");
+    const target = doc.getParagraphElements()[0]!;
+    const id = getParagraphId(target);
+    const originalType = target.attrs.find(([k]) => k === "Type")?.[1];
+
+    const result = await handleEditPar({
+      path,
+      action: "edit",
+      id,
+      textRuns: [{ content: "edited without a type" }],
+    });
+    expect(result.isError).toBeFalsy();
+
+    const updated = doc.getParagraphElements().find((p) => getParagraphId(p) === id)!;
+    expect(updated.attrs.find(([k]) => k === "Type")?.[1]).toBe(originalType);
+  });
+
+  test("edit with an explicit invalid type still fails", async () => {
+    const { path, doc } = freshDoc("edit-invalid-type");
+    const target = doc.getParagraphElements()[0]!;
+    const id = getParagraphId(target);
+
+    const result = await handleEditPar({ path, action: "edit", id, type: "Bogus Type" });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]!.text).toContain("invalid paragraph type");
+  });
+
   test("edit requires id", async () => {
     const { path } = freshDoc("edit-no-id");
     const result = await handleEditPar({ path, action: "edit", type: "Action" });

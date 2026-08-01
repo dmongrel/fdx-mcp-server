@@ -12,11 +12,38 @@ import { type XmlElement, type XmlNode, createElement, findChildren, getAttr, se
 export interface TextRunInput {
   content: string;
   style?: string;
+  /** Arbitrary passthrough <Text> attributes (AdornmentStyle, Font, Color, Size, RevisionID, ...). */
+  attrs?: Record<string, string>;
+}
+
+/** A <Text> run as read from XML: content plus its full attribute set. */
+export interface TextRun {
+  content: string;
+  attrs: Record<string, string>;
 }
 
 /** Concatenates all direct <Text> children's content, in order (styling attributes stripped). */
 export function paragraphText(el: XmlElement): string {
   return findChildren(el, "Text").map(textContent).join("");
+}
+
+/** Reads a paragraph's <Text> runs with their full attribute sets, in order. */
+export function getParagraphRuns(el: XmlElement): TextRun[] {
+  return findChildren(el, "Text").map((child) => ({
+    content: textContent(child),
+    attrs: Object.fromEntries(child.attrs),
+  }));
+}
+
+/** Builds the <Text> attrs for a run: attrs map first, then `style` overriding Style if given. */
+function buildTextAttrs(tr: TextRunInput): Array<[string, string]> {
+  const attrs: Array<[string, string]> = tr.attrs ? Object.entries(tr.attrs) : [];
+  if (tr.style) {
+    const existing = attrs.find((a) => a[0] === "Style");
+    if (existing) existing[1] = tr.style;
+    else attrs.push(["Style", tr.style]);
+  }
+  return attrs;
 }
 
 /** Builds a new <Paragraph> element with Type/id/Alignment attrs and a run of <Text> children. */
@@ -31,10 +58,9 @@ export function buildParagraphElement(
     ["id", id],
   ];
   if (alignment) attrs.push(["Alignment", alignment]);
-  const children: XmlNode[] = textRuns.map((tr) => {
-    const textAttrs: Array<[string, string]> = tr.style ? [["Style", tr.style]] : [];
-    return createElement("Text", textAttrs, [{ type: "text", value: tr.content }]);
-  });
+  const children: XmlNode[] = textRuns.map((tr) =>
+    createElement("Text", buildTextAttrs(tr), [{ type: "text", value: tr.content }]),
+  );
   return createElement("Paragraph", attrs, children);
 }
 
@@ -42,8 +68,7 @@ export function buildParagraphElement(
 export function setParagraphTextRuns(el: XmlElement, textRuns: TextRunInput[]): void {
   el.children = el.children.filter((c) => !(c.type === "element" && c.name === "Text"));
   for (const tr of textRuns) {
-    const textAttrs: Array<[string, string]> = tr.style ? [["Style", tr.style]] : [];
-    el.children.push(createElement("Text", textAttrs, [{ type: "text", value: tr.content }]));
+    el.children.push(createElement("Text", buildTextAttrs(tr), [{ type: "text", value: tr.content }]));
   }
 }
 
