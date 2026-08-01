@@ -2,6 +2,14 @@
   "name": "fdx-mcp-server",
   "version": "0.0.7",
   "description": "A Model Context Protocol server — Bun-first, Deno-compatible.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmongrel/fdx-mcp-server.git"
+  },
+  "homepage": "https://github.com/dmongrel/fdx-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/dmongrel/fdx-mcp-server/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
