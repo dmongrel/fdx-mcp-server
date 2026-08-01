@@ -37,6 +37,7 @@ import { editSmarttypeExtensionsTool, handleEditSmarttypeExtensions } from "./to
 import { getSmarttypeLocationsTool, handleGetSmarttypeLocations } from "./tools/get-smarttype-locations.ts";
 import { editSmarttypeLocationsTool, handleEditSmarttypeLocations } from "./tools/edit-smarttype-locations.ts";
 import { getLocationsTool, handleGetLocations } from "./tools/get-locations.ts";
+import { editLocationsTool, handleEditLocations } from "./tools/edit-locations.ts";
 import { getSmarttypeSceneIntrosTool, handleGetSmarttypeSceneIntros } from "./tools/get-smarttype-scene-intros.ts";
 import { editSmarttypeSceneIntrosTool, handleEditSmarttypeSceneIntros } from "./tools/edit-smarttype-scene-intros.ts";
 import { getSmarttypeTimesOfDayTool, handleGetSmarttypeTimesOfDay } from "./tools/get-smarttype-times-of-day.ts";
@@ -157,6 +158,7 @@ const tools: FdxTool[] = [
   getSmarttypeLocationsTool,
   editSmarttypeLocationsTool,
   getLocationsTool,
+  editLocationsTool,
   getSmarttypeSceneIntrosTool,
   editSmarttypeSceneIntrosTool,
   getSmarttypeTimesOfDayTool,
@@ -271,6 +273,7 @@ const toolHandlers: Record<
   get_smarttype_locations: (args) => handleGetSmarttypeLocations(args),
   edit_smarttype_locations: (args) => handleEditSmarttypeLocations(args),
   get_locations: (args) => handleGetLocations(args),
+  edit_locations: (args) => handleEditLocations(args),
   get_smarttype_scene_intros: (args) => handleGetSmarttypeSceneIntros(args),
   edit_smarttype_scene_intros: (args) => handleEditSmarttypeSceneIntros(args),
   get_smarttype_times_of_day: (args) => handleGetSmarttypeTimesOfDay(args),
