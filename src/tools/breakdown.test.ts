@@ -15,6 +15,9 @@ import {
   rankCharacters,
   buildArcBeatData,
   getScenePropertiesById,
+  locateSluglineLocation,
+  buildLocationAppearances,
+  rankLocations,
 } from "./breakdown.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
@@ -53,6 +56,50 @@ describe("parseSlugline", () => {
     expect(intro).toBe("INT");
     expect(timeOfDay).toBe("DAY");
     expect(location).toBe("BRIDGE -");
+  });
+});
+
+describe("locateSluglineLocation", () => {
+  test("finds the location's character offsets within the full slugline text, trimming the trailing separator", async () => {
+    const doc = await loadFixture();
+    const text = "INT. CAVE - NIGHT";
+    const loc = locateSluglineLocation(doc, text)!;
+    expect(loc.location).toBe("CAVE");
+    expect(text.slice(loc.start, loc.end)).toBe("CAVE");
+    expect(loc.intro).toBe("INT");
+    expect(loc.timeOfDay).toBe("NIGHT");
+  });
+
+  test("returns undefined when there is no location", async () => {
+    const doc = await loadFixture();
+    expect(locateSluglineLocation(doc, "")).toBeUndefined();
+  });
+
+  test("offsets stay correct with a multi-word location", async () => {
+    const doc = await loadFixture();
+    const text = "EXT. PREHISTORIC VALLEY - DAY";
+    const loc = locateSluglineLocation(doc, text)!;
+    expect(loc.location).toBe("PREHISTORIC VALLEY");
+    expect(text.slice(loc.start, loc.end)).toBe("PREHISTORIC VALLEY");
+  });
+});
+
+describe("buildLocationAppearances / rankLocations", () => {
+  test("groups Scene Heading paragraphs by parsed location", async () => {
+    const doc = await loadFixture();
+    const appearances = buildLocationAppearances(doc);
+    expect(appearances.get("CAVE")).toHaveLength(2);
+    expect(appearances.get("PREHISTORIC VALLEY")).toHaveLength(4);
+  });
+
+  test("rankLocations sorts by scene count descending", async () => {
+    const doc = await loadFixture();
+    const ranked = rankLocations(buildLocationAppearances(doc));
+    const valley = ranked.find((r) => r.location === "PREHISTORIC VALLEY")!;
+    const cave = ranked.find((r) => r.location === "CAVE")!;
+    expect(valley.total).toBe(4);
+    expect(cave.total).toBe(2);
+    expect(ranked.indexOf(valley)).toBeLessThan(ranked.indexOf(cave));
   });
 });
 

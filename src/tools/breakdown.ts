@@ -178,6 +178,35 @@ export function parseSlugline(doc: FdxDocument, text: string): { intro: string; 
   return { intro, location, timeOfDay };
 }
 
+export interface SluglineLocation {
+  intro: string;
+  location: string;
+  timeOfDay: string;
+  /** Character offset of `location` within the original `text`, for splicing a replacement in. */
+  start: number;
+  end: number;
+}
+
+/**
+ * Like parseSlugline, but also returns the character range the location occupies within `text` —
+ * needed to splice a rename into a Scene Heading's actual <Text> runs without disturbing the
+ * intro token, separators, or time-of-day around it.
+ */
+export function locateSluglineLocation(doc: FdxDocument, text: string): SluglineLocation | undefined {
+  const { intro, location: rawLocation, timeOfDay } = parseSlugline(doc, text);
+  if (rawLocation === "") return undefined;
+  const searchFrom = intro ? text.indexOf(intro) + intro.length : 0;
+  const start = text.indexOf(rawLocation, Math.max(searchFrom, 0));
+  if (start === -1) return undefined;
+  // parseSlugline's word-based time-of-day split leaves the separator's "-" token attached to the
+  // end of location whenever a time-of-day follows (e.g. "CAVE -" for "INT. CAVE - NIGHT") — that
+  // dash isn't part of the location name itself, so trim it back off.
+  let location = rawLocation;
+  if (timeOfDay !== "") location = location.replace(/\s*-$/, "");
+  if (location === "") return undefined;
+  return { intro, location, timeOfDay, start, end: start + location.length };
+}
+
 /**
  * Scans every section-type paragraph (Scene Heading, Act Break, Act&Scene Break, etc.), extracts
  * its SceneProperties (Color/Length/Page) when present, and parses its text into
@@ -311,6 +340,46 @@ export function rankCharacters(appearances: Map<string, CharacterAppearance[]>):
     sceneCount: list.length,
   }));
   ranked.sort((a, b) => (a.total !== b.total ? b.total - a.total : compareNamesCI(a.name, b.name)));
+  return ranked;
+}
+
+export interface LocationScene {
+  id: string;
+  text: string;
+  page: number;
+}
+
+/**
+ * Walks every Scene Heading paragraph (only Scene Heading — other section types like Act Break
+ * don't carry a real location, and parseSlugline would misparse them as if they did) and groups
+ * them by parsed location.
+ */
+export function buildLocationAppearances(doc: FdxDocument): Map<string, LocationScene[]> {
+  const result = new Map<string, LocationScene[]>();
+  for (const p of doc.getParagraphElements()) {
+    if (getParagraphType(p) !== "Scene Heading") continue;
+    const text = paragraphText(p);
+    const loc = locateSluglineLocation(doc, text);
+    if (!loc) continue;
+    const sp = getSceneProperties(p);
+    const page = sp ? parseInt(sp.page, 10) || 0 : 0;
+    const list = result.get(loc.location) ?? [];
+    list.push({ id: getParagraphId(p), text, page });
+    result.set(loc.location, list);
+  }
+  return result;
+}
+
+export interface RankedLocation {
+  location: string;
+  total: number;
+}
+
+/** Summarizes and sorts a location-appearances map by scene count descending, tie-breaking
+ *  case-insensitively by name. Mirrors rankCharacters. */
+export function rankLocations(appearances: Map<string, LocationScene[]>): RankedLocation[] {
+  const ranked = [...appearances].map(([location, scenes]) => ({ location, total: scenes.length }));
+  ranked.sort((a, b) => (a.total !== b.total ? b.total - a.total : compareNamesCI(a.location, b.location)));
   return ranked;
 }
 

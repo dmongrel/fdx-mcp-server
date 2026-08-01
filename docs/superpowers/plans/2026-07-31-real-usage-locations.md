@@ -257,11 +257,17 @@ export interface SluglineLocation {
  * intro token, separators, or time-of-day around it.
  */
 export function locateSluglineLocation(doc: FdxDocument, text: string): SluglineLocation | undefined {
-  const { intro, location, timeOfDay } = parseSlugline(doc, text);
-  if (location === "") return undefined;
+  const { intro, location: rawLocation, timeOfDay } = parseSlugline(doc, text);
+  if (rawLocation === "") return undefined;
   const searchFrom = intro ? text.indexOf(intro) + intro.length : 0;
-  const start = text.indexOf(location, Math.max(searchFrom, 0));
+  const start = text.indexOf(rawLocation, Math.max(searchFrom, 0));
   if (start === -1) return undefined;
+  // parseSlugline's word-based time-of-day split leaves the separator's "-" token attached to the
+  // end of location whenever a time-of-day follows (e.g. "CAVE -" for "INT. CAVE - NIGHT") — that
+  // dash isn't part of the location name itself, so trim it back off.
+  let location = rawLocation;
+  if (timeOfDay !== "") location = location.replace(/\s*-$/, "");
+  if (location === "") return undefined;
   return { intro, location, timeOfDay, start, end: start + location.length };
 }
 ```
