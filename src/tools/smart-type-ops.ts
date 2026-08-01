@@ -200,7 +200,7 @@ export async function runSmartListEdit(
   separator: string | undefined,
   setSeparator: boolean,
   /** Called after a successful `remove`, with the removed value and its cs flag; return a
-   * warning line to append, or "" for none. Lets edit_characters flag Cast/arc-beat rows that
+   * warning line to append, or "" for none. Lets edit_smarttype_characters flag Cast/arc-beat rows that
    * still reference a name being dropped from the SmartType list, without coupling this generic
    * engine to Cast/arc-beat internals. */
   crossRefCheck?: (doc: FdxDocument, removedValue: string, cs: boolean) => string,

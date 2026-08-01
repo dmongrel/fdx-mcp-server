@@ -31,7 +31,7 @@ export const contextRules: ContextRule[] = [
   {
     title: "Persistence",
     content:
-      "After any edit operation (edit_par, edit_copyright, edit_characters, etc.), call 'save_fdx' to persist changes to disk. Edits are applied in cache only until then.",
+      "After any edit operation (edit_par, edit_copyright, edit_smarttype_characters, etc.), call 'save_fdx' to persist changes to disk. Edits are applied in cache only until then.",
   },
   {
     title: "Paragraph Structure",

@@ -28,7 +28,7 @@ describe("get_context", () => {
   });
 
   test("includes key tools", () => {
-    for (const name of ["get_context", "read_fdx", "save_fdx", "edit_par", "get_characters"]) {
+    for (const name of ["get_context", "read_fdx", "save_fdx", "edit_par", "get_smarttype_characters"]) {
       expect(text).toContain(`\`${name}\``);
     }
   });
