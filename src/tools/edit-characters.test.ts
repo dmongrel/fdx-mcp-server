@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync, copyFileSync } from "node:fs";
+import { mkdtempSync, copyFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
@@ -15,6 +15,36 @@ function freshCopy(): string {
   const dir = mkdtempSync(join(tmpdir(), "fdx-edit-characters-"));
   const path = join(dir, "script.fdx");
   copyFileSync(FIXTURE_PATH, path);
+  return path;
+}
+
+/** A minimal document where "DANAERIAN COMMANDER" is a SmartType Character with a live Cast
+ * Member row and a CharacterArcBeat still pointing at it — the cross-reference warning case. */
+function fixtureWithReferences(): string {
+  const dir = mkdtempSync(join(tmpdir(), "fdx-edit-characters-refs-"));
+  const path = join(dir, "script.fdx");
+  const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1">
+      <Text>INT. STRONGHOLD</Text>
+      <SceneProperties>
+        <SceneArcBeats>
+          <CharacterArcBeat Name="DANAERIAN COMMANDER"/>
+        </SceneArcBeats>
+      </SceneProperties>
+    </Paragraph>
+  </Content>
+  <SmartType>
+    <Characters>
+      <Character>DANAERIAN COMMANDER</Character>
+    </Characters>
+  </SmartType>
+  <Cast>
+    <Member Actor="Man 1" Character="DANAERIAN COMMANDER"/>
+  </Cast>
+</FinalDraft>`;
+  writeFileSync(path, source, "utf-8");
   return path;
 }
 
@@ -49,6 +79,22 @@ describe("edit_characters", () => {
     await handleReadFdx({ path });
     const result = await handleEditCharacters({ path, action: "remove", find: "NOT_A_CHARACTER" });
     expect(result.isError).toBe(true);
+  });
+
+  test("remove warns when Cast/arc-beat rows still reference the removed name", async () => {
+    const path = fixtureWithReferences();
+    await handleReadFdx({ path });
+    const result = await handleEditCharacters({ path, action: "remove", find: "DANAERIAN COMMANDER" });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).toContain("Warning: 1 Cast member(s) and 1 arc beat(s) still reference this name.");
+  });
+
+  test("remove does not warn when nothing else references the removed name", async () => {
+    const path = freshCopy();
+    await handleReadFdx({ path });
+    const result = await handleEditCharacters({ path, action: "remove", find: "OOK" });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).not.toContain("Warning:");
   });
 
   test("fix with uppercase+dedup cleans the list", async () => {

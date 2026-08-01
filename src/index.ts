@@ -28,6 +28,8 @@ import { readFullFileTool, handleReadFullFile } from "./tools/read-full-file.ts"
 import { listTypesTool, handleListTypes } from "./tools/list-types.ts";
 import { getCharactersTool, handleGetCharacters } from "./tools/get-characters.ts";
 import { editCharactersTool, handleEditCharacters } from "./tools/edit-characters.ts";
+import { getCastTool, handleGetCast } from "./tools/get-cast.ts";
+import { editCastTool, handleEditCast } from "./tools/edit-cast.ts";
 import { getExtensionsTool, handleGetExtensions } from "./tools/get-extensions.ts";
 import { editExtensionsTool, handleEditExtensions } from "./tools/edit-extensions.ts";
 import { getLocationsTool, handleGetLocations } from "./tools/get-locations.ts";
@@ -61,6 +63,7 @@ import { getCharacterAppearancesTool, handleGetCharacterAppearances } from "./to
 import { getPageMapTool, handleGetPageMap } from "./tools/get-page-map.ts";
 import { getScenePropertiesTool, handleGetSceneProperties } from "./tools/get-scene-properties.ts";
 import { getSceneArcBeatsTool, handleGetSceneArcBeats } from "./tools/get-scene-arc-beats.ts";
+import { editSceneArcBeatsTool, handleEditSceneArcBeats } from "./tools/edit-scene-arc-beats.ts";
 import { getRevisionsTool, handleGetRevisions } from "./tools/get-revisions.ts";
 import { getTagDataTool, handleGetTagData } from "./tools/get-tag-data.ts";
 import { getDisplayBoardsTool, handleGetDisplayBoards } from "./tools/get-display-boards.ts";
@@ -142,6 +145,8 @@ const tools: FdxTool[] = [
   listTypesTool,
   getCharactersTool,
   editCharactersTool,
+  getCastTool,
+  editCastTool,
   getExtensionsTool,
   editExtensionsTool,
   getLocationsTool,
@@ -175,6 +180,7 @@ const tools: FdxTool[] = [
   getPageMapTool,
   getScenePropertiesTool,
   getSceneArcBeatsTool,
+  editSceneArcBeatsTool,
   getRevisionsTool,
   getTagDataTool,
   getDisplayBoardsTool,
@@ -250,6 +256,8 @@ const toolHandlers: Record<
   list_types: (args) => handleListTypes(args),
   get_characters: (args) => handleGetCharacters(args),
   edit_characters: (args) => handleEditCharacters(args),
+  get_cast: (args) => handleGetCast(args),
+  edit_cast: (args) => handleEditCast(args),
   get_extensions: (args) => handleGetExtensions(args),
   edit_extensions: (args) => handleEditExtensions(args),
   get_locations: (args) => handleGetLocations(args),
@@ -283,6 +291,7 @@ const toolHandlers: Record<
   get_page_map: (args) => handleGetPageMap(args),
   get_scene_properties: (args) => handleGetSceneProperties(args),
   get_scene_arc_beats: (args) => handleGetSceneArcBeats(args),
+  edit_scene_arc_beats: (args) => handleEditSceneArcBeats(args),
   get_revisions: (args) => handleGetRevisions(args),
   get_tag_data: (args) => handleGetTagData(args),
   get_display_boards: (args) => handleGetDisplayBoards(args),

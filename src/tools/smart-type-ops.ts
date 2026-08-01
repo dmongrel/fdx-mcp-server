@@ -199,6 +199,11 @@ export async function runSmartListEdit(
   e: SmartListEdit,
   separator: string | undefined,
   setSeparator: boolean,
+  /** Called after a successful `remove`, with the removed value and its cs flag; return a
+   * warning line to append, or "" for none. Lets edit_characters flag Cast/arc-beat rows that
+   * still reference a name being dropped from the SmartType list, without coupling this generic
+   * engine to Cast/arc-beat internals. */
+  crossRefCheck?: (doc: FdxDocument, removedValue: string, cs: boolean) => string,
 ): Promise<ToolResult> {
   if (!hasFdxExtension(path)) {
     return errResult("only .fdx files are supported");
@@ -224,12 +229,16 @@ export async function runSmartListEdit(
     }
   }
 
+  let crossRefWarning = "";
   if (e.action) {
     const result = editSmartList(list.values, e);
     if (!result.ok) {
       return errResult(`failed to ${e.action} ${noun} entry: ${result.reason}`);
     }
     doc.setSmartTypeList(leaf, result.list);
+    if (crossRefCheck && e.action.toLowerCase() === "remove" && e.find) {
+      crossRefWarning = crossRefCheck(doc, e.find, !!e.cs);
+    }
   } else if (!sepUpdated) {
     return errResult("action is required (or provide a separator to change)");
   }
@@ -243,6 +252,7 @@ export async function runSmartListEdit(
     msg = `Updated ${noun} separator.`;
   }
   if (sepUpdated && e.action) msg += " Separator updated.";
+  if (crossRefWarning) msg += ` ${crossRefWarning}`;
   msg += " File updated in cache — call save_fdx to persist changes to disk.";
 
 const result = pushCacheWarning(
@@ -293,7 +303,13 @@ const EDIT_LIST_PROPERTIES = {
 };
 
 /** Builds an edit_<list> tool + handler pair for a plain (no-separator) SmartType leaf. */
-export function makeSmartListEditTool(name: string, description: string, leaf: string, noun: string) {
+export function makeSmartListEditTool(
+  name: string,
+  description: string,
+  leaf: string,
+  noun: string,
+  crossRefCheck?: (doc: FdxDocument, removedValue: string, cs: boolean) => string,
+) {
   const tool: FdxTool = {
     name,
     description: description + EDIT_ACTIONS_HELP,
@@ -315,7 +331,7 @@ export function makeSmartListEditTool(name: string, description: string, leaf: s
       uppercase: arg<boolean>(args, "uppercase"),
       dedup: arg<boolean>(args, "dedup"),
     };
-    return runSmartListEdit(path, leaf, noun, e, undefined, false);
+    return runSmartListEdit(path, leaf, noun, e, undefined, false, crossRefCheck);
   }
   return { tool, handler };
 }

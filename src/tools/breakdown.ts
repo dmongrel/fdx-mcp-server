@@ -384,6 +384,27 @@ export function buildArcBeatData(doc: FdxDocument): ArcBeatData[] {
   return out;
 }
 
+/**
+ * Counts Cast <Member> rows and CharacterArcBeat entries (across every scene) whose name matches
+ * `name`, case-insensitively unless `cs`. Used to warn a caller removing a SmartType Characters
+ * entry that Cast/arc-beat data still references the name they're about to orphan.
+ */
+export function countCharacterReferences(doc: FdxDocument, name: string, cs: boolean): { cast: number; arcBeats: number } {
+  const match = (v: string) => (cs ? v === name : v.toLowerCase() === name.toLowerCase());
+
+  const cast = doc.getCastMembers().filter((m) => match(getAttr(m, "Character") ?? "")).length;
+
+  let arcBeats = 0;
+  for (const p of doc.getParagraphElements()) {
+    const sp = findChild(p, "SceneProperties");
+    const arcBeatsEl = sp && findChild(sp, "SceneArcBeats");
+    if (!arcBeatsEl) continue;
+    arcBeats += findChildren(arcBeatsEl, "CharacterArcBeat").filter((b) => match(getAttr(b, "Name") ?? "")).length;
+  }
+
+  return { cast, arcBeats };
+}
+
 /** Retrieves one paragraph's SceneProperties by id, parsed into the get_scene_properties JSON shape. */
 export function getScenePropertiesById(doc: FdxDocument, id: string): ScenePropertiesResult | null | undefined {
   const p = doc.getParagraphElements().find((el) => getParagraphId(el) === id);

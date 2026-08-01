@@ -242,6 +242,34 @@ export class FdxDocument {
   }
 
   /* ---------------------------------------------------------------- */
+  /*  Cast (top-level). Deliberately does not expose <Actors> at all — */
+  /*  its Actor rows carry a binary voice-synthesis blob in WinVoice/  */
+  /*  MacVoice that must never be parsed, mutated, or re-encoded by    */
+  /*  any tool. Cast <Member> rows reference an actor only by name.    */
+  /* ---------------------------------------------------------------- */
+
+  getCastElement(create = false): XmlElement | undefined {
+    let cast = findChild(this.root, "Cast");
+    if (!cast && create) {
+      cast = createElement("Cast");
+      this.root.children.push(cast);
+    }
+    return cast;
+  }
+
+  /** The <Narrator> pseudo-cast-entry, if present (distinct from getCastMembers()'s rows). */
+  getNarratorElement(): XmlElement | undefined {
+    const cast = this.getCastElement();
+    return cast ? findChild(cast, "Narrator") : undefined;
+  }
+
+  /** All <Member Character="..." Actor="..."/> rows under <Cast>, in document order. */
+  getCastMembers(): XmlElement[] {
+    const cast = this.getCastElement();
+    return cast ? findChildren(cast, "Member") : [];
+  }
+
+  /* ---------------------------------------------------------------- */
   /*  SmartType dictionaries                                           */
   /* ---------------------------------------------------------------- */
 

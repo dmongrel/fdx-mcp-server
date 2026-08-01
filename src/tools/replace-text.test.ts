@@ -9,7 +9,7 @@ import { handleEditPar } from "./edit-par.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId, paragraphText } from "../fdx/paragraph.ts";
-import { findChildren, textContent } from "../fdx/xml.ts";
+import { findChild, findChildren, getAttr, setAttr, textContent } from "../fdx/xml.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 const FIXTURE_SOURCE = readFileSync(FIXTURE_PATH, "utf-8");
@@ -129,5 +129,26 @@ describe("replace_text", () => {
       attrs: [...r.attrs],
     }));
     expect(runsAfter).toEqual(runsBefore);
+  });
+
+  test("hazard: never touches <Actors> WinVoice, even when its content matches find", async () => {
+    const { path, doc } = freshDoc("winvoice-hazard");
+
+    // Actors/WinVoice can hold arbitrary binary-derived characters, including a curly quote —
+    // exactly the kind of content a "normalize smart quotes" replace_text call would target.
+    const winVoiceBlob = "‘Q|Çg(Ð„{DEST";
+    const actors = findChild(doc.root, "Actors")!;
+    const actor = findChildren(actors, "Actor")[0]!;
+    setAttr(actor, "WinVoice", winVoiceBlob);
+
+    const result = await handleReplaceText({ path, find: "‘", replace: '"' });
+    expect(result.isError).toBeFalsy();
+    // The fixture has no curly quotes in <Text> content, so nothing should match at all —
+    // replace_text only ever walks <Content>'s paragraphs, never the sibling <Actors> block.
+    expect(result.content[0]!.text).toContain("Replaced 0 occurrence");
+
+    const actorAfter = findChildren(findChild(doc.root, "Actors")!, "Actor")[0]!;
+    expect(getAttr(actorAfter, "WinVoice")).toBe(winVoiceBlob);
+    expect(doc.serialize()).toContain(`WinVoice="${winVoiceBlob}"`);
   });
 });

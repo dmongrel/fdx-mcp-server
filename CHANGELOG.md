@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.4] - 2026-08-01
+
+### Added
+
+- **`get_cast`/`edit_cast`** tools — read and write `<Cast>` `<Member Character="..." Actor="..."/>` rows: create, edit (actor and/or character), remove, and `action=fix` (drops rows whose character has neither a Character-cue paragraph nor a SmartType Characters entry — the orphan cleanup a character rename otherwise leaves behind). Deliberately never reads or writes the sibling `<Actors>` block: its rows carry a binary voice-synthesis blob in `WinVoice`/`MacVoice` that must round-trip untouched, so an `actor` value is always the caller-supplied name of an existing Actor row, never invented or retargeted.
+- **`edit_scene_arc_beats`** tool — rename or remove `CharacterArcBeat` entries in Scene Headings' `SceneProperties` (the write half of the existing read-only `get_scene_arc_beats`), optionally scoped to one scene. Fixes the case where a character rename updates cue paragraphs but leaves a stale arc-beat name double-counting one role.
+- **`edit_characters action=remove`** now warns (without blocking) when Cast `Member` rows or `CharacterArcBeat` entries still reference the name being dropped from the SmartType Characters list — the exact silent-orphan failure mode this release's Cast/arc-beat tools were built to clean up after.
+
 ## [0.0.3] - 2026-07-31
 
 ### Added
