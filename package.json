@@ -21,7 +21,8 @@
   "files": [
     "dist",
     "LICENSE.md",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "dev": "bun run --watch src/index.ts",
