@@ -4,18 +4,18 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
-import { handleGetExtensions } from "./get-extensions.ts";
+import { handleGetSmarttypeExtensions } from "./get-smarttype-extensions.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
-describe("get_extensions", () => {
+describe("get_smarttype_extensions", () => {
   test("path is required", async () => {
-    expect((await handleGetExtensions({})).isError).toBe(true);
+    expect((await handleGetSmarttypeExtensions({})).isError).toBe(true);
   });
 
   test("returns the Extensions SmartType list", async () => {
     await handleReadFdx({ path: FIXTURE_PATH });
-    const result = await handleGetExtensions({ path: FIXTURE_PATH });
+    const result = await handleGetSmarttypeExtensions({ path: FIXTURE_PATH });
     expect(result.content[0]!.text).toContain("(O.S.)");
     expect(result.content[0]!.text).toContain("(SUBTITLE)");
   });

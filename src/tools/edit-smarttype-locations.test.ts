@@ -6,8 +6,8 @@ import { mkdtempSync, copyFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
-import { handleGetLocations } from "./get-locations.ts";
-import { handleEditLocations } from "./edit-locations.ts";
+import { handleGetSmarttypeLocations } from "./get-smarttype-locations.ts";
+import { handleEditSmarttypeLocations } from "./edit-smarttype-locations.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
@@ -18,22 +18,22 @@ function freshCopy(): string {
   return path;
 }
 
-describe("edit_locations", () => {
+describe("edit_smarttype_locations", () => {
   test("create appends a new location", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditLocations({ path, action: "create", value: "SHUTTLE BAY" });
+    const result = await handleEditSmarttypeLocations({ path, action: "create", value: "SHUTTLE BAY" });
     expect(result.isError).toBeFalsy();
-    const after = await handleGetLocations({ path });
+    const after = await handleGetSmarttypeLocations({ path });
     expect(after.content[0]!.text).toContain("SHUTTLE BAY");
   });
 
   test("remove deletes an existing location", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditLocations({ path, action: "remove", find: "cave" });
+    const result = await handleEditSmarttypeLocations({ path, action: "remove", find: "cave" });
     expect(result.isError).toBeFalsy();
-    const after = await handleGetLocations({ path });
+    const after = await handleGetSmarttypeLocations({ path });
     expect(after.content[0]!.text.split("\n")).not.toContain("CAVE");
     expect(after.content[0]!.text).toContain("PREHISTORIC VALLEY");
   });

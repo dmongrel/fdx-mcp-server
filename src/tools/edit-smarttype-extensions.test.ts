@@ -6,8 +6,8 @@ import { mkdtempSync, copyFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
-import { handleGetExtensions } from "./get-extensions.ts";
-import { handleEditExtensions } from "./edit-extensions.ts";
+import { handleGetSmarttypeExtensions } from "./get-smarttype-extensions.ts";
+import { handleEditSmarttypeExtensions } from "./edit-smarttype-extensions.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
@@ -18,22 +18,22 @@ function freshCopy(): string {
   return path;
 }
 
-describe("edit_extensions", () => {
+describe("edit_smarttype_extensions", () => {
   test("create appends a new extension", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditExtensions({ path, action: "create", value: "(V.O.)" });
+    const result = await handleEditSmarttypeExtensions({ path, action: "create", value: "(V.O.)" });
     expect(result.isError).toBeFalsy();
-    const after = await handleGetExtensions({ path });
+    const after = await handleGetSmarttypeExtensions({ path });
     expect(after.content[0]!.text).toContain("(V.O.)");
   });
 
   test("edit replaces a matching entry case-insensitively", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditExtensions({ path, action: "edit", find: "(o.c.)", replace: "(OFFSCREEN)" });
+    const result = await handleEditSmarttypeExtensions({ path, action: "edit", find: "(o.c.)", replace: "(OFFSCREEN)" });
     expect(result.isError).toBeFalsy();
-    const after = await handleGetExtensions({ path });
+    const after = await handleGetSmarttypeExtensions({ path });
     expect(after.content[0]!.text).toContain("(OFFSCREEN)");
     expect(after.content[0]!.text).not.toContain("(O.C.)");
   });

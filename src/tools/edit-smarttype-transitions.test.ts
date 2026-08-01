@@ -6,8 +6,8 @@ import { mkdtempSync, copyFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
-import { handleGetTransitions } from "./get-transitions.ts";
-import { handleEditTransitions } from "./edit-transitions.ts";
+import { handleGetSmarttypeTransitions } from "./get-smarttype-transitions.ts";
+import { handleEditSmarttypeTransitions } from "./edit-smarttype-transitions.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
@@ -18,20 +18,20 @@ function freshCopy(): string {
   return path;
 }
 
-describe("edit_transitions", () => {
+describe("edit_smarttype_transitions", () => {
   test("create appends a new transition", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditTransitions({ path, action: "create", value: "SMASH CUT TO:" });
+    const result = await handleEditSmarttypeTransitions({ path, action: "create", value: "SMASH CUT TO:" });
     expect(result.isError).toBeFalsy();
-    const after = await handleGetTransitions({ path });
+    const after = await handleGetSmarttypeTransitions({ path });
     expect(after.content[0]!.text).toContain("SMASH CUT TO:");
   });
 
   test("unknown action is rejected", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditTransitions({ path, action: "bogus" });
+    const result = await handleEditSmarttypeTransitions({ path, action: "bogus" });
     expect(result.isError).toBe(true);
   });
 });

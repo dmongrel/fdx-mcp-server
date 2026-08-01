@@ -28,20 +28,20 @@ import { findParTool, handleFindPar } from "./tools/find-par.ts";
 import { replaceTextTool, handleReplaceText } from "./tools/replace-text.ts";
 import { readFullFileTool, handleReadFullFile } from "./tools/read-full-file.ts";
 import { listTypesTool, handleListTypes } from "./tools/list-types.ts";
-import { getCharactersTool, handleGetCharacters } from "./tools/get-characters.ts";
-import { editCharactersTool, handleEditCharacters } from "./tools/edit-characters.ts";
+import { getSmarttypeCharactersTool, handleGetSmarttypeCharacters } from "./tools/get-smarttype-characters.ts";
+import { editSmarttypeCharactersTool, handleEditSmarttypeCharacters } from "./tools/edit-smarttype-characters.ts";
 import { getCastTool, handleGetCast } from "./tools/get-cast.ts";
 import { editCastTool, handleEditCast } from "./tools/edit-cast.ts";
-import { getExtensionsTool, handleGetExtensions } from "./tools/get-extensions.ts";
-import { editExtensionsTool, handleEditExtensions } from "./tools/edit-extensions.ts";
-import { getLocationsTool, handleGetLocations } from "./tools/get-locations.ts";
-import { editLocationsTool, handleEditLocations } from "./tools/edit-locations.ts";
-import { getSceneIntrosTool, handleGetSceneIntros } from "./tools/get-scene-intros.ts";
-import { editSceneIntrosTool, handleEditSceneIntros } from "./tools/edit-scene-intros.ts";
-import { getTimesOfDayTool, handleGetTimesOfDay } from "./tools/get-times-of-day.ts";
-import { editTimesOfDayTool, handleEditTimesOfDay } from "./tools/edit-times-of-day.ts";
-import { getTransitionsTool, handleGetTransitions } from "./tools/get-transitions.ts";
-import { editTransitionsTool, handleEditTransitions } from "./tools/edit-transitions.ts";
+import { getSmarttypeExtensionsTool, handleGetSmarttypeExtensions } from "./tools/get-smarttype-extensions.ts";
+import { editSmarttypeExtensionsTool, handleEditSmarttypeExtensions } from "./tools/edit-smarttype-extensions.ts";
+import { getSmarttypeLocationsTool, handleGetSmarttypeLocations } from "./tools/get-smarttype-locations.ts";
+import { editSmarttypeLocationsTool, handleEditSmarttypeLocations } from "./tools/edit-smarttype-locations.ts";
+import { getSmarttypeSceneIntrosTool, handleGetSmarttypeSceneIntros } from "./tools/get-smarttype-scene-intros.ts";
+import { editSmarttypeSceneIntrosTool, handleEditSmarttypeSceneIntros } from "./tools/edit-smarttype-scene-intros.ts";
+import { getSmarttypeTimesOfDayTool, handleGetSmarttypeTimesOfDay } from "./tools/get-smarttype-times-of-day.ts";
+import { editSmarttypeTimesOfDayTool, handleEditSmarttypeTimesOfDay } from "./tools/edit-smarttype-times-of-day.ts";
+import { getSmarttypeTransitionsTool, handleGetSmarttypeTransitions } from "./tools/get-smarttype-transitions.ts";
+import { editSmarttypeTransitionsTool, handleEditSmarttypeTransitions } from "./tools/edit-smarttype-transitions.ts";
 import { getSpellCheckListsTool, handleGetSpellCheckLists } from "./tools/get-spell-check-lists.ts";
 import { editSpellCheckTool, handleEditSpellCheck } from "./tools/edit-spell-check.ts";
 import { getSectionTool, handleGetSection } from "./tools/get-section.ts";
@@ -147,20 +147,20 @@ const tools: FdxTool[] = [
   replaceTextTool,
   readFullFileTool,
   listTypesTool,
-  getCharactersTool,
-  editCharactersTool,
+  getSmarttypeCharactersTool,
+  editSmarttypeCharactersTool,
   getCastTool,
   editCastTool,
-  getExtensionsTool,
-  editExtensionsTool,
-  getLocationsTool,
-  editLocationsTool,
-  getSceneIntrosTool,
-  editSceneIntrosTool,
-  getTimesOfDayTool,
-  editTimesOfDayTool,
-  getTransitionsTool,
-  editTransitionsTool,
+  getSmarttypeExtensionsTool,
+  editSmarttypeExtensionsTool,
+  getSmarttypeLocationsTool,
+  editSmarttypeLocationsTool,
+  getSmarttypeSceneIntrosTool,
+  editSmarttypeSceneIntrosTool,
+  getSmarttypeTimesOfDayTool,
+  editSmarttypeTimesOfDayTool,
+  getSmarttypeTransitionsTool,
+  editSmarttypeTransitionsTool,
   getSpellCheckListsTool,
   editSpellCheckTool,
   getSectionTool,
@@ -260,20 +260,20 @@ const toolHandlers: Record<
   replace_text: (args) => handleReplaceText(args),
   read_full_file: (args) => handleReadFullFile(args),
   list_types: (args) => handleListTypes(args),
-  get_characters: (args) => handleGetCharacters(args),
-  edit_characters: (args) => handleEditCharacters(args),
+  get_smarttype_characters: (args) => handleGetSmarttypeCharacters(args),
+  edit_smarttype_characters: (args) => handleEditSmarttypeCharacters(args),
   get_cast: (args) => handleGetCast(args),
   edit_cast: (args) => handleEditCast(args),
-  get_extensions: (args) => handleGetExtensions(args),
-  edit_extensions: (args) => handleEditExtensions(args),
-  get_locations: (args) => handleGetLocations(args),
-  edit_locations: (args) => handleEditLocations(args),
-  get_scene_intros: (args) => handleGetSceneIntros(args),
-  edit_scene_intros: (args) => handleEditSceneIntros(args),
-  get_times_of_day: (args) => handleGetTimesOfDay(args),
-  edit_times_of_day: (args) => handleEditTimesOfDay(args),
-  get_transitions: (args) => handleGetTransitions(args),
-  edit_transitions: (args) => handleEditTransitions(args),
+  get_smarttype_extensions: (args) => handleGetSmarttypeExtensions(args),
+  edit_smarttype_extensions: (args) => handleEditSmarttypeExtensions(args),
+  get_smarttype_locations: (args) => handleGetSmarttypeLocations(args),
+  edit_smarttype_locations: (args) => handleEditSmarttypeLocations(args),
+  get_smarttype_scene_intros: (args) => handleGetSmarttypeSceneIntros(args),
+  edit_smarttype_scene_intros: (args) => handleEditSmarttypeSceneIntros(args),
+  get_smarttype_times_of_day: (args) => handleGetSmarttypeTimesOfDay(args),
+  edit_smarttype_times_of_day: (args) => handleEditSmarttypeTimesOfDay(args),
+  get_smarttype_transitions: (args) => handleGetSmarttypeTransitions(args),
+  edit_smarttype_transitions: (args) => handleEditSmarttypeTransitions(args),
   get_spell_check_lists: (args) => handleGetSpellCheckLists(args),
   edit_spell_check: (args) => handleEditSpellCheck(args),
   get_section: (args) => handleGetSection(args),

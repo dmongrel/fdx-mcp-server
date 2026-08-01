@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * edit_characters — Add, change, remove, or fix entries in the SmartType Characters list.
- * Mirrors Go's tools/edit_characters.go.
+ * edit_smarttype_characters — Add, change, remove, or fix entries in the SmartType Characters
+ * list. Mirrors Go's tools/edit_characters.go.
  */
 
 import { makeSmartListEditTool } from "./smart-type-ops.ts";
@@ -20,13 +20,12 @@ function crossRefCheck(doc: FdxDocument, name: string, cs: boolean): string {
 }
 
 const { tool, handler } = makeSmartListEditTool(
-  "edit_characters",
+  "edit_smarttype_characters",
   "Add, change, remove, or fix entries in the SmartType Characters list (character names).",
   "Character",
   "Character",
   crossRefCheck,
 );
 
-export const editCharactersTool = tool;
-export const handleEditCharacters = handler;
-
+export const editSmarttypeCharactersTool = tool;
+export const handleEditSmarttypeCharacters = handler;

@@ -6,8 +6,8 @@ import { mkdtempSync, copyFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
-import { handleGetSceneIntros } from "./get-scene-intros.ts";
-import { handleEditSceneIntros } from "./edit-scene-intros.ts";
+import { handleGetSmarttypeSceneIntros } from "./get-smarttype-scene-intros.ts";
+import { handleEditSmarttypeSceneIntros } from "./edit-smarttype-scene-intros.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
@@ -18,30 +18,30 @@ function freshCopy(): string {
   return path;
 }
 
-describe("edit_scene_intros", () => {
+describe("edit_smarttype_scene_intros", () => {
   test("create appends a new scene intro", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditSceneIntros({ path, action: "create", value: "INT./EXT." });
+    const result = await handleEditSmarttypeSceneIntros({ path, action: "create", value: "INT./EXT." });
     expect(result.isError).toBeFalsy();
-    const after = await handleGetSceneIntros({ path });
+    const after = await handleGetSmarttypeSceneIntros({ path });
     expect(after.content[0]!.text).toContain("INT./EXT.");
   });
 
   test("separator alone (no action) updates just the separator", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditSceneIntros({ path, separator: " -- " });
+    const result = await handleEditSmarttypeSceneIntros({ path, separator: " -- " });
     expect(result.isError).toBeFalsy();
     expect(result.content[0]!.text).toContain("separator");
-    const after = await handleGetSceneIntros({ path });
+    const after = await handleGetSmarttypeSceneIntros({ path });
     expect(after.content[0]!.text.split("\n")[0]).toBe('Separator: " -- "');
   });
 
   test("action is required when no separator is provided", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditSceneIntros({ path });
+    const result = await handleEditSmarttypeSceneIntros({ path });
     expect(result.isError).toBe(true);
   });
 });

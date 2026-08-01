@@ -4,18 +4,18 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
-import { handleGetTransitions } from "./get-transitions.ts";
+import { handleGetSmarttypeTransitions } from "./get-smarttype-transitions.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
-describe("get_transitions", () => {
+describe("get_smarttype_transitions", () => {
   test("path is required", async () => {
-    expect((await handleGetTransitions({})).isError).toBe(true);
+    expect((await handleGetSmarttypeTransitions({})).isError).toBe(true);
   });
 
   test("returns the Transitions SmartType list", async () => {
     await handleReadFdx({ path: FIXTURE_PATH });
-    const result = await handleGetTransitions({ path: FIXTURE_PATH });
+    const result = await handleGetSmarttypeTransitions({ path: FIXTURE_PATH });
     expect(result.content[0]!.text).toContain("CUT TO:");
     expect(result.content[0]!.text).toContain("FADE OUT.");
   });

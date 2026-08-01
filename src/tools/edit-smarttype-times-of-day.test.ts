@@ -6,8 +6,8 @@ import { mkdtempSync, copyFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleReadFdx } from "./read-fdx.ts";
-import { handleGetTimesOfDay } from "./get-times-of-day.ts";
-import { handleEditTimesOfDay } from "./edit-times-of-day.ts";
+import { handleGetSmarttypeTimesOfDay } from "./get-smarttype-times-of-day.ts";
+import { handleEditSmarttypeTimesOfDay } from "./edit-smarttype-times-of-day.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 
@@ -18,20 +18,20 @@ function freshCopy(): string {
   return path;
 }
 
-describe("edit_times_of_day", () => {
+describe("edit_smarttype_times_of_day", () => {
   test("create appends a new time of day", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditTimesOfDay({ path, action: "create", value: "DUSK" });
+    const result = await handleEditSmarttypeTimesOfDay({ path, action: "create", value: "DUSK" });
     expect(result.isError).toBeFalsy();
-    const after = await handleGetTimesOfDay({ path });
+    const after = await handleGetSmarttypeTimesOfDay({ path });
     expect(after.content[0]!.text).toContain("DUSK");
   });
 
   test("edit + separator change together", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditTimesOfDay({
+    const result = await handleEditSmarttypeTimesOfDay({
       path,
       action: "edit",
       find: "day",
@@ -40,7 +40,7 @@ describe("edit_times_of_day", () => {
     });
     expect(result.isError).toBeFalsy();
     expect(result.content[0]!.text).toContain("Separator updated");
-    const after = await handleGetTimesOfDay({ path });
+    const after = await handleGetSmarttypeTimesOfDay({ path });
     const text = after.content[0]!.text;
     expect(text.split("\n")[0]).toBe('Separator: " / "');
     expect(text).toContain("DAYTIME");
