@@ -65,7 +65,7 @@ export const editParTool: FdxTool = {
 };
 
 /** Adds `value` to a SmartType list if not already present (exact match), re-sorting case-insensitively. */
-function addSmartTypeValue(doc: FdxDocument, leaf: string, value: string): void {
+export function addSmartTypeValue(doc: FdxDocument, leaf: string, value: string): void {
   const list = doc.getSmartTypeList(leaf);
   if (!list) return;
   const v = value.trim();
