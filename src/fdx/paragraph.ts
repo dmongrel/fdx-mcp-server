@@ -7,7 +7,7 @@
  * and the get_section* tools (Phase 2/3).
  */
 
-import { type XmlElement, type XmlNode, createElement, findChildren, getAttr, setAttr, textContent } from "./xml.ts";
+import { type XmlElement, type XmlNode, createElement, findChildren, getAttr, setAttr, setTextContent, textContent } from "./xml.ts";
 
 export interface TextRunInput {
   content: string;
@@ -87,6 +87,38 @@ export function getParagraphId(el: XmlElement): string {
 export function findParagraphIdAttr(el: XmlElement): { name: string; value: string } | undefined {
   const found = el.attrs.find(([k]) => k.toLowerCase() === "id");
   return found ? { name: found[0], value: found[1] } : undefined;
+}
+
+/**
+ * Splices `replacement` into a paragraph's concatenated text at character range [start, end),
+ * preserving <Text> run boundaries and attributes when that range falls entirely inside one run.
+ * When the range spans more than one run, every run collapses into a single plain (no-attrs) run
+ * holding the full new text — styling that straddled the splice point can't be preserved, so it's
+ * dropped rather than guessed at.
+ */
+export function spliceParagraphText(
+  el: XmlElement,
+  start: number,
+  end: number,
+  replacement: string,
+): "single-run" | "collapsed" {
+  const runs = findChildren(el, "Text");
+  let pos = 0;
+  for (const run of runs) {
+    const content = textContent(run);
+    const runStart = pos;
+    const runEnd = pos + content.length;
+    if (start >= runStart && end <= runEnd) {
+      const localStart = start - runStart;
+      const localEnd = end - runStart;
+      setTextContent(run, content.slice(0, localStart) + replacement + content.slice(localEnd));
+      return "single-run";
+    }
+    pos = runEnd;
+  }
+  const full = paragraphText(el);
+  setParagraphTextRuns(el, [{ content: full.slice(0, start) + replacement + full.slice(end) }]);
+  return "collapsed";
 }
 
 export function getParagraphType(el: XmlElement): string {
