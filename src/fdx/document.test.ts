@@ -96,5 +96,38 @@ describe("FdxDocument", () => {
     const doc = FdxDocument.parse(fixture);
     expect(doc.consolidateSpellCheckWords()).toBe(0);
   });
+
+  test("getHighlightedCharacters returns [] when CharacterHighlighting is empty", () => {
+    const doc = FdxDocument.parse(fixture);
+    expect(doc.getCharacterHighlightingElement()).toBeDefined();
+    expect(doc.getHighlightedCharacters()).toEqual([]);
+  });
+
+  test("getCharacterHighlightingElement(true) creates the block when absent", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content/>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    expect(doc.getCharacterHighlightingElement()).toBeUndefined();
+    const created = doc.getCharacterHighlightingElement(true);
+    expect(created).toBeDefined();
+    expect(doc.getHighlightedCharacters()).toEqual([]);
+  });
+
+  test("getHighlightedCharacters returns each Character row", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content/>
+  <CharacterHighlighting>
+    <Character Name="GROG" Color="#0000FFFF0000" Visible="Yes"/>
+    <Character Name="OOK" Color="#RRRRGGGGBBBB" Visible="No"/>
+  </CharacterHighlighting>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const rows = doc.getHighlightedCharacters();
+    expect(rows.length).toBe(2);
+    expect(rows[0]!.attrs.find(([k]) => k === "Name")?.[1]).toBe("GROG");
+  });
 });
 

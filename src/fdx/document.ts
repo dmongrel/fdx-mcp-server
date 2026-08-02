@@ -270,6 +270,25 @@ export class FdxDocument {
   }
 
   /* ---------------------------------------------------------------- */
+  /*  CharacterHighlighting (top-level)                                */
+  /* ---------------------------------------------------------------- */
+
+  getCharacterHighlightingElement(create = false): XmlElement | undefined {
+    let ch = findChild(this.root, "CharacterHighlighting");
+    if (!ch && create) {
+      ch = createElement("CharacterHighlighting");
+      this.root.children.push(ch);
+    }
+    return ch;
+  }
+
+  /** All <Character Name="..." Color="..." Visible="..."/> rows under <CharacterHighlighting>. */
+  getHighlightedCharacters(): XmlElement[] {
+    const ch = this.getCharacterHighlightingElement();
+    return ch ? findChildren(ch, "Character") : [];
+  }
+
+  /* ---------------------------------------------------------------- */
   /*  SmartType dictionaries                                           */
   /* ---------------------------------------------------------------- */
 
