@@ -6,6 +6,9 @@
  * Substitutes inside each <Text> run's own content, leaving run boundaries and every run
  * attribute (AdornmentStyle, Font, Color, Size, RevisionID, ...) untouched. A match that only
  * exists when spanning two runs is left alone and reported as skipped rather than merged.
+ *
+ * The core substitution loop is exported as runPreservingReplace so other tools (rename_character)
+ * can reuse it instead of duplicating run-preserving substring replace.
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
@@ -62,6 +65,67 @@ function replaceAllOccurrences(haystack: string, find: string, replace: string, 
   return haystack.replace(new RegExp(escapeRegExp(find), "gi"), replace);
 }
 
+export interface RunPreservingReplaceOptions {
+  find: string;
+  replace: string;
+  caseSensitive: boolean;
+  parType?: string;
+  startIndex?: number;
+  endIndex?: number;
+}
+
+export interface RunPreservingReplaceResult {
+  totalReplaced: number;
+  paragraphsTouched: number;
+  touched: boolean;
+  skipped: Array<{ id: string; count: number }>;
+}
+
+/**
+ * Substitutes `find` with `replace` inside each <Text> run's own content across the paragraphs in
+ * [startIndex, endIndex) (defaults to the whole document), optionally restricted to `parType`. A
+ * match that only exists by spanning two runs is left unreplaced and counted in `skipped` instead.
+ */
+export function runPreservingReplace(doc: FdxDocument, opts: RunPreservingReplaceOptions): RunPreservingReplaceResult {
+  const { find, replace, caseSensitive, parType } = opts;
+  const paragraphs = doc.getParagraphElements();
+  const startIndex = opts.startIndex ?? 0;
+  const endIndex = opts.endIndex ?? paragraphs.length;
+
+  let totalReplaced = 0;
+  let paragraphsTouched = 0;
+  const skipped: Array<{ id: string; count: number }> = [];
+  let touched = false;
+
+  for (let i = startIndex; i < endIndex; i++) {
+    const para = paragraphs[i]!;
+    if (parType && getParagraphType(para) !== parType) continue;
+
+    const naiveTotal = countOccurrences(paragraphText(para), find, caseSensitive);
+    if (naiveTotal === 0) continue;
+
+    let perRunReplaced = 0;
+    for (const run of findChildren(para, "Text")) {
+      const content = textContent(run);
+      const count = countOccurrences(content, find, caseSensitive);
+      if (count === 0) continue;
+      setTextContent(run, replaceAllOccurrences(content, find, replace, caseSensitive));
+      perRunReplaced += count;
+    }
+
+    if (perRunReplaced > 0) {
+      totalReplaced += perRunReplaced;
+      paragraphsTouched++;
+      touched = true;
+    }
+
+    const skippedCount = naiveTotal - perRunReplaced;
+    if (skippedCount > 0) skipped.push({ id: getParagraphId(para), count: skippedCount });
+  }
+
+  return { totalReplaced, paragraphsTouched, touched, skipped };
+}
+
 export async function handleReplaceText(args: Record<string, unknown> | undefined): Promise<ToolResult> {
   const path = arg<string>(args, "path");
   const find = arg<string>(args, "find");
@@ -95,34 +159,14 @@ export async function handleReplaceText(args: Record<string, unknown> | undefine
     endIndex = findSectionEnd(paragraphs, idx);
   }
 
-  let totalReplaced = 0;
-  const skipped: Array<{ id: string; count: number }> = [];
-  let touched = false;
-
-  for (let i = startIndex; i < endIndex; i++) {
-    const para = paragraphs[i]!;
-    if (parType && getParagraphType(para) !== parType) continue;
-
-    const naiveTotal = countOccurrences(paragraphText(para), find, caseSensitive);
-    if (naiveTotal === 0) continue;
-
-    let perRunReplaced = 0;
-    for (const run of findChildren(para, "Text")) {
-      const content = textContent(run);
-      const count = countOccurrences(content, find, caseSensitive);
-      if (count === 0) continue;
-      setTextContent(run, replaceAllOccurrences(content, find, replace, caseSensitive));
-      perRunReplaced += count;
-    }
-
-    if (perRunReplaced > 0) {
-      totalReplaced += perRunReplaced;
-      touched = true;
-    }
-
-    const skippedCount = naiveTotal - perRunReplaced;
-    if (skippedCount > 0) skipped.push({ id: getParagraphId(para), count: skippedCount });
-  }
+  const { totalReplaced, touched, skipped } = runPreservingReplace(doc, {
+    find,
+    replace,
+    caseSensitive,
+    parType,
+    startIndex,
+    endIndex,
+  });
 
   let msg = `Replaced ${totalReplaced} occurrence(s) of "${find}" with "${replace}".`;
   if (skipped.length > 0) {
