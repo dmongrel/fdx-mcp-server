@@ -204,7 +204,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "get_context",
     description:
-      "Call this tool before processing any file to get the exact formatting rules, constraints, and structural requirements. Returns a list of all available tools with their full descriptions.",
+      "Call this tool before processing any file to get the exact formatting rules, constraints, and structural requirements. Returns a list of all available tools with their full descriptions. Calling it also checks for updates to fdx-mcp-server.",
   },
   {
     name: "get_dual_dialogue",

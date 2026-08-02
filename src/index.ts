@@ -80,8 +80,6 @@ import { getTagDataTool, handleGetTagData } from "./tools/get-tag-data.ts";
 import { getDisplayBoardsTool, handleGetDisplayBoards } from "./tools/get-display-boards.ts";
 import { getFdxBreakdownTool, handleGetFdxBreakdown } from "./tools/get-fdx-breakdown.ts";
 import { convertToPdfTool, handleConvertToPdf } from "./tools/convert-to-pdf.ts";
-import { checkForUpdate } from "./tools/check-update.ts";
-import { setUpdateNotice } from "./tools/get-context.ts";
 
 /* ------------------------------------------------------------------ */
 /*  MCP Server instance                                               */
@@ -414,11 +412,4 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 const transport = new StdioServerTransport();
 server.connect(transport).catch(console.error);
-
-// Check for updates in the background — non-blocking, fail-open.
-checkForUpdate().then((result) => {
-  if (result !== null && result.available) {
-    setUpdateNotice(result.latest);
-  }
-});
 

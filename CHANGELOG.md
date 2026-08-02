@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.17] - 2026-08-02
+
+### Changed
+
+- **`get_context`** now checks for a newer published version on every call instead of once at server startup. A long-lived server process (one that isn't restarted often by its MCP client) previously could never learn about an update published after it started; since `get_context` is normally called once per conversation, checking there instead keeps the notice current without adding a noticeable amount of network traffic.
+
 ## [0.0.16] - 2026-08-02
 
 ### Added

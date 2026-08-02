@@ -8,13 +8,14 @@
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { getContextText } from "./context-data.ts";
+import { checkForUpdate } from "./check-update.ts";
 
 /* ------------------------------------------------------------------ */
 /*  Tool definition                                                   */
 /* ------------------------------------------------------------------ */
 
 const baseDescription =
-  "Read-Only. Call this tool before processing any file to get the exact formatting rules, constraints, and structural requirements. Returns a list of all available tools with their full descriptions.";
+  "Read-Only. Call this tool before processing any file to get the exact formatting rules, constraints, and structural requirements. Returns a list of all available tools with their full descriptions. Calling it also checks for updates to fdx-mcp-server.";
 
 export const getContextTool: FdxTool = {
   name: "get_context",
@@ -54,7 +55,15 @@ export function setUpdateNotice(latestVersion: string): void {
 /*  Handler                                                           */
 /* ------------------------------------------------------------------ */
 
-export function handleGetContext(): ToolResult {
+export async function handleGetContext(
+  checkFn: () => Promise<Awaited<ReturnType<typeof checkForUpdate>>> = checkForUpdate,
+): Promise<ToolResult> {
+  const result = await checkFn();
+  // A failed check (null) is fail-open: leave any existing notice as-is rather than clearing it.
+  if (result !== null) {
+    setUpdateNotice(result.available ? result.latest : "");
+  }
+
   const body = getContextText;
   if (_updateNotice) {
     return {
