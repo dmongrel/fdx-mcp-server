@@ -6,6 +6,8 @@
  * Substitutes inside each <Text> run's own content, leaving run boundaries and every run
  * attribute (AdornmentStyle, Font, Color, Size, RevisionID, ...) untouched. A match that only
  * exists when spanning two runs is left alone and reported as skipped rather than merged.
+ * Pass preview=true to see what would happen (each occurrence marked with «...» in its
+ * paragraph's text) without changing anything.
  *
  * The core substitution loop is exported as runPreservingReplace so other tools (rename_character)
  * can reuse it instead of duplicating run-preserving substring replace.
@@ -22,7 +24,7 @@ import { findSectionIndex, findSectionEnd } from "../fdx/sections.ts";
 export const replaceTextTool: FdxTool = {
   name: "replace_text",
   description:
-    "Find and replace text across paragraphs in a loaded screenplay, substituting inside each <Text> run's own content so run boundaries and every run attribute (AdornmentStyle, Font, Color, Size, RevisionID, ...) are preserved. A match that only exists by spanning two runs is left unreplaced and reported as skipped. Optionally scope to a section (id) and/or a paragraph type (parType). After editing, call save_fdx to persist changes to disk.",
+    "Find and replace text across paragraphs in a loaded screenplay, substituting inside each <Text> run's own content so run boundaries and every run attribute (AdornmentStyle, Font, Color, Size, RevisionID, ...) are preserved. A match that only exists by spanning two runs is left unreplaced and reported as skipped. Optionally scope to a section (id) and/or a paragraph type (parType). Pass preview=true to see what would be matched — each occurrence marked with «...» in its paragraph's text, original document casing preserved — without changing anything; call again with preview omitted (or false) to apply. After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -35,6 +37,10 @@ export const replaceTextTool: FdxTool = {
         description: "id is the scene id (the id of the Scene Heading paragraph) to scope the replacement to",
       },
       caseSensitive: { type: "boolean", description: "whether matching should be case-sensitive" },
+      preview: {
+        type: "boolean",
+        description: "when true, report what would be matched/skipped without changing anything",
+      },
     },
     required: ["path", "find", "replace"],
   },
@@ -65,6 +71,12 @@ function replaceAllOccurrences(haystack: string, find: string, replace: string, 
   return haystack.replace(new RegExp(escapeRegExp(find), "gi"), replace);
 }
 
+/** Wraps every occurrence of `find` in «...», preserving the original matched substring's casing. */
+function markMatches(haystack: string, find: string, caseSensitive: boolean): string {
+  if (caseSensitive) return haystack.split(find).join(`«${find}»`);
+  return haystack.replace(new RegExp(escapeRegExp(find), "gi"), (m) => `«${m}»`);
+}
+
 export interface RunPreservingReplaceOptions {
   find: string;
   replace: string;
@@ -72,6 +84,15 @@ export interface RunPreservingReplaceOptions {
   parType?: string;
   startIndex?: number;
   endIndex?: number;
+  preview?: boolean;
+}
+
+export interface PreviewMatch {
+  id: string;
+  type: string;
+  text: string;
+  wouldReplace: number;
+  skipped: number;
 }
 
 export interface RunPreservingReplaceResult {
@@ -79,15 +100,17 @@ export interface RunPreservingReplaceResult {
   paragraphsTouched: number;
   touched: boolean;
   skipped: Array<{ id: string; count: number }>;
+  previewMatches?: PreviewMatch[];
 }
 
 /**
  * Substitutes `find` with `replace` inside each <Text> run's own content across the paragraphs in
  * [startIndex, endIndex) (defaults to the whole document), optionally restricted to `parType`. A
  * match that only exists by spanning two runs is left unreplaced and counted in `skipped` instead.
+ * When `preview` is true, nothing is mutated — `previewMatches` reports what would happen instead.
  */
 export function runPreservingReplace(doc: FdxDocument, opts: RunPreservingReplaceOptions): RunPreservingReplaceResult {
-  const { find, replace, caseSensitive, parType } = opts;
+  const { find, replace, caseSensitive, parType, preview } = opts;
   const paragraphs = doc.getParagraphElements();
   const startIndex = opts.startIndex ?? 0;
   const endIndex = opts.endIndex ?? paragraphs.length;
@@ -95,13 +118,15 @@ export function runPreservingReplace(doc: FdxDocument, opts: RunPreservingReplac
   let totalReplaced = 0;
   let paragraphsTouched = 0;
   const skipped: Array<{ id: string; count: number }> = [];
+  const previewMatches: PreviewMatch[] = [];
   let touched = false;
 
   for (let i = startIndex; i < endIndex; i++) {
     const para = paragraphs[i]!;
     if (parType && getParagraphType(para) !== parType) continue;
 
-    const naiveTotal = countOccurrences(paragraphText(para), find, caseSensitive);
+    const text = paragraphText(para);
+    const naiveTotal = countOccurrences(text, find, caseSensitive);
     if (naiveTotal === 0) continue;
 
     let perRunReplaced = 0;
@@ -109,8 +134,23 @@ export function runPreservingReplace(doc: FdxDocument, opts: RunPreservingReplac
       const content = textContent(run);
       const count = countOccurrences(content, find, caseSensitive);
       if (count === 0) continue;
-      setTextContent(run, replaceAllOccurrences(content, find, replace, caseSensitive));
+      if (!preview) {
+        setTextContent(run, replaceAllOccurrences(content, find, replace, caseSensitive));
+      }
       perRunReplaced += count;
+    }
+
+    const skippedCount = naiveTotal - perRunReplaced;
+
+    if (preview) {
+      previewMatches.push({
+        id: getParagraphId(para),
+        type: getParagraphType(para),
+        text: markMatches(text, find, caseSensitive),
+        wouldReplace: perRunReplaced,
+        skipped: skippedCount,
+      });
+      continue;
     }
 
     if (perRunReplaced > 0) {
@@ -119,11 +159,12 @@ export function runPreservingReplace(doc: FdxDocument, opts: RunPreservingReplac
       touched = true;
     }
 
-    const skippedCount = naiveTotal - perRunReplaced;
     if (skippedCount > 0) skipped.push({ id: getParagraphId(para), count: skippedCount });
   }
 
-  return { totalReplaced, paragraphsTouched, touched, skipped };
+  return preview
+    ? { totalReplaced, paragraphsTouched, touched, skipped, previewMatches }
+    : { totalReplaced, paragraphsTouched, touched, skipped };
 }
 
 export async function handleReplaceText(args: Record<string, unknown> | undefined): Promise<ToolResult> {
@@ -138,6 +179,7 @@ export async function handleReplaceText(args: Record<string, unknown> | undefine
   const parType = arg<string>(args, "parType");
   const sceneId = arg<string>(args, "id");
   const caseSensitive = Boolean(args?.caseSensitive);
+  const preview = Boolean(args?.preview);
 
   let doc: FdxDocument;
   let warning: string;
@@ -159,24 +201,35 @@ export async function handleReplaceText(args: Record<string, unknown> | undefine
     endIndex = findSectionEnd(paragraphs, idx);
   }
 
-  const { totalReplaced, touched, skipped } = runPreservingReplace(doc, {
-    find,
-    replace,
-    caseSensitive,
-    parType,
-    startIndex,
-    endIndex,
-  });
+  const result = runPreservingReplace(doc, { find, replace, caseSensitive, parType, startIndex, endIndex, preview });
 
-  let msg = `Replaced ${totalReplaced} occurrence(s) of "${find}" with "${replace}".`;
-  if (skipped.length > 0) {
-    const skippedTotal = skipped.reduce((sum, s) => sum + s.count, 0);
-    const detail = skipped.map((s) => `${s.id} (${s.count})`).join(", ");
+  if (preview) {
+    const matches = result.previewMatches ?? [];
+    const totalMatches = matches.reduce((sum, m) => sum + m.wouldReplace, 0);
+    const totalSkipped = matches.reduce((sum, m) => sum + m.skipped, 0);
+    const paragraphsWithReplacements = matches.filter((m) => m.wouldReplace > 0).length;
+    const skipNote = totalSkipped > 0 ? `; ${totalSkipped} occurrence(s) would be skipped (span a run boundary)` : "";
+    const body = {
+      preview: true,
+      find,
+      replace,
+      matches,
+      totalMatches,
+      totalSkipped,
+      message: `Preview: ${totalMatches} occurrence(s) across ${paragraphsWithReplacements} paragraph(s) would be replaced${skipNote}. Nothing was changed — call again with preview=false (or omit preview) to apply.`,
+    };
+    return pushCacheWarning(textResult(JSON.stringify(body, null, 2)), warning);
+  }
+
+  let msg = `Replaced ${result.totalReplaced} occurrence(s) of "${find}" with "${replace}".`;
+  if (result.skipped.length > 0) {
+    const skippedTotal = result.skipped.reduce((sum, s) => sum + s.count, 0);
+    const detail = result.skipped.map((s) => `${s.id} (${s.count})`).join(", ");
     msg += ` ${skippedTotal} occurrence(s) skipped because they only match by spanning a run boundary — inspect with get_par_runs: ${detail}.`;
   }
 
   let dirtyWarning = "";
-  if (touched) {
+  if (result.touched) {
     dirtyWarning = documentCache.touchDirty(path, doc);
     msg += " File updated in cache — call save_fdx to persist changes to disk.";
   }

@@ -151,4 +151,110 @@ describe("replace_text", () => {
     expect(getAttr(actorAfter, "WinVoice")).toBe(winVoiceBlob);
     expect(doc.serialize()).toContain(`WinVoice="${winVoiceBlob}"`);
   });
+
+  test("preview reports matches without mutating the document", async () => {
+    const { path, doc } = freshDoc("preview-basic");
+    const target = doc.getParagraphElements().find((p) => paragraphText(p).includes("boulder"))!;
+    const id = getParagraphId(target);
+
+    const result = await handleReplaceText({ path, find: "boulder", replace: "rock", preview: true });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse(result.content[result.content.length - 1]!.text);
+    expect(body.preview).toBe(true);
+    expect(body.totalMatches).toBe(1);
+    expect(body.totalSkipped).toBe(0);
+    const match = body.matches.find((m: { id: string }) => m.id === id);
+    expect(match).toBeDefined();
+    expect(match.wouldReplace).toBe(1);
+    expect(match.skipped).toBe(0);
+    expect(match.text).toContain("«boulder»");
+
+    // Nothing changed.
+    const stillThere = doc.getParagraphElements().find((p) => getParagraphId(p) === id)!;
+    expect(paragraphText(stillThere)).toContain("boulder");
+    expect(paragraphText(stillThere)).not.toContain("rock");
+  });
+
+  test("preview marks a case-insensitive match with its original document casing", async () => {
+    const { path } = freshDoc("preview-casing");
+    const result = await handleReplaceText({ path, find: "grog", replace: "ZOG", parType: "Character", preview: true });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse(result.content[0]!.text);
+    const match = body.matches.find((m: { text: string }) => m.text.includes("«Grog»") || m.text.includes("«GROG»"));
+    expect(match).toBeDefined();
+    // The find term itself ("grog", lowercase) must not appear verbatim inside the marker.
+    expect(match.text).not.toContain("«grog»");
+  });
+
+  test("preview marks every occurrence in a paragraph with multiple matches", async () => {
+    const { path, doc } = freshDoc("preview-multi");
+    await handleEditPar({
+      path,
+      action: "create",
+      type: "Action",
+      textRuns: [{ content: "Grog sees Grog's reflection and greets Grog." }],
+    });
+    const created = doc.getParagraphElements().at(-1)!;
+    const id = getParagraphId(created);
+
+    const result = await handleReplaceText({ path, find: "Grog", replace: "Zog", preview: true });
+    const body = JSON.parse(result.content[0]!.text);
+    const match = body.matches.find((m: { id: string }) => m.id === id);
+    expect(match.wouldReplace).toBe(3);
+    expect((match.text.match(/«Grog»/g) ?? []).length).toBe(3);
+  });
+
+  test("preview surfaces a run-spanning match as skip-only, not silently omitted", async () => {
+    const { path, doc } = freshDoc("preview-spanning");
+    await handleEditPar({
+      path,
+      action: "create",
+      type: "Action",
+      textRuns: [{ content: "fo" }, { content: "obar", attrs: { AdornmentStyle: "-1" } }],
+    });
+    const created = doc.getParagraphElements().at(-1)!;
+    const id = getParagraphId(created);
+    const runsBefore = findChildren(created, "Text").map((r) => textContent(r));
+
+    const result = await handleReplaceText({ path, find: "foobar", replace: "TARGET", preview: true });
+    const body = JSON.parse(result.content[0]!.text);
+    expect(body.totalMatches).toBe(0);
+    expect(body.totalSkipped).toBe(1);
+    const match = body.matches.find((m: { id: string }) => m.id === id);
+    expect(match).toBeDefined();
+    expect(match.wouldReplace).toBe(0);
+    expect(match.skipped).toBe(1);
+
+    const runsAfter = findChildren(doc.getParagraphElements().find((p) => getParagraphId(p) === id)!, "Text").map((r) =>
+      textContent(r),
+    );
+    expect(runsAfter).toEqual(runsBefore);
+  });
+
+  test("preview with zero matches returns an empty list, not an error", async () => {
+    const { path } = freshDoc("preview-no-match");
+    const result = await handleReplaceText({ path, find: "zzz_no_such_text_zzz", replace: "x", preview: true });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse(result.content[0]!.text);
+    expect(body.matches).toEqual([]);
+    expect(body.totalMatches).toBe(0);
+  });
+
+  test("preview respects parType/id/caseSensitive scoping the same as mutate mode", async () => {
+    const { path } = freshDoc("preview-scoping");
+    const csResult = await handleReplaceText({
+      path,
+      find: "grog",
+      replace: "GROG",
+      parType: "Dialogue",
+      caseSensitive: true,
+      preview: true,
+    });
+    const csBody = JSON.parse(csResult.content[0]!.text);
+    expect(csBody.totalMatches).toBe(0);
+
+    const badScope = await handleReplaceText({ path, find: "Zog", replace: "x", id: "does-not-exist", preview: true });
+    expect(badScope.isError).toBe(true);
+    expect(badScope.content[0]!.text).toContain("section id not found");
+  });
 });
