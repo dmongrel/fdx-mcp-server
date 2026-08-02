@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.10] - 2026-08-02
+
+### Changed
+
+- **`edit_par`/`edit_dual_dialogue` `action=create` now return the new paragraph's/wrapper's id** as JSON (`{id, type, message}` / `{id, message}`) instead of a plain sentence, so a caller can address what it just created without a fragile text-matching lookup — including an empty paragraph, which has no text to match on at all. `action=edit`/`action=remove` are unchanged.
+- **`find_par` now reports each hit's containing scene and page.** Output is a JSON array; every hit carries `sceneId`, `sceneHeading`, and `page` (all `null` when the hit is before any section heading), found by scanning backward for the nearest preceding section heading — no more guessing which scene a match belongs to from page numbers.
+- **`get_section` now includes each paragraph's id**, returning a JSON array of `{id, type, text}`. It absorbs `get_section_par_list`, which is removed — every edit workflow needed both back to back and joined them by position. Omitting `id` now starts at the first section in the document (matching `get_section_par_list`'s old default) rather than document index 0.
+- **`get_par_runs` accepts a batch of paragraphs** via `ids` (an array, in the given order) or `sectionId` (every paragraph in a section, heading included), returning a JSON array — a pre-sweep audit of styled runs no longer needs one call per paragraph. `id` (single paragraph) is unchanged.
+
+### Removed
+
+- **`get_section_par_list`** — folded into `get_section` (see above).
+
 ## [0.0.9] - 2026-08-02
 
 ### Changed
