@@ -70,5 +70,34 @@ describe("edit_spell_check", () => {
     const result = await handleEditSpellCheck({ path, action: "remove", find: "NOT_A_WORD_XYZ" });
     expect(result.isError).toBe(true);
   });
+
+  test("action=create with values adds every word in one call", async () => {
+    const path = freshCopy();
+    await handleReadFdx({ path });
+    const result = await handleEditSpellCheck({ path, action: "create", values: ["Talpek", "Ethnen", "Vriha"] });
+    expect(result.isError).toBeFalsy();
+    const after = await handleGetSpellCheckLists({ path });
+    expect(after.content[0]!.text).toContain("Talpek");
+    expect(after.content[0]!.text).toContain("Ethnen");
+    expect(after.content[0]!.text).toContain("Vriha");
+  });
+
+  test("values takes precedence over value when both are given", async () => {
+    const path = freshCopy();
+    await handleReadFdx({ path });
+    await handleEditSpellCheck({ path, action: "create", value: "ShouldNotAppear", values: ["OnlyThis"] });
+    const after = await handleGetSpellCheckLists({ path });
+    expect(after.content[0]!.text).toContain("OnlyThis");
+    expect(after.content[0]!.text).not.toContain("ShouldNotAppear");
+  });
+
+  test("uppercase still applies correctly after a bulk add", async () => {
+    const path = freshCopy();
+    await handleReadFdx({ path });
+    await handleEditSpellCheck({ path, action: "create", values: ["zzzaaa", "zzzbbb"], uppercase: true });
+    const after = await handleGetSpellCheckLists({ path });
+    expect(after.content[0]!.text).toContain("ZZZAAA");
+    expect(after.content[0]!.text).toContain("ZZZBBB");
+  });
 });
 

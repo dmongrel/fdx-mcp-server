@@ -14,7 +14,7 @@ import { editSmartList, actionPastTense, type SmartListEdit } from "./smart-type
 export const editSpellCheckTool: FdxTool = {
   name: "edit_spell_check",
   description:
-    "Add, change, remove, or fix entries in the spell-check ignore-words list (a single list of any-case words). action=create appends value; action=edit replaces the first word equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first word equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively. Ignore-ranges are preserved untouched. After editing, call save_fdx to persist changes to disk.",
+    "Add, change, remove, or fix entries in the spell-check ignore-words list (a single list of any-case words). action=create appends value, or pass values (an array) to add many words in one call — useful after get_flagged_words surfaces a batch of misspellings to ignore; action=edit replaces the first word equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first word equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively. Ignore-ranges are preserved untouched. After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -23,6 +23,11 @@ export const editSpellCheckTool: FdxTool = {
       find: { type: "string", description: "(edit/remove) the existing word to change or delete" },
       replace: { type: "string", description: "(edit) the word to replace the found entry with" },
       value: { type: "string", description: "(create) the new word to add to the list" },
+      values: {
+        type: "array",
+        items: { type: "string" },
+        description: "(create) add many words in one call; takes precedence over value when both are given",
+      },
       cs: { type: "boolean", description: "(edit/remove) match find case-sensitively (default false)" },
       uppercase: { type: "boolean", description: "uppercase every word after the change" },
       dedup: { type: "boolean", description: "remove duplicate words (exact, case-sensitive match) after the change" },
@@ -49,27 +54,45 @@ export async function handleEditSpellCheck(args: Record<string, unknown> | undef
   // Fold any stray nested words into the single canonical list first.
   doc.consolidateSpellCheckWords();
 
-  const e: SmartListEdit = {
-    action,
-    find: args?.find as string | undefined,
-    replace: args?.replace as string | undefined,
-    value: args?.value as string | undefined,
-    cs: args?.cs as boolean | undefined,
-    uppercase: args?.uppercase as boolean | undefined,
-    dedup: args?.dedup as boolean | undefined,
-  };
+  const values = args?.values as string[] | undefined;
+  const cs = args?.cs as boolean | undefined;
+  const uppercase = args?.uppercase as boolean | undefined;
+  const dedup = args?.dedup as boolean | undefined;
 
-  const result = editSmartList(doc.getIgnoredWords(), e);
-  if (!result.ok) {
-    return errResult(`failed to ${action} ignore word: ${result.reason}`);
+  let successMsg: string;
+  if (action === "create" && Array.isArray(values) && values.length > 0) {
+    let workingList = doc.getIgnoredWords();
+    for (const v of values) {
+      const result = editSmartList(workingList, { action: "create", value: v, cs, uppercase, dedup });
+      if (!result.ok) {
+        return errResult(`failed to create ignore word "${v}": ${result.reason}`);
+      }
+      workingList = result.list;
+    }
+    doc.setIgnoredWords(workingList);
+    successMsg = `Successfully created ${values.length} ignore word(s). File updated in cache — call save_fdx to persist changes to disk.`;
+  } else {
+    const e: SmartListEdit = {
+      action,
+      find: args?.find as string | undefined,
+      replace: args?.replace as string | undefined,
+      value: args?.value as string | undefined,
+      cs,
+      uppercase,
+      dedup,
+    };
+
+    const result = editSmartList(doc.getIgnoredWords(), e);
+    if (!result.ok) {
+      return errResult(`failed to ${action} ignore word: ${result.reason}`);
+    }
+    doc.setIgnoredWords(result.list);
+    successMsg = `Successfully ${actionPastTense(action ?? "")} spell-check ignore words. File updated in cache — call save_fdx to persist changes to disk.`;
   }
-  doc.setIgnoredWords(result.list);
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
 
-  let out = textResult(
-    `Successfully ${actionPastTense(action ?? "")} spell-check ignore words. File updated in cache — call save_fdx to persist changes to disk.`,
-  );
+  let out = textResult(successMsg);
   out = pushCacheWarning(out, warning);
   out = pushCacheWarning(out, dirtyWarning);
   return out;
