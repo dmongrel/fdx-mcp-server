@@ -215,6 +215,48 @@ describe("edit_par", () => {
     expect(after.some((p) => getParagraphId(p) === id)).toBe(false);
   });
 
+  test("remove reports the removed paragraph's type", async () => {
+    const { path, doc } = freshDoc("remove-reports-type");
+    const target = doc.getParagraphElements()[1]!;
+    const id = getParagraphId(target);
+    const type = target.attrs.find(([k]) => k === "Type")?.[1];
+
+    const result = await handleEditPar({ path, action: "remove", id });
+    expect(result.isError).toBeFalsy();
+    expect(result.content.map((c) => c.text).join("\n")).toContain(`(${type})`);
+  });
+
+  test("remove refuses a dual-dialogue wrapper paragraph, cascading nothing", async () => {
+    const { path, doc } = freshDoc("remove-dual-dialogue-wrapper");
+    const content = doc.getContentElement(true)!;
+    const before = doc.getParagraphElements().length;
+    const wrapperId = "dd-wrapper-1";
+
+    content.children.push({
+      type: "element",
+      name: "Paragraph",
+      attrs: [["Type", "General"], ["id", wrapperId]],
+      children: [
+        {
+          type: "element",
+          name: "DualDialogue",
+          attrs: [],
+          children: [
+            { type: "element", name: "Paragraph", attrs: [["Type", "Character"], ["id", "dd-char-1"]], children: [] },
+            { type: "element", name: "Paragraph", attrs: [["Type", "Dialogue"], ["id", "dd-dial-1"]], children: [] },
+          ],
+        },
+      ],
+    });
+
+    const result = await handleEditPar({ path, action: "remove", id: wrapperId });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]!.text).toContain("dual-dialogue wrapper");
+    expect(result.content[0]!.text).toContain("edit_dual_dialogue");
+    // Nothing was removed — the wrapper and its two nested paragraphs are all still present.
+    expect(doc.getParagraphElements().length).toBe(before + 1);
+  });
+
   test("remove requires id and rejects an unknown id", async () => {
     const { path } = freshDoc("remove-missing");
     expect((await handleEditPar({ path, action: "remove" })).isError).toBe(true);

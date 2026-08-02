@@ -26,12 +26,12 @@ import {
   setParagraphType,
   type TextRunInput,
 } from "../fdx/paragraph.ts";
-import type { XmlElement } from "../fdx/xml.ts";
+import { findChild, findChildren, type XmlElement } from "../fdx/xml.ts";
 
 export const editParTool: FdxTool = {
   name: "edit_par",
   description:
-    "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted. After editing, call save_fdx to persist changes to disk.",
+    "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper). After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -136,6 +136,7 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   let modifiedType = "";
   let touched = false;
   let dupWarning = "";
+  let removedType = "";
 
   if (action === "edit") {
     if (!id) return errResult("failed to edit paragraph: id is required");
@@ -161,6 +162,17 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
     const idx = content.children.findIndex(
       (c): c is XmlElement => c.type === "element" && c.name === "Paragraph" && getParagraphId(c) === id,
     );
+    const target = content.children[idx] as XmlElement;
+    const dd = findChild(target, "DualDialogue");
+    if (dd) {
+      const nestedCount = findChildren(dd, "Paragraph").length;
+      return errResult(
+        `failed to remove paragraph: ${id} is a dual-dialogue wrapper containing ${nestedCount} nested paragraph(s); ` +
+          "edit_par does not cascade into DualDialogue — use edit_dual_dialogue action=remove instead " +
+          "(extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper)",
+      );
+    }
+    removedType = getParagraphType(target);
     content.children.splice(idx, 1);
     touched = true;
   } else if (action === "create") {
@@ -191,7 +203,10 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   if (modifiedType) refreshSmartTypes(doc, modifiedType, modifiedText);
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
-  const msg = `Successfully ${pastTense(action)} paragraph in script. File updated in cache — call save_fdx to persist changes to disk.`;
+  const msg =
+    action === "remove"
+      ? `Successfully removed paragraph (${removedType}) from script. File updated in cache — call save_fdx to persist changes to disk.`
+      : `Successfully ${pastTense(action)} paragraph in script. File updated in cache — call save_fdx to persist changes to disk.`;
   const result = pushCacheWarning(
     pushCacheWarning(pushWarning(textResult(msg), dupWarning), dirtyWarning),
     warning,

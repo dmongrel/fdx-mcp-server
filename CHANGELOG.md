@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.8] - 2026-08-01
+
+### Fixed
+
+- **`edit_par action=remove` no longer silently discards a dual-dialogue block.** A dual-dialogue wrapper paragraph (a `<Paragraph>` holding a `<DualDialogue>` with several nested Character/Dialogue paragraphs) is a single top-level paragraph, so removing it deleted every paragraph nested inside with no indication anything beyond the one addressed id had been touched — two calls silently removed eight paragraphs from a real script. `remove` now refuses a dual-dialogue wrapper outright, pointing the caller at `edit_dual_dialogue action=remove` (which already handles `extract=true`/`extract=false` correctly). For an ordinary paragraph, the success message now names the type that was removed.
+
 ## [0.0.7] - 2026-07-31
 
 ### Fixed

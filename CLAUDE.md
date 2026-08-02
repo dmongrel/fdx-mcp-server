@@ -18,6 +18,10 @@ The Go implementation of this project lives at `/g/_GoProjects/fdx-mcp-server`.
 | **Deno** | `deno run --allow-read --allow-write --allow-net https://raw.githubusercontent.com/dmongrel/fdx-mcp-server/master/index.ts` | Sandboxed by default; flags grant filesystem + network access. |
 | **Node/NPM** (global) | Install with `npm install -g fdx-mcp-server`, then run as `fdx-mcp-server` | Full offline support after one-time install. |
 
+## Handoffs
+
+Handoff docs (e.g. `*.md` describing a bug/feature to pick up in a future session) live at `F:\Vault\mcp\fdx-mcp-server`, not in this repo.
+
 ## Key files
 
 - `README.md` — Setup and configuration instructions for all three runtime paths
