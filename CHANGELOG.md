@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.12] - 2026-08-02
+
+### Added
+
+- **`replace_text` gains a `preview` option.** `preview=true` reports what would be matched — and what would be skipped for spanning a run boundary — without changing anything: each occurrence is marked with `«...»` in its paragraph's text (original document casing preserved), and skip-only paragraphs are surfaced up front instead of only being discoverable after a real run. Same call shape as a normal `replace_text` call, so preview-then-commit is a two-line workflow.
+
 ## [0.0.11] - 2026-08-02
 
 Most of the changes across 0.0.9–0.0.11 were requested by an AI agent working on an actual
