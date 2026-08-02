@@ -96,7 +96,7 @@ export const contextRules: ContextRule[] = [
   {
     title: "UUID Generation",
     content:
-      "New paragraphs created by edit_par or edit_dual_dialogue receive fresh UUIDs via generateUUID(). Existing paragraph IDs must be preserved when editing or moving content.",
+      "New paragraphs created by edit_par or edit_dual_dialogue receive fresh UUIDs via generateUUID(), returned directly in the create response ({id, ...} as JSON) — no separate lookup needed. Existing paragraph IDs must be preserved when editing or moving content.",
   },
   {
     title: "Analysis Tools — Combining Them",
@@ -134,7 +134,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "edit_par",
     description:
-      "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper). After editing, call save_fdx to persist changes to disk.",
+      "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper). After editing, call save_fdx to persist changes to disk.",
   },
   {
     name: "edit_spell_check",

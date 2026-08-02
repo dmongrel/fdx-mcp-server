@@ -61,6 +61,25 @@ describe("edit_par", () => {
     expect(secondId).not.toBe(getParagraphId(created));
   });
 
+  test("create returns the new paragraph's id and type as JSON", async () => {
+    const { path, doc } = freshDoc("create-returns-id");
+
+    const result = await handleEditPar({
+      path,
+      action: "create",
+      type: "Action",
+      textRuns: [{ content: "a fresh paragraph" }],
+    });
+    expect(result.isError).toBeFalsy();
+
+    const body = JSON.parse(result.content[result.content.length - 1]!.text);
+    expect(body.type).toBe("Action");
+    expect(body.id).toMatch(UUID_RE);
+
+    const created = doc.getParagraphElements().find((p) => getParagraphId(p) === body.id);
+    expect(created).toBeDefined();
+  });
+
   test("create with beforeParId inserts immediately before the anchor", async () => {
     const { path, doc } = freshDoc("create-before");
     const anchor = doc.getParagraphElements()[2]!;

@@ -31,7 +31,7 @@ import { findChild, findChildren, type XmlElement } from "../fdx/xml.ts";
 export const editParTool: FdxTool = {
   name: "edit_par",
   description:
-    "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper). After editing, call save_fdx to persist changes to disk.",
+    "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper). After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -137,6 +137,7 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   let touched = false;
   let dupWarning = "";
   let removedType = "";
+  let createdId = "";
 
   if (action === "edit") {
     if (!id) return errResult("failed to edit paragraph: id is required");
@@ -177,7 +178,8 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
     touched = true;
   } else if (action === "create") {
     const type = typeArg ?? "";
-    const newPara = buildParagraphElement(type, generateUuid(), alignment, textRuns);
+    const newId = generateUuid();
+    const newPara = buildParagraphElement(type, newId, alignment, textRuns);
     if (beforeParId) {
       const idx = paragraphs.findIndex((p) => getParagraphId(p) === beforeParId);
       if (idx === -1) return errResult("failed to create paragraph: anchor paragraph not found");
@@ -193,6 +195,7 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
     }
     modifiedText = paragraphText(newPara);
     modifiedType = type;
+    createdId = newId;
     touched = true;
   } else {
     return errResult(`failed to ${action} paragraph`);
@@ -203,12 +206,24 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   if (modifiedType) refreshSmartTypes(doc, modifiedType, modifiedText);
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
-  const msg =
-    action === "remove"
-      ? `Successfully removed paragraph (${removedType}) from script. File updated in cache — call save_fdx to persist changes to disk.`
-      : `Successfully ${pastTense(action)} paragraph in script. File updated in cache — call save_fdx to persist changes to disk.`;
+  let mainBlock: ToolResult;
+  if (action === "create") {
+    mainBlock = textResult(
+      JSON.stringify({
+        id: createdId,
+        type: modifiedType,
+        message: "Successfully created paragraph in script. File updated in cache — call save_fdx to persist changes to disk.",
+      }),
+    );
+  } else {
+    const msg =
+      action === "remove"
+        ? `Successfully removed paragraph (${removedType}) from script. File updated in cache — call save_fdx to persist changes to disk.`
+        : `Successfully ${pastTense(action)} paragraph in script. File updated in cache — call save_fdx to persist changes to disk.`;
+    mainBlock = textResult(msg);
+  }
   const result = pushCacheWarning(
-    pushCacheWarning(pushWarning(textResult(msg), dupWarning), dirtyWarning),
+    pushCacheWarning(pushWarning(mainBlock, dupWarning), dirtyWarning),
     warning,
   );
   return result;
