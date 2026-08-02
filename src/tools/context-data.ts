@@ -51,7 +51,7 @@ export const contextRules: ContextRule[] = [
   {
     title: "Dialogue Sequence",
     content:
-      "Speaking requires a strict chain: Character -> [Parenthetical] -> Dialogue. A Dialogue paragraph is invalid unless preceded immediately by Character or Parenthetical.",
+      "Speaking requires a strict chain: Character -> [Parenthetical] -> Dialogue. A Dialogue paragraph is invalid unless preceded immediately by Character or Parenthetical. create_dialogue creates a valid group in one call instead of two or three separate edit_par creates that leave the document in an invalid intermediate state in between.",
   },
   {
     title: "Scene Establishment",
@@ -147,6 +147,11 @@ export const contextTools: ToolInfo[] = [
       "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper). After editing, call save_fdx to persist changes to disk.",
   },
   {
+    name: "create_dialogue",
+    description:
+      "Create a Character/[Parenthetical]/Dialogue group as one atomic, contiguous insertion — a new speech in a single call. Use beforeParId or afterParId to control insertion position. Returns {characterId, parentheticalId, dialogueId, message} as JSON.",
+  },
+  {
     name: "edit_spell_check",
     description:
       "Add, change, remove, or fix entries in the spell-check ignore-words list (a single list of any-case words). action=create appends value; action=edit replaces the first word equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively. Ignore-ranges are preserved untouched. After editing, call save_fdx to persist changes to disk.",
@@ -240,6 +245,11 @@ export const contextTools: ToolInfo[] = [
     name: "get_par",
     description:
       "Read-Only. Retrieve a single paragraph by its id from a loaded screenplay — returns type, alignment, text content, and all formatting attributes.",
+  },
+  {
+    name: "diff_fdx",
+    description:
+      "Read-Only. Diffs two documents' top-level body paragraphs by id: added, removed, and modified (type/text, before/after). Everything else is folded into unchangedCount.",
   },
   {
     name: "get_par_runs",

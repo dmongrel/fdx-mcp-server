@@ -27,6 +27,8 @@ import { findDuplicateIdsTool, handleFindDuplicateIds } from "./tools/find-dupli
 import { fixDuplicateIdsTool, handleFixDuplicateIds } from "./tools/fix-duplicate-ids.ts";
 import { getParRunsTool, handleGetParRuns } from "./tools/get-par-runs.ts";
 import { editParTool, handleEditPar } from "./tools/edit-par.ts";
+import { createDialogueTool, handleCreateDialogue } from "./tools/create-dialogue.ts";
+import { diffFdxTool, handleDiffFdx } from "./tools/diff-fdx.ts";
 import { findParTool, handleFindPar } from "./tools/find-par.ts";
 import { replaceTextTool, handleReplaceText } from "./tools/replace-text.ts";
 import { readFullFileTool, handleReadFullFile } from "./tools/read-full-file.ts";
@@ -151,6 +153,8 @@ const tools: FdxTool[] = [
   fixDuplicateIdsTool,
   getParRunsTool,
   editParTool,
+  createDialogueTool,
+  diffFdxTool,
   findParTool,
   replaceTextTool,
   readFullFileTool,
@@ -269,6 +273,8 @@ const toolHandlers: Record<
   fix_duplicate_ids: (args) => handleFixDuplicateIds(args),
   get_par_runs: (args) => handleGetParRuns(args),
   edit_par: (args) => handleEditPar(args),
+  create_dialogue: (args) => handleCreateDialogue(args),
+  diff_fdx: (args) => handleDiffFdx(args),
   find_par: (args) => handleFindPar(args),
   replace_text: (args) => handleReplaceText(args),
   read_full_file: (args) => handleReadFullFile(args),
