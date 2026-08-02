@@ -21,7 +21,7 @@ import { writeTextFile } from "../fdx/runtime.ts";
 export const saveFdxTool: FdxTool = {
   name: "save_fdx",
   description:
-    "Save the cached FinalDraft document for a path back to disk (use this after edit_par, edit_title_page, etc.). Document versioning is filename-based and defaults to on: the path's _v# suffix is read and bumped (script.fdx -> script_v1.fdx -> script_v2.fdx). The FinalDraft file-format Version attribute is preserved, not incremented. Pass version=false to overwrite the same file in place. On a versioned save the returned path becomes the active document: the in-memory document is cached under that new path, so future read/edit tools should use the returned path.",
+    "Save the cached FinalDraft document for a path back to disk (use this after edit_par, edit_title_page, etc.). Document versioning is filename-based and defaults to on: the path's _v# suffix is read and bumped (script.fdx -> script_v1.fdx -> script_v2.fdx). The FinalDraft file-format Version attribute is preserved, not incremented. Pass version=false to overwrite the same file in place. On a versioned save the returned path becomes the active document: the in-memory document is cached under that new path, so future read/edit tools should use the returned path. The previous path is never written back to and stays cached and dirty for the rest of the session — that dirty flag is expected, not a sign of lost work; see get_context's Versioned Saves and the Cache section.",
   inputSchema: {
     type: "object",
     properties: {

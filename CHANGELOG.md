@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.9] - 2026-08-02
+
+### Changed
+
+- **`save_fdx`'s description now documents that a versioned save leaves the previous path cached and dirty**, pointing to `get_context`'s Versioned Saves and the Cache section rather than only explaining the mechanism there. Completes item 2 of the versioned-save-cache-semantics handoff (item 1, the `get_context` section itself, shipped in 0.0.8's predecessor).
+
 ## [0.0.8] - 2026-08-01
 
 ### Fixed

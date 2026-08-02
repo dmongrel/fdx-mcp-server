@@ -293,7 +293,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "save_fdx",
     description:
-      "Save FinalDraft data back to disk with optional version bump (filename _v# suffix increments). Runs consolidateSpellCheckWords to fold any stray nested <Word>s into the canonical top-level list. After editing, always call save_fdx to persist changes.",
+      "Save FinalDraft data back to disk with optional version bump (filename _v# suffix increments). Runs consolidateSpellCheckWords to fold any stray nested <Word>s into the canonical top-level list. The previous path is never written back to and stays cached and dirty for the rest of the session — expected, not lost work; see Versioned Saves and the Cache above. After editing, always call save_fdx to persist changes.",
   },
   {
     name: "search_actions",
