@@ -20,7 +20,7 @@ The Go implementation of this project lives at `/g/_GoProjects/fdx-mcp-server`.
 
 ## Handoffs
 
-Handoff docs (e.g. `*.md` describing a bug/feature to pick up in a future session) live at `F:\Vault\mcp\fdx-mcp-server`, not in this repo.
+Handoff docs (e.g. `*.md` describing a bug/feature to pick up in a future session) live at `F:\Vault\mcp\fdx-mcp-server`, not in this repo. Once a handoff has been implemented, move it into the `done\` subfolder there.
 
 ## Key files
 
