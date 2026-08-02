@@ -18,5 +18,18 @@ describe("get_cache_status", () => {
     expect(status.entries.some((e: { path: string }) => e.path === "status-test.fdx")).toBe(true);
     expect(status.count).toBe(status.entries.length);
   });
+
+  test("reports hasSavepoint per entry", () => {
+    const path = "status-savepoint-test.fdx";
+    documentCache.set(path, FdxDocument.parse('<?xml version="1.0"?><FinalDraft Version="6"></FinalDraft>'));
+    const before = handleGetCacheStatus();
+    const beforeStatus = JSON.parse(before.content[0]!.text);
+    expect(beforeStatus.entries.find((e: { path: string }) => e.path === path).hasSavepoint).toBe(false);
+
+    documentCache.setSavepoint(path);
+    const after = handleGetCacheStatus();
+    const afterStatus = JSON.parse(after.content[0]!.text);
+    expect(afterStatus.entries.find((e: { path: string }) => e.path === path).hasSavepoint).toBe(true);
+  });
 });
 
