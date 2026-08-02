@@ -8,8 +8,8 @@ import { handleGetSection } from "./get-section.ts";
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 const SCENE_HEADING_ID = "6e39d99f-6972-42f8-bdc8-3f0dbe546280";
 
-function allText(result: { content: Array<{ text: string }> }): string {
-  return result.content.map((c) => c.text).join("\n");
+function items(result: { content: Array<{ text: string }> }): Array<Record<string, unknown>> {
+  return JSON.parse(result.content[result.content.length - 1]!.text);
 }
 
 describe("get_section", () => {
@@ -20,25 +20,29 @@ describe("get_section", () => {
   test("errors on an unknown section id", async () => {
     const result = await handleGetSection({ path: FIXTURE_PATH, id: "does-not-exist" });
     expect(result.isError).toBe(true);
-    expect(allText(result)).toContain("section id not found");
+    expect(result.content[0]!.text).toContain("section id not found");
   });
 
-  test("returns the heading plus paragraphs up to the next section heading", async () => {
+  test("returns the heading plus paragraphs up to the next section heading, with ids", async () => {
     const result = await handleGetSection({ path: FIXTURE_PATH, id: SCENE_HEADING_ID });
     expect(result.isError).toBeFalsy();
-    const text = allText(result);
-    expect(text).toContain("[Scene Heading]");
-    expect(text).toContain("EXT. PREHISTORIC VALLEY - DAY");
-    // Must not include a second Scene Heading block (that would mean it overran the boundary).
-    const headingCount = (text.match(/\[Scene Heading\]/g) ?? []).length;
+    const rows = items(result);
+    expect(rows[0]).toEqual({ id: SCENE_HEADING_ID, type: "Scene Heading", text: "EXT. PREHISTORIC VALLEY - DAY" });
+    // Must not include a second Scene Heading (that would mean it overran the boundary).
+    const headingCount = rows.filter((r) => r.type === "Scene Heading").length;
     expect(headingCount).toBe(1);
+    expect(rows.length).toBeGreaterThan(1);
+    for (const row of rows) {
+      expect(typeof row.id).toBe("string");
+      expect((row.id as string).length).toBeGreaterThan(0);
+    }
   });
 
-  test("omitting id starts from the very first paragraph", async () => {
+  test("omitting id starts at the first section in the document", async () => {
     const result = await handleGetSection({ path: FIXTURE_PATH });
     expect(result.isError).toBeFalsy();
-    // The document opens with a Scene Heading section.
-    expect(allText(result)).toContain("[Scene Heading]");
+    const rows = items(result);
+    expect(rows[0]!.id).toBe(SCENE_HEADING_ID);
+    expect(rows[0]!.type).toBe("Scene Heading");
   });
 });
-

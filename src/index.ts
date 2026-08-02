@@ -48,7 +48,6 @@ import { getSpellCheckListsTool, handleGetSpellCheckLists } from "./tools/get-sp
 import { editSpellCheckTool, handleEditSpellCheck } from "./tools/edit-spell-check.ts";
 import { getSectionTool, handleGetSection } from "./tools/get-section.ts";
 import { getSectionListTool, handleGetSectionList } from "./tools/get-section-list.ts";
-import { getSectionParListTool, handleGetSectionParList } from "./tools/get-section-par-list.ts";
 import { getDualDialogueTool, handleGetDualDialogue } from "./tools/get-dual-dialogue.ts";
 import { editDualDialogueTool, handleEditDualDialogue } from "./tools/edit-dual-dialogue.ts";
 import { getTitlePageTool, handleGetTitlePage } from "./tools/get-title-page.ts";
@@ -169,7 +168,6 @@ const tools: FdxTool[] = [
   editSpellCheckTool,
   getSectionTool,
   getSectionListTool,
-  getSectionParListTool,
   getDualDialogueTool,
   editDualDialogueTool,
   getTitlePageTool,
@@ -284,7 +282,6 @@ const toolHandlers: Record<
   edit_spell_check: (args) => handleEditSpellCheck(args),
   get_section: (args) => handleGetSection(args),
   get_section_list: (args) => handleGetSectionList(args),
-  get_section_par_list: (args) => handleGetSectionParList(args),
   get_dual_dialogue: (args) => handleGetDualDialogue(args),
   edit_dual_dialogue: (args) => handleEditDualDialogue(args),
   get_title_page: (args) => handleGetTitlePage(args),

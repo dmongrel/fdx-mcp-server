@@ -239,17 +239,12 @@ export const contextTools: ToolInfo[] = [
   {
     name: "get_section",
     description:
-      "Read-Only. Retrieve a section: its heading paragraph (any section type) plus all following paragraphs up to the next section heading of any type (exclusive). Returns each paragraph's id, type, and text.",
+      "Read-Only. Retrieve every paragraph in a section (a section-type heading such as a Scene Heading, Act Break, or Shot, and the paragraphs that follow it up to the next section heading) as a JSON array of {id, type, text}. Omit id to start at the first section in the document.",
   },
   {
     name: "get_section_list",
     description:
       "Read-Only. List all section headings (any section type) in document order with their ids, types, and text; pass type to list only paragraphs of that exact type instead.",
-  },
-  {
-    name: "get_section_par_list",
-    description:
-      "Read-Only. Retrieve all paragraph ids within a section, starting from a specific section id (the heading itself is included).",
   },
   {
     name: "get_spell_check_lists",

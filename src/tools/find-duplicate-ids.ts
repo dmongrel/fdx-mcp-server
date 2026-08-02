@@ -16,7 +16,7 @@ import { findDuplicateParagraphIds } from "../fdx/duplicate-ids.ts";
 export const findDuplicateIdsTool: FdxTool = {
   name: "find_duplicate_ids",
   description:
-    "Read-Only. Detects top-level body paragraphs that share the same id — a silent-corruption gap where FinalDraft's copy/paste duplicates a paragraph's id instead of minting a new one. Every id-addressed tool (get_par, edit_par, edit_scene_arc_beats, get_section_par_list) resolves a duplicated id to its first match, so a caller addressing a later paragraph with that id edits the wrong one. Call fix_duplicate_ids to repair what this finds.",
+    "Read-Only. Detects top-level body paragraphs that share the same id — a silent-corruption gap where FinalDraft's copy/paste duplicates a paragraph's id instead of minting a new one. Every id-addressed tool (get_par, edit_par, edit_scene_arc_beats, get_section) resolves a duplicated id to its first match, so a caller addressing a later paragraph with that id edits the wrong one. Call fix_duplicate_ids to repair what this finds.",
   inputSchema: {
     type: "object",
     properties: {

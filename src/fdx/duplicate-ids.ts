@@ -4,8 +4,8 @@
 /**
  * Detects and repairs duplicate <Paragraph> ids: FinalDraft's copy/paste sometimes duplicates a
  * paragraph's id attribute instead of minting a new one, and every id-addressed tool (get_par,
- * edit_par, edit_scene_arc_beats, get_section_par_list) silently resolves a duplicated id to the
- * first match. See HANDOFF-duplicate-paragraph-ids.md for the repro that motivated this.
+ * edit_par, edit_scene_arc_beats, get_section) silently resolves a duplicated id to the first
+ * match. See HANDOFF-duplicate-paragraph-ids.md for the repro that motivated this.
  */
 
 import type { FdxDocument } from "./document.ts";
