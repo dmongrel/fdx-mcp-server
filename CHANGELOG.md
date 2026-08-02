@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.15] - 2026-08-02
+
+### Added
+
+- **`get_flagged_words`** tool — surfaces every `<Text>` run carrying `AdornmentStyle="-1"` (Final Draft's unknown-word marker, the on-screen squiggle) as `{word, paragraphId, paragraphType, page}` per hit, a ready-made typo index instead of calling `get_par_runs` on every paragraph one at a time. Pass `excludeIgnoreList=true` to filter out words already in the spell-check ignore list.
+
+### Changed
+
+- **`get_script_stats`** now reports document integrity counts: `adornmentStyleCount`, `winVoiceCount`, `totalTextRuns`, `curlyQuoteCount`, and `flaggedWordCount` (the `AdornmentStyle="-1"` subset of `adornmentStyleCount`). Useful for confirming nothing was altered by a sweep — compare the counts before and after.
+- **`edit_spell_check`** `action=create` now accepts `values` (an array) to add many ignore words in one call, instead of one `edit_spell_check` call per word.
+
 ## [0.0.14] - 2026-08-02
 
 ### Added

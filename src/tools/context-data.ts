@@ -154,7 +154,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "edit_spell_check",
     description:
-      "Add, change, remove, or fix entries in the spell-check ignore-words list (a single list of any-case words). action=create appends value; action=edit replaces the first word equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively. Ignore-ranges are preserved untouched. After editing, call save_fdx to persist changes to disk.",
+      "Add, change, remove, or fix entries in the spell-check ignore-words list (a single list of any-case words). action=create appends value, or pass values (an array) to add many words in one call — useful after get_flagged_words surfaces a batch of misspellings to ignore; action=edit replaces the first word equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively. Ignore-ranges are preserved untouched. After editing, call save_fdx to persist changes to disk.",
   },
   {
     name: "edit_title_page",
@@ -334,7 +334,12 @@ export const contextTools: ToolInfo[] = [
   {
     name: "get_script_stats",
     description:
-      "Read-Only. Retrieve high-level document metrics as JSON: total pages, scene count, act break count, total paragraph count, and a per-paragraph-type breakdown. Call this first for a quick overview before deeper inspection.",
+      'Read-Only. Retrieve high-level document metrics as JSON: total pages, scene count, act break count, total paragraph count, a per-paragraph-type breakdown, and document integrity counts (adornmentStyleCount, winVoiceCount, totalTextRuns, curlyQuoteCount, flaggedWordCount — flaggedWordCount is the AdornmentStyle="-1" subset of adornmentStyleCount, Final Draft\'s unknown-word marker; see get_flagged_words to list them individually). Call this first for a quick overview before deeper inspection, or to confirm nothing was altered by a sweep (compare these counts before/after).',
+  },
+  {
+    name: "get_flagged_words",
+    description:
+      'Read-Only. Surfaces every <Text> run carrying AdornmentStyle="-1" — Final Draft\'s unknown-word marker — as {word, paragraphId, paragraphType, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/replace_text). Pass excludeIgnoreList=true to filter out words already in the spell-check ignore list.',
   },
   {
     name: "get_scene_index",
