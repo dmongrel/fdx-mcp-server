@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.16] - 2026-08-02
+
+### Added
+
+- **`get_placeholders`** tool — lists every paragraph whose full text is entirely one `[...]` span (a drafting placeholder like `[FIX - ...]`), regardless of paragraph type, as `{id, type, text, page}` per hit. Combine with `batch_edit` and `edit_par action=remove` to bulk-clear them once applied.
+
+### Changed
+
+- **`get_script_stats`** now reports `placeholderCount` (always) and accepts `excludePlaceholders=true` to exclude whole-bracket placeholder paragraphs from `paragraphCount`, `byType`, `sceneCount`, and `actBreakCount` — a stable baseline while placeholders are still present, without deleting anything. `totalPages` is unaffected either way.
+
 ## [0.0.15] - 2026-08-02
 
 ### Added

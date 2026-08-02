@@ -68,6 +68,7 @@ import { getHeaderAndFooterTool, handleGetHeaderAndFooter } from "./tools/get-he
 import { editHeaderAndFooterTool, handleEditHeaderAndFooter } from "./tools/edit-header-and-footer.ts";
 import { getScriptStatsTool, handleGetScriptStats } from "./tools/get-script-stats.ts";
 import { getFlaggedWordsTool, handleGetFlaggedWords } from "./tools/get-flagged-words.ts";
+import { getPlaceholdersTool, handleGetPlaceholders } from "./tools/get-placeholders.ts";
 import { getSceneIndexTool, handleGetSceneIndex } from "./tools/get-scene-index.ts";
 import { getCharacterAppearancesTool, handleGetCharacterAppearances } from "./tools/get-character-appearances.ts";
 import { getPageMapTool, handleGetPageMap } from "./tools/get-page-map.ts";
@@ -195,6 +196,7 @@ const tools: FdxTool[] = [
   editHeaderAndFooterTool,
   getScriptStatsTool,
   getFlaggedWordsTool,
+  getPlaceholdersTool,
   getSceneIndexTool,
   getCharacterAppearancesTool,
   getPageMapTool,
@@ -316,6 +318,7 @@ const toolHandlers: Record<
   edit_header_and_footer: (args) => handleEditHeaderAndFooter(args),
   get_script_stats: (args) => handleGetScriptStats(args),
   get_flagged_words: (args) => handleGetFlaggedWords(args),
+  get_placeholders: (args) => handleGetPlaceholders(args),
   get_scene_index: (args) => handleGetSceneIndex(args),
   get_character_appearances: (args) => handleGetCharacterAppearances(args),
   get_page_map: (args) => handleGetPageMap(args),
