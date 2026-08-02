@@ -232,6 +232,11 @@ export const contextTools: ToolInfo[] = [
       "Read-Only. Retrieve a single paragraph by its id from a loaded screenplay — returns type, alignment, text content, and all formatting attributes.",
   },
   {
+    name: "get_par_runs",
+    description:
+      "Read-Only. Retrieve one or more paragraphs' <Text> runs with full attribute sets preserved (unlike get_par, which flattens to plain text). Pass exactly one of id (single), ids (array), or sectionId (whole section).",
+  },
+  {
     name: "get_smarttype_scene_intros",
     description:
       "Read-Only. Retrieve the SmartType SceneIntros list (scene heading prefixes like 'INT.', 'EXT.') as newline-joined entries in document order, or an empty message if none exist. Reports the effective separator on a leading line when present.",

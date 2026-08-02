@@ -27,11 +27,19 @@ describe("get_par_runs", () => {
     expect(result.content[0]!.text).toContain("path is required");
   });
 
-  test("id is required", async () => {
-    const { path } = freshDoc("no-id");
+  test("exactly one of id, ids, or sectionId is required", async () => {
+    const { path } = freshDoc("no-selector");
     const result = await handleGetParRuns({ path });
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toContain("id is required");
+    expect(result.content[0]!.text).toContain("exactly one of id, ids, or sectionId");
+  });
+
+  test("rejects both id and ids given together", async () => {
+    const { path, doc } = freshDoc("both-selectors");
+    const id = getParagraphId(doc.getParagraphElements()[0]!);
+    const result = await handleGetParRuns({ path, id, ids: [id] });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]!.text).toContain("exactly one of id, ids, or sectionId");
   });
 
   test("unknown id fails", async () => {
@@ -82,5 +90,47 @@ describe("get_par_runs", () => {
     expect(body.runs[1].content).toBe("Praetorate");
     expect(body.runs[1].attrs).toEqual({ AdornmentStyle: "-1", Font: "Courier Final Draft" });
     expect(body.runs[0].attrs).toEqual({});
+  });
+
+  test("ids returns runs for each paragraph in the given order", async () => {
+    const { path, doc } = freshDoc("ids-batch");
+    const paragraphs = doc.getParagraphElements();
+    const firstId = getParagraphId(paragraphs[1]!);
+    const secondId = getParagraphId(paragraphs[0]!);
+
+    const result = await handleGetParRuns({ path, ids: [firstId, secondId] });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse(result.content[0]!.text);
+    expect(body.length).toBe(2);
+    expect(body[0].id).toBe(firstId);
+    expect(body[1].id).toBe(secondId);
+    expect(Array.isArray(body[0].runs)).toBe(true);
+  });
+
+  test("ids fails the whole call on a missing id", async () => {
+    const { path, doc } = freshDoc("ids-missing");
+    const id = getParagraphId(doc.getParagraphElements()[0]!);
+    const result = await handleGetParRuns({ path, ids: [id, "does-not-exist"] });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]!.text).toContain("paragraph id not found");
+  });
+
+  test("sectionId returns every paragraph in that section, heading included", async () => {
+    const { path, doc } = freshDoc("section-batch");
+    const sceneHeading = doc.getParagraphElements()[0]!;
+    const sceneId = getParagraphId(sceneHeading);
+
+    const result = await handleGetParRuns({ path, sectionId: sceneId });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse(result.content[0]!.text);
+    expect(body[0].id).toBe(sceneId);
+    expect(body.length).toBeGreaterThan(1);
+  });
+
+  test("sectionId errors on an unknown section id", async () => {
+    const { path } = freshDoc("section-unknown");
+    const result = await handleGetParRuns({ path, sectionId: "nope" });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]!.text).toContain("section id not found");
   });
 });
