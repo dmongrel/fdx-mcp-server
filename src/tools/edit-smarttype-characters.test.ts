@@ -43,6 +43,9 @@ function fixtureWithReferences(): string {
   <Cast>
     <Member Actor="Man 1" Character="DANAERIAN COMMANDER"/>
   </Cast>
+  <CharacterHighlighting>
+    <Character Name="DANAERIAN COMMANDER" Color="#0000FFFF0000" Visible="Yes"/>
+  </CharacterHighlighting>
 </FinalDraft>`;
   writeFileSync(path, source, "utf-8");
   return path;
@@ -81,12 +84,14 @@ describe("edit_smarttype_characters", () => {
     expect(result.isError).toBe(true);
   });
 
-  test("remove warns when Cast/arc-beat rows still reference the removed name", async () => {
+  test("remove warns when Cast/arc-beat/highlighting rows still reference the removed name", async () => {
     const path = fixtureWithReferences();
     await handleReadFdx({ path });
     const result = await handleEditSmarttypeCharacters({ path, action: "remove", find: "DANAERIAN COMMANDER" });
     expect(result.isError).toBeFalsy();
-    expect(result.content[0]!.text).toContain("Warning: 1 Cast member(s) and 1 arc beat(s) still reference this name.");
+    expect(result.content[0]!.text).toContain(
+      "Warning: 1 Cast member(s), 1 arc beat(s), and 1 CharacterHighlighting entry(ies) still reference this name.",
+    );
   });
 
   test("remove does not warn when nothing else references the removed name", async () => {

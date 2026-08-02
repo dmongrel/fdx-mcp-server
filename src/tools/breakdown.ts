@@ -459,7 +459,7 @@ export function buildArcBeatData(doc: FdxDocument): ArcBeatData[] {
  * `name`, case-insensitively unless `cs`. Used to warn a caller removing a SmartType Characters
  * entry that Cast/arc-beat data still references the name they're about to orphan.
  */
-export function countCharacterReferences(doc: FdxDocument, name: string, cs: boolean): { cast: number; arcBeats: number } {
+export function countCharacterReferences(doc: FdxDocument, name: string, cs: boolean): { cast: number; arcBeats: number; highlighting: number } {
   const match = (v: string) => (cs ? v === name : v.toLowerCase() === name.toLowerCase());
 
   const cast = doc.getCastMembers().filter((m) => match(getAttr(m, "Character") ?? "")).length;
@@ -472,7 +472,9 @@ export function countCharacterReferences(doc: FdxDocument, name: string, cs: boo
     arcBeats += findChildren(arcBeatsEl, "CharacterArcBeat").filter((b) => match(getAttr(b, "Name") ?? "")).length;
   }
 
-  return { cast, arcBeats };
+  const highlighting = doc.getHighlightedCharacters().filter((c) => match(getAttr(c, "Name") ?? "")).length;
+
+  return { cast, arcBeats, highlighting };
 }
 
 /** Retrieves one paragraph's SceneProperties by id, parsed into the get_scene_properties JSON shape. */
