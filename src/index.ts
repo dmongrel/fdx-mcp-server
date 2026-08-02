@@ -19,6 +19,9 @@ import { newFileTool, handleNewFile } from "./tools/new-file.ts";
 import { getCacheStatusTool, handleGetCacheStatus } from "./tools/get-cache-status.ts";
 import { closeFdxTool, handleCloseFdx } from "./tools/close-fdx.ts";
 import { reloadFdxTool, handleReloadFdx } from "./tools/reload-fdx.ts";
+import { savepointTool, handleSavepoint } from "./tools/savepoint.ts";
+import { rollbackTool, handleRollback } from "./tools/rollback.ts";
+import { batchEditTool, handleBatchEdit } from "./tools/batch-edit.ts";
 import { getParTool, handleGetPar } from "./tools/get-par.ts";
 import { findDuplicateIdsTool, handleFindDuplicateIds } from "./tools/find-duplicate-ids.ts";
 import { fixDuplicateIdsTool, handleFixDuplicateIds } from "./tools/fix-duplicate-ids.ts";
@@ -140,6 +143,9 @@ const tools: FdxTool[] = [
   getCacheStatusTool,
   closeFdxTool,
   reloadFdxTool,
+  savepointTool,
+  rollbackTool,
+  batchEditTool,
   getParTool,
   findDuplicateIdsTool,
   fixDuplicateIdsTool,
@@ -255,6 +261,9 @@ const toolHandlers: Record<
   get_cache_status: () => handleGetCacheStatus(),
   close_fdx: (args) => handleCloseFdx(args),
   reload_fdx: (args) => handleReloadFdx(args),
+  savepoint: (args) => handleSavepoint(args),
+  rollback: (args) => handleRollback(args),
+  batch_edit: (args) => handleBatchEdit(args),
   get_par: (args) => handleGetPar(args),
   find_duplicate_ids: (args) => handleFindDuplicateIds(args),
   fix_duplicate_ids: (args) => handleFixDuplicateIds(args),

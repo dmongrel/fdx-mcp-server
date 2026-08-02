@@ -39,6 +39,11 @@ export const contextRules: ContextRule[] = [
       "A versioned save (save_fdx with the default version bump) writes a NEW path, re-caches the document there clean, and leaves the previous path cached and dirty. This is expected: the old path's in-memory copy genuinely differs from the file on disk at that path, and the server never writes back to it. Under versioning every superseded path stays dirty for the rest of the session. Track the dirty flag on your CURRENT path only — a dirty flag on a superseded version is normal and means nothing was lost; the content is on disk under the newer name. Because each versioned save mints a new path, a sequence of saves on one document fills the 4-slot cache by the fourth save and begins evicting. Eviction warnings naming a superseded version are expected noise. To avoid them, call close_fdx on the previous path after a versioned save; it will require force=true, which is safe precisely because the content was written to the new path.",
   },
   {
+    title: "Batch Edits and Savepoints",
+    content:
+      "batch_edit runs an ordered list of edit operations against one document, all-or-nothing: if any operation fails, every operation in the batch is rolled back and the document is left exactly as it was before the call. It takes a savepoint automatically before running and leaves it in place afterward, win or lose — so rollback can undo the whole batch even after it succeeds, if you change your mind. savepoint/rollback are the same mechanism, callable directly around any sequence of individual edit_* calls — one level only, and a new savepoint (manual or from the next batch_edit call) always overwrites whatever was there. Neither touches disk; save_fdx is still a separate, explicit step.",
+  },
+  {
     title: "Paragraph Structure",
     content:
       "A paragraph has a Type (e.g., Scene Heading, Action, Dialogue), an Id (UUID), and optional Text runs with styling. Paragraphs are ordered sequentially in the document.",
@@ -380,6 +385,21 @@ export const contextTools: ToolInfo[] = [
     name: "reload_fdx",
     description:
       "Force a fresh re-parse of an .fdx file from disk, replacing the cached copy — use to intentionally discard unsaved edits or pick up external changes to the file. Refuses if the cached copy has unsaved edits unless force=true is passed.",
+  },
+  {
+    name: "savepoint",
+    description:
+      "Captures the current in-memory state of a cached document as a single rollback point, overwriting any previous savepoint for this path. Call rollback to restore it. Does not touch disk.",
+  },
+  {
+    name: "rollback",
+    description:
+      "Restores a document to its last savepoint, discarding any edits made since. Errors if no savepoint exists for this path. Does not touch disk.",
+  },
+  {
+    name: "batch_edit",
+    description:
+      "Run an ordered list of edit operations against one document, all-or-nothing. Takes a savepoint automatically and leaves it in place afterward, so rollback can undo the whole batch even after success. Allowlisted to in-memory mutation tools only.",
   },
 ];
 

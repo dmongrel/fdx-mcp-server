@@ -5,8 +5,8 @@ import { describe, expect, test } from "bun:test";
 import { contextRules, contextTools } from "./context-data.ts";
 
 describe("context-data", () => {
-  test("has 17 formatting rules", () => {
-    expect(contextRules.length).toBe(17);
+  test("has 18 formatting rules", () => {
+    expect(contextRules.length).toBe(18);
   });
 
   test("every rule has a non-empty title and content", () => {
