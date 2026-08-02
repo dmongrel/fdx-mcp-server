@@ -14,7 +14,7 @@ import { buildScriptStats } from "./breakdown.ts";
 export const getScriptStatsTool: FdxTool = {
   name: "get_script_stats",
   description:
-    "Read-Only. Retrieve high-level document metrics as JSON: total pages, scene count, act break count, total paragraph count, and a per-paragraph-type breakdown. Call this first for a quick overview before deeper inspection.",
+    'Read-Only. Retrieve high-level document metrics as JSON: total pages, scene count, act break count, total paragraph count, a per-paragraph-type breakdown, and document integrity counts (adornmentStyleCount, winVoiceCount, totalTextRuns, curlyQuoteCount, flaggedWordCount — flaggedWordCount is the AdornmentStyle="-1" subset of adornmentStyleCount, Final Draft\'s unknown-word marker; see get_flagged_words to list them individually). Call this first for a quick overview before deeper inspection, or to confirm nothing was altered by a sweep (compare these counts before/after).',
   inputSchema: {
     type: "object",
     properties: {

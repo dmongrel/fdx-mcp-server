@@ -10,7 +10,7 @@
  */
 
 import type { FdxDocument } from "../fdx/document.ts";
-import { findChild, findChildren, getAttr, type XmlElement } from "../fdx/xml.ts";
+import { findChild, findChildren, getAttr, type XmlElement, type XmlNode } from "../fdx/xml.ts";
 import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
 import { isSectionType } from "../fdx/sections.ts";
 
@@ -51,6 +51,11 @@ export interface ScriptStats {
   actBreakCount: number;
   paragraphCount: number;
   byType: Record<string, number>;
+  adornmentStyleCount: number;
+  winVoiceCount: number;
+  totalTextRuns: number;
+  curlyQuoteCount: number;
+  flaggedWordCount: number;
 }
 
 export interface CharacterArc {
@@ -412,10 +417,52 @@ export function buildPageMap(doc: FdxDocument): PageMapEntry[] {
   return out;
 }
 
+const CURLY_QUOTE_RE = /[“”‘’]/g;
+
+interface IntegrityCounts {
+  totalTextRuns: number;
+  adornmentStyleCount: number;
+  flaggedWordCount: number;
+  curlyQuoteCount: number;
+}
+
+/**
+ * Walks the whole document tree once, counting every <Text> run (styled or not), how many carry an
+ * AdornmentStyle attribute at all, how many are specifically "-1" (Final Draft's unknown-word
+ * marker), and curly-quote characters in text-node content. Scoped to the whole tree (not just
+ * top-level body paragraphs) since a raw-regex sweep isn't scoped that way either. Never inspects
+ * attribute values for curly quotes, so <Actors>' WinVoice/MacVoice blobs are excluded by
+ * construction, not by special-casing them.
+ */
+function walkIntegrityCounts(node: XmlNode, acc: IntegrityCounts): void {
+  if (node.type === "text") {
+    const matches = node.value.match(CURLY_QUOTE_RE);
+    if (matches) acc.curlyQuoteCount += matches.length;
+    return;
+  }
+  if (node.type !== "element") return;
+  if (node.name === "Text") {
+    acc.totalTextRuns++;
+    const adornment = getAttr(node, "AdornmentStyle");
+    if (adornment !== undefined) acc.adornmentStyleCount++;
+    if (adornment === "-1") acc.flaggedWordCount++;
+  }
+  for (const child of node.children) walkIntegrityCounts(child, acc);
+}
+
+/** Counts <Actor> rows under <Actors> with a non-empty WinVoice value (not merely a present one — a
+ *  default/never-assigned row still carries WinVoice="", which isn't a real voice occurrence). */
+function countWinVoiceOccurrences(root: XmlElement): number {
+  const actors = findChild(root, "Actors");
+  if (!actors) return 0;
+  return findChildren(actors, "Actor").filter((a) => (getAttr(a, "WinVoice") ?? "") !== "").length;
+}
+
 /**
  * Computes high-level document metrics: the highest SceneProperties.Page value seen (total
  * pages), the count of Scene Heading and Act&Scene Break/Act Break paragraphs, total paragraph
- * count, and a per-type breakdown. Mirrors Go's buildScriptStats.
+ * count, a per-type breakdown, and document integrity counts (AdornmentStyle/WinVoice/Text-run/
+ * curly-quote/flagged-word occurrences). Mirrors Go's buildScriptStats plus the integrity counts.
  */
 export function buildScriptStats(doc: FdxDocument): ScriptStats {
   const paragraphs = doc.getParagraphElements();
@@ -425,6 +472,11 @@ export function buildScriptStats(doc: FdxDocument): ScriptStats {
     actBreakCount: 0,
     paragraphCount: paragraphs.length,
     byType: {},
+    adornmentStyleCount: 0,
+    winVoiceCount: 0,
+    totalTextRuns: 0,
+    curlyQuoteCount: 0,
+    flaggedWordCount: 0,
   };
   for (const p of paragraphs) {
     const type = getParagraphType(p);
@@ -437,6 +489,15 @@ export function buildScriptStats(doc: FdxDocument): ScriptStats {
       if (!Number.isNaN(page) && page > stats.totalPages) stats.totalPages = page;
     }
   }
+
+  const integrity: IntegrityCounts = { totalTextRuns: 0, adornmentStyleCount: 0, flaggedWordCount: 0, curlyQuoteCount: 0 };
+  walkIntegrityCounts(doc.root, integrity);
+  stats.totalTextRuns = integrity.totalTextRuns;
+  stats.adornmentStyleCount = integrity.adornmentStyleCount;
+  stats.flaggedWordCount = integrity.flaggedWordCount;
+  stats.curlyQuoteCount = integrity.curlyQuoteCount;
+  stats.winVoiceCount = countWinVoiceOccurrences(doc.root);
+
   return stats;
 }
 

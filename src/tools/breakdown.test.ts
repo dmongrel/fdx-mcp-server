@@ -180,6 +180,46 @@ describe("buildScriptStats", () => {
     expect(stats.totalPages).toBe(0);
     expect(stats.byType["Scene Heading"]).toBe(6);
   });
+
+  test("counts AdornmentStyle presence, WinVoice non-empty values, and total Text runs", () => {
+    const source = `<?xml version="1.0"?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Action" id="p1">
+      <Text>Plain run.</Text>
+      <Text AdornmentStyle="-1">satys</Text>
+      <Text AdornmentStyle="1">Bold run.</Text>
+    </Paragraph>
+  </Content>
+  <Actors>
+    <Actor Name="Man 1" WinVoice="somevoicedata"/>
+    <Actor Name="Man 2" WinVoice=""/>
+  </Actors>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const stats = buildScriptStats(doc);
+    expect(stats.totalTextRuns).toBe(3);
+    expect(stats.adornmentStyleCount).toBe(2); // "-1" and "1", not the plain run
+    expect(stats.flaggedWordCount).toBe(1); // only "-1"
+    expect(stats.winVoiceCount).toBe(1); // only the non-empty one
+  });
+
+  test("curlyQuoteCount counts paragraph text but not a WinVoice value with a lookalike byte", () => {
+    const source = `<?xml version="1.0"?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Action" id="p1">
+      <Text>He said “hello” and left.</Text>
+    </Paragraph>
+  </Content>
+  <Actors>
+    <Actor Name="Man 1" WinVoice="‘Q|Çg(Ð„{DEST"/>
+  </Actors>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const stats = buildScriptStats(doc);
+    expect(stats.curlyQuoteCount).toBe(2); // the “ and ” in paragraph text only
+  });
 });
 
 describe("buildPageMap", () => {
