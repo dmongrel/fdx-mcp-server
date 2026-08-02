@@ -16,7 +16,7 @@
     ".": "./dist/index.js"
   },
   "bin": {
-    "fdx-mcp-server": "./dist/index.js"
+    "fdx-mcp-server": "dist/index.js"
   },
   "files": [
     "dist",
