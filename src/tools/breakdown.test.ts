@@ -236,6 +236,29 @@ describe("buildScriptStats", () => {
     expect(stats.placeholderCount).toBe(2); // p1 and p2 only; p3 has real text before the bracket
     expect(stats.paragraphCount).toBe(4); // unaffected without excludePlaceholders
   });
+
+  test("excludePlaceholders removes them from paragraphCount, byType, sceneCount, and actBreakCount", () => {
+    const source = `<?xml version="1.0"?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1"><Text>[FIX - placeholder scene heading]</Text></Paragraph>
+    <Paragraph Type="General" id="p1"><Text>[FIX - move this scene earlier]</Text></Paragraph>
+    <Paragraph Type="Action" id="p2"><Text>Grog picks up a rock.</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const withPlaceholders = buildScriptStats(doc);
+    expect(withPlaceholders.paragraphCount).toBe(3);
+    expect(withPlaceholders.sceneCount).toBe(1);
+    expect(withPlaceholders.byType["General"]).toBe(1);
+
+    const excluded = buildScriptStats(doc, { excludePlaceholders: true });
+    expect(excluded.paragraphCount).toBe(1);
+    expect(excluded.sceneCount).toBe(0);
+    expect(excluded.byType["General"]).toBeUndefined();
+    expect(excluded.byType["Action"]).toBe(1);
+    expect(excluded.placeholderCount).toBe(2); // still reported even though excluded from the rest
+  });
 });
 
 describe("buildPageMap", () => {
