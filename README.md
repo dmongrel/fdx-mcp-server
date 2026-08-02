@@ -18,6 +18,7 @@ Written in TypeScript, it runs on **Bun** or **Deno** using the stdio transport 
   - [Option B — Global NPM Install](#option-b--global-npm-install)
 - [Usage](#usage)
 - [Features](#features)
+- [Publishing](#publishing)
 
 ---
 
@@ -132,3 +133,20 @@ Key capabilities exposed by `fdx-mcp-server`:
 - **Script breakdowns** — generate full production breakdown reports (props, vehicles, camera, cast) as text or HTML/PDF.
 - **Macro system** — query macro aliases and their activation scopes.
 - **Search & navigation** — find paragraphs by text, list sections and section contents, retrieve revision colors and display board data; diff two documents' paragraphs by id (added/removed/modified) — useful for confirming what a versioned save actually changed.
+
+---
+
+## Publishing
+
+Maintainer notes for releasing a new version to npm:
+
+```bash
+bun run build     # rebuilds dist/index.js, which is checked into the repo
+npm publish
+```
+
+If the npm account has two-factor authentication enabled, **each `npm publish` requires its own
+live 2FA approval** — logging in beforehand is not enough, and the approval from one publish does
+not carry over to the next. Because of this, `npm publish` has to be run interactively, in a real
+terminal, by whoever holds the authenticator — it cannot be scripted or run non-interactively (e.g.
+from an AI coding assistant's shell tool) without a fresh prompt failing with an `EOTP` error.
