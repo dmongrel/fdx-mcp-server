@@ -109,7 +109,7 @@ In `src/fdx/sections.ts`, add this function after `findSectionEnd`:
  * Returns -1 when `index` is before the first section heading in the document.
  */
 export function findContainingSectionIndex(paragraphs: XmlElement[], index: number): number {
-  for (let i = index; i >= 0; i--) {
+  for (let i = Math.min(index, paragraphs.length - 1); i >= 0; i--) {
     if (isSectionType(getParagraphType(paragraphs[i]!))) return i;
   }
   return -1;

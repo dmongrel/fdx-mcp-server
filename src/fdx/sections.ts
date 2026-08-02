@@ -31,3 +31,15 @@ export function findSectionEnd(paragraphs: XmlElement[], startIndex: number): nu
   return idx === -1 ? paragraphs.length : startIndex + 1 + idx;
 }
 
+/**
+ * Scans backward from `index` (inclusive) for the nearest section-type paragraph — the section
+ * the paragraph at `index` belongs to. A section-type paragraph is its own containing section.
+ * Returns -1 when `index` is before the first section heading in the document.
+ */
+export function findContainingSectionIndex(paragraphs: XmlElement[], index: number): number {
+  for (let i = Math.min(index, paragraphs.length - 1); i >= 0; i--) {
+    if (isSectionType(getParagraphType(paragraphs[i]!))) return i;
+  }
+  return -1;
+}
+

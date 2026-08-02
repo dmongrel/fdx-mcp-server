@@ -73,7 +73,7 @@ export interface ScenePropertiesResult {
 }
 
 /** Raw <Color>/<Length>/<Page>/<Title> attributes from a paragraph's <SceneProperties>, if present. */
-function getSceneProperties(p: XmlElement): { color: string; length: string; page: string; title: string } | undefined {
+export function getSceneProperties(p: XmlElement): { color: string; length: string; page: string; title: string } | undefined {
   const sp = findChild(p, "SceneProperties");
   if (!sp) return undefined;
   return {
