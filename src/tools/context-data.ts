@@ -178,7 +178,8 @@ export const contextTools: ToolInfo[] = [
   },
   {
     name: "find_par",
-    description: "Read-Only. Search for a paragraph by text content.",
+    description:
+      "Read-Only. Search for a paragraph by text content. Returns a JSON array of hits, each carrying id, type, text, and the containing section's sceneId/sceneHeading/page.",
   },
   {
     name: "get_smarttype_characters",

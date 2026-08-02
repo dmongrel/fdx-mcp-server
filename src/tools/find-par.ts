@@ -3,19 +3,23 @@
 
 /**
  * find_par — searches top-level body paragraphs by text content, optionally scoped to a section
- * (via id) and/or filtered by paragraph type, with optional case sensitivity. Mirrors Go's
- * tools/find_par.go.
+ * (via id) and/or filtered by paragraph type, with optional case sensitivity. Each hit reports its
+ * containing section (id, heading text, page), found by scanning backward for the nearest
+ * preceding section-type paragraph — no more guessing which scene a match belongs to. Mirrors Go's
+ * tools/find_par.go, extended with scene/page reporting.
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
-import { findSectionIndex, findSectionEnd } from "../fdx/sections.ts";
+import { findSectionIndex, findSectionEnd, findContainingSectionIndex } from "../fdx/sections.ts";
+import { getSceneProperties } from "./breakdown.ts";
 
 export const findParTool: FdxTool = {
   name: "find_par",
-  description: "Read-Only. Search for a paragraph by text content.",
+  description:
+    "Read-Only. Search for a paragraph by text content. Returns a JSON array of hits, each carrying id, type, text, and the containing section's sceneId/sceneHeading/page (all null when the hit is before any section heading) — no separate lookup needed to place a match in the document.",
   inputSchema: {
     type: "object",
     properties: {
@@ -31,6 +35,15 @@ export const findParTool: FdxTool = {
     required: ["path", "textContent"],
   },
 };
+
+interface FindParHit {
+  id: string;
+  type: string;
+  text: string;
+  sceneId: string | null;
+  sceneHeading: string | null;
+  page: number | null;
+}
 
 export async function handleFindPar(args: Record<string, unknown> | undefined): Promise<ToolResult> {
   const path = arg<string>(args, "path");
@@ -63,17 +76,37 @@ export async function handleFindPar(args: Record<string, unknown> | undefined): 
   }
 
   const searchLower = caseSensitive ? "" : query.toLowerCase();
-  const results: string[] = [];
+  const hits: FindParHit[] = [];
   for (let i = startIndex; i < endIndex; i++) {
     const p = paragraphs[i]!;
     if (parType && getParagraphType(p) !== parType) continue;
 
     const text = paragraphText(p);
-    const hit = caseSensitive ? text.includes(query) : text.toLowerCase().includes(searchLower);
-    if (hit) results.push(`[${getParagraphType(p)}] [${getParagraphId(p)}] ${text}`);
+    const isHit = caseSensitive ? text.includes(query) : text.toLowerCase().includes(searchLower);
+    if (!isHit) continue;
+
+    const sectionIdx = findContainingSectionIndex(paragraphs, i);
+    let hSceneId: string | null = null;
+    let sceneHeading: string | null = null;
+    let page: number | null = null;
+    if (sectionIdx !== -1) {
+      const sectionPara = paragraphs[sectionIdx]!;
+      hSceneId = getParagraphId(sectionPara);
+      sceneHeading = paragraphText(sectionPara);
+      const sp = getSceneProperties(sectionPara);
+      const parsedPage = sp ? parseInt(sp.page, 10) : NaN;
+      page = Number.isNaN(parsedPage) ? null : parsedPage;
+    }
+
+    hits.push({
+      id: getParagraphId(p),
+      type: getParagraphType(p),
+      text,
+      sceneId: hSceneId,
+      sceneHeading,
+      page,
+    });
   }
 
-  const out = results.length === 0 ? "No paragraph found" : results.join("\n---\n");
-  return pushCacheWarning(textResult(out), warning);
+  return pushCacheWarning(textResult(JSON.stringify(hits)), warning);
 }
-
