@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [0.0.11] - 2026-08-02
 
+Most of the changes across 0.0.9–0.0.11 were requested by an AI agent working on an actual
+production screenplay (not a hypothetical use case) — friction hit in real editing sessions,
+recorded as it came up, and worked through here roughly in the order it was raised.
+
 ### Added
 
 - **`rename_character`** tool — renames or merges a character across all five places a name is stored: Character-cue paragraphs (run-preserving substring replace), the SmartType Characters dictionary, `<Cast>` Member rows, `CharacterArcBeat` entries in every scene's `SceneProperties`, and `<CharacterHighlighting>` (a location nothing in the codebase touched before this). A merge — `to` already exists somewhere — drops `from`'s entry there rather than creating a duplicate, except a scene where both names already have separate arc beats, left untouched (with a warning) since arc beats carry authored notes a drop would destroy. Returns a JSON report of what happened in each location.
