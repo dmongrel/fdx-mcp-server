@@ -472,13 +472,14 @@ function countWinVoiceOccurrences(root: XmlElement): number {
  * count, a per-type breakdown, and document integrity counts (AdornmentStyle/WinVoice/Text-run/
  * curly-quote/flagged-word occurrences). Mirrors Go's buildScriptStats plus the integrity counts.
  */
-export function buildScriptStats(doc: FdxDocument): ScriptStats {
+export function buildScriptStats(doc: FdxDocument, opts?: { excludePlaceholders?: boolean }): ScriptStats {
   const paragraphs = doc.getParagraphElements();
+  const excludePlaceholders = opts?.excludePlaceholders ?? false;
   const stats: ScriptStats = {
     totalPages: 0,
     sceneCount: 0,
     actBreakCount: 0,
-    paragraphCount: paragraphs.length,
+    paragraphCount: 0,
     byType: {},
     adornmentStyleCount: 0,
     winVoiceCount: 0,
@@ -488,16 +489,24 @@ export function buildScriptStats(doc: FdxDocument): ScriptStats {
     placeholderCount: 0,
   };
   for (const p of paragraphs) {
-    const type = getParagraphType(p);
-    stats.byType[type] = (stats.byType[type] ?? 0) + 1;
-    if (type.toLowerCase() === "scene heading") stats.sceneCount++;
-    if (type.toLowerCase() === "act&scene break" || type.toLowerCase() === "act break") stats.actBreakCount++;
-    if (isPlaceholderParagraph(p)) stats.placeholderCount++;
+    const isPlaceholder = isPlaceholderParagraph(p);
+    if (isPlaceholder) stats.placeholderCount++;
+
+    // Computed unconditionally, before the exclusion check below, so totalPages is identical
+    // whether or not excludePlaceholders is set.
     const sp = getSceneProperties(p);
     if (sp && sp.page !== "") {
       const page = parseInt(sp.page, 10);
       if (!Number.isNaN(page) && page > stats.totalPages) stats.totalPages = page;
     }
+
+    if (excludePlaceholders && isPlaceholder) continue;
+
+    stats.paragraphCount++;
+    const type = getParagraphType(p);
+    stats.byType[type] = (stats.byType[type] ?? 0) + 1;
+    if (type.toLowerCase() === "scene heading") stats.sceneCount++;
+    if (type.toLowerCase() === "act&scene break" || type.toLowerCase() === "act break") stats.actBreakCount++;
   }
 
   const integrity: IntegrityCounts = { totalTextRuns: 0, adornmentStyleCount: 0, flaggedWordCount: 0, curlyQuoteCount: 0 };
