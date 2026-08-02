@@ -117,6 +117,11 @@ export const contextTools: ToolInfo[] = [
       "Add, change, remove, or fix entries in the SmartType Characters list (character names). action=create appends value; action=edit replaces the first entry equal to find (case-insensitive unless cs=true) with replace; action=remove deletes the first entry equal to find; action=fix just cleans the list. Optional uppercase and dedup flags post-process the list, which is always alphabetized case-insensitively after any change. After editing, call save_fdx to persist changes to disk.",
   },
   {
+    name: "rename_character",
+    description:
+      "Rename (or merge) a character across every place its name is stored: cue paragraphs, SmartType Characters, Cast, arc beats, and CharacterHighlighting. Returns a JSON report of what was touched in each location.",
+  },
+  {
     name: "edit_dual_dialogue",
     description:
       "Restructure dual dialogue (side-by-side speech). action=create moves the top-level paragraphs named by ids (in order) into a new wrapper paragraph holding a <DualDialogue>, inserted where the first of them was, returning {id, message} as JSON (id is the new wrapper's id) — edit the paragraphs' content beforehand with edit_par. action=remove deletes the wrapper named by id; pass extract=true to move the contained paragraphs back to the top level first, or extract=false to delete the wrapper and its contents. After editing, call save_fdx to persist changes to disk.",

@@ -122,7 +122,7 @@ Key capabilities exposed by `fdx-mcp-server`:
 - **Document lifecycle** — open, save, reload, create new `.fdx` files; manage server-side document cache.
 - **Document integrity** — detect and repair paragraphs that silently share a duplicated id (a FinalDraft copy/paste artifact that otherwise makes id-addressed edits land on the wrong paragraph).
 - **Scene analysis** — parse scene headings (INT./EXT., location, time of day), extract scene index and properties, compute script stats and page maps.
-- **Character tracking** — retrieve character lists, extension metadata (V.O., O.S.), per-character scene appearance counts, and arc beats across scenes.
+- **Character tracking** — retrieve character lists, extension metadata (V.O., O.S.), per-character scene appearance counts, and arc beats across scenes; rename or merge a character across every place its name is stored (cue paragraphs, dictionary, cast, arc beats, highlighting) in one call.
 - **Dual dialogue support** — read and create side-by-side dialogue blocks.
 - **SmartType dictionaries** — manage the FinalDraft autocomplete lists: characters, extensions, transitions, scene intros, times of day, spell-check lists, and paragraph types.
 - **Location usage** — see actual location usage parsed from Scene Heading text (not just the autocomplete dictionary) and rename a location across every scene that uses it in one call.

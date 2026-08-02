@@ -30,6 +30,7 @@ import { readFullFileTool, handleReadFullFile } from "./tools/read-full-file.ts"
 import { listTypesTool, handleListTypes } from "./tools/list-types.ts";
 import { getSmarttypeCharactersTool, handleGetSmarttypeCharacters } from "./tools/get-smarttype-characters.ts";
 import { editSmarttypeCharactersTool, handleEditSmarttypeCharacters } from "./tools/edit-smarttype-characters.ts";
+import { renameCharacterTool, handleRenameCharacter } from "./tools/rename-character.ts";
 import { getCastTool, handleGetCast } from "./tools/get-cast.ts";
 import { editCastTool, handleEditCast } from "./tools/edit-cast.ts";
 import { getSmarttypeExtensionsTool, handleGetSmarttypeExtensions } from "./tools/get-smarttype-extensions.ts";
@@ -150,6 +151,7 @@ const tools: FdxTool[] = [
   listTypesTool,
   getSmarttypeCharactersTool,
   editSmarttypeCharactersTool,
+  renameCharacterTool,
   getCastTool,
   editCastTool,
   getSmarttypeExtensionsTool,
@@ -264,6 +266,7 @@ const toolHandlers: Record<
   list_types: (args) => handleListTypes(args),
   get_smarttype_characters: (args) => handleGetSmarttypeCharacters(args),
   edit_smarttype_characters: (args) => handleEditSmarttypeCharacters(args),
+  rename_character: (args) => handleRenameCharacter(args),
   get_cast: (args) => handleGetCast(args),
   edit_cast: (args) => handleEditCast(args),
   get_smarttype_extensions: (args) => handleGetSmarttypeExtensions(args),
