@@ -38,7 +38,8 @@ describe("edit_dual_dialogue / get_dual_dialogue", () => {
       ids: [CHARACTER_ID, PARENTHETICAL_ID, DIALOGUE_ID],
     });
     expect(result.isError).toBeFalsy();
-    expect(result.content[0]!.text).toContain("call save_fdx");
+    const body = JSON.parse(result.content[0]!.text);
+    expect(body.message).toContain("call save_fdx");
 
     const doc = documentCache.get(path)!;
     const paragraphs = doc.getParagraphElements();
@@ -54,6 +55,7 @@ describe("edit_dual_dialogue / get_dual_dialogue", () => {
     );
     expect(wrapper).toBeDefined();
     const wrapperId = getParagraphId(wrapper!);
+    expect(body.id).toBe(wrapperId);
     const getResult = await handleGetDualDialogue({ path, id: wrapperId });
     expect(getResult.isError).toBeFalsy();
     const text = getResult.content[0]!.text;

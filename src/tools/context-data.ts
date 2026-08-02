@@ -119,7 +119,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "edit_dual_dialogue",
     description:
-      "Restructure dual dialogue (side-by-side speech). action=create moves the top-level paragraphs named by ids (in order) into a new wrapper paragraph holding a <DualDialogue>, inserted where the first of them was — edit the paragraphs' content beforehand with edit_par. action=remove deletes the wrapper named by id; pass extract=true to move the contained paragraphs back to the top level first, or extract=false to delete the wrapper and its contents. After editing, call save_fdx to persist changes to disk.",
+      "Restructure dual dialogue (side-by-side speech). action=create moves the top-level paragraphs named by ids (in order) into a new wrapper paragraph holding a <DualDialogue>, inserted where the first of them was, returning {id, message} as JSON (id is the new wrapper's id) — edit the paragraphs' content beforehand with edit_par. action=remove deletes the wrapper named by id; pass extract=true to move the contained paragraphs back to the top level first, or extract=false to delete the wrapper and its contents. After editing, call save_fdx to persist changes to disk.",
   },
   {
     name: "edit_element_settings",

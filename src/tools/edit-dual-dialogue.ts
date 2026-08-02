@@ -24,7 +24,7 @@ import { actionPastTense } from "./smart-type-ops.ts";
 export const editDualDialogueTool: FdxTool = {
   name: "edit_dual_dialogue",
   description:
-    "Restructure dual dialogue (side-by-side speech). action=create moves the top-level paragraphs named by ids (in order) into a new wrapper paragraph holding a <DualDialogue>, inserted where the first of them was — edit the paragraphs' content beforehand with edit_par. action=remove deletes the wrapper named by id; pass extract=true to move the contained paragraphs back to the top level first, or extract=false to delete the wrapper and its contents. After editing, call save_fdx to persist changes to disk.",
+    "Restructure dual dialogue (side-by-side speech). action=create moves the top-level paragraphs named by ids (in order) into a new wrapper paragraph holding a <DualDialogue>, inserted where the first of them was, returning {id, message} as JSON (id is the new wrapper's id) — edit the paragraphs' content beforehand with edit_par. action=remove deletes the wrapper named by id; pass extract=true to move the contained paragraphs back to the top level first, or extract=false to delete the wrapper and its contents. After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -61,6 +61,7 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
   }
 
   const content = doc.getContentElement(true)!;
+  let wrapperId: string | undefined;
 
   if (action.toLowerCase() === "create") {
     const ids = arg<string[]>(args, "ids") ?? [];
@@ -96,9 +97,10 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
     content.children = content.children.filter((c) => !(c.type === "element" && moved.includes(c)));
 
     const dd = createElement("DualDialogue", [], moved);
+    wrapperId = generateUuid();
     const wrapper = createElement("Paragraph", [
       ["Type", "General"],
-      ["id", generateUuid()],
+      ["id", wrapperId],
     ], [dd]);
 
     content.children.splice(insertPos, 0, wrapper);
@@ -128,13 +130,10 @@ export async function handleEditDualDialogue(args: Record<string, unknown> | und
   }
 
   const dirtyWarning = documentCache.touchDirty(path, doc);
-  const result = pushCacheWarning(
-    pushCacheWarning(
-      textResult(`Successfully ${actionPastTense(action)} dual dialogue. File updated in cache — call save_fdx to persist changes to disk.`),
-      warning,
-    ),
-    dirtyWarning,
-  );
+  const message = `Successfully ${actionPastTense(action)} dual dialogue. File updated in cache — call save_fdx to persist changes to disk.`;
+  const mainBlock =
+    action.toLowerCase() === "create" ? textResult(JSON.stringify({ id: wrapperId!, message })) : textResult(message);
+  const result = pushCacheWarning(pushCacheWarning(mainBlock, warning), dirtyWarning);
   return result;
 }
 
