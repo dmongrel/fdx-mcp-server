@@ -26,7 +26,23 @@ Handoff docs (e.g. `*.md` describing a bug/feature to pick up in a future sessio
 
 - `README.md` — Setup and configuration instructions for all three runtime paths
 - `CHANGELOG.md` — Per-version release notes; update alongside a version bump in `package.json`
+- `TOOLS.md` — Hand-maintained table of every registered tool (name, params, description)
 - `.idea/` — IntelliJ IDEA project metadata (the repo is TypeScript, not a native JetBrains project)
+
+## Keeping docs in sync
+
+Any change that adds, removes, renames, or changes the input/output shape of a tool must update
+**all three** of `README.md`, `CHANGELOG.md`, and `TOOLS.md` in the same change — not just the one
+that seems most relevant. In practice:
+- `CHANGELOG.md` gets a new version entry (bump `package.json` alongside it) describing the change.
+- `TOOLS.md`'s row for that tool (name, parameters, description) is updated to match the tool's
+  actual current schema/description; a removed tool's row is deleted and the tool-count header
+  line is decremented; a new tool gets a new row.
+- `README.md` is checked for anything it says about that tool or the feature area — it doesn't
+  enumerate every tool today, so most changes won't touch it, but don't skip the check.
+- If a tool's own description string changes, check `src/tools/context-data.ts` for a mirrored
+  copy (the `get_context`/`search_actions` catalog) and update it identically — this file is easy
+  to miss since it's not one of the three "docs" above, but drifts the same way.
 
 
 ## Developing
