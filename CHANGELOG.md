@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.13] - 2026-08-02
+
+### Added
+
+- **`batch_edit`** tool — runs an ordered list of edit operations against one document, all-or-nothing. Validates every operation's tool name against a fixed allowlist of in-memory mutation tools before touching anything (never `save_fdx`/`reload_fdx`/`close_fdx`/`new_file`/`read_fdx` — a disk write can't be rolled back). Takes a savepoint automatically before running; the first operation to fail rolls back everything and stops, and a fully successful batch leaves the savepoint in place so the whole thing can still be undone afterward with `rollback`.
+- **`savepoint`/`rollback`** tools — a single-level, per-document snapshot of in-memory content and dirty state, independent of disk. `savepoint` captures it (overwriting any previous one); `rollback` restores it, repeatably. The same mechanism `batch_edit` uses internally, exposed directly for use around any sequence of individual `edit_*` calls.
+
+### Changed
+
+- **`get_cache_status`** now reports `hasSavepoint` per cached document.
+
 ## [0.0.12] - 2026-08-02
 
 ### Added

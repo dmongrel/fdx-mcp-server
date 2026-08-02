@@ -120,6 +120,7 @@ Add a configuration block to your MCP client's config file (e.g., `claude_deskto
 Key capabilities exposed by `fdx-mcp-server`:
 
 - **Document lifecycle** — open, save, reload, create new `.fdx` files; manage server-side document cache.
+- **Batch edits & savepoints** — apply an ordered list of edits atomically (all-or-nothing, with automatic rollback on failure), or take a manual savepoint around any sequence of edits and roll back to it on demand.
 - **Document integrity** — detect and repair paragraphs that silently share a duplicated id (a FinalDraft copy/paste artifact that otherwise makes id-addressed edits land on the wrong paragraph).
 - **Scene analysis** — parse scene headings (INT./EXT., location, time of day), extract scene index and properties, compute script stats and page maps.
 - **Character tracking** — retrieve character lists, extension metadata (V.O., O.S.), per-character scene appearance counts, and arc beats across scenes; rename or merge a character across every place its name is stored (cue paragraphs, dictionary, cast, arc beats, highlighting) in one call.
