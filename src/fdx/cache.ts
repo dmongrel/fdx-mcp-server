@@ -11,18 +11,20 @@
  * least-recently-used entry (a candidate for eviction).
  */
 
-import type { FdxDocument } from "./document.ts";
+import { FdxDocument } from "./document.ts";
 
 export const MAX_DOCUMENT_CACHE_SIZE = 4;
 
 export interface CacheEntryInfo {
   path: string;
   dirty: boolean;
+  hasSavepoint: boolean;
 }
 
 interface CacheEntry {
   doc: FdxDocument;
   dirty: boolean;
+  savepoint?: { xml: string; dirty: boolean };
 }
 
 export function evictionWarning(path: string): string {
@@ -84,6 +86,37 @@ export class LruCache {
   }
 
   /**
+   * Snapshots path's current document (serialized) and dirty flag, overwriting any existing
+   * savepoint for this path. Fails if nothing is cached for path.
+   */
+  setSavepoint(path: string): { ok: true } | { ok: false; reason: string } {
+    const entry = this.items.get(path);
+    if (!entry) return { ok: false, reason: "nothing cached for path" };
+    entry.savepoint = { xml: entry.doc.serialize(), dirty: entry.dirty };
+    return { ok: true };
+  }
+
+  /**
+   * Restores path's document and dirty flag from its savepoint. The savepoint is left in place
+   * afterward — calling this twice in a row restores the same state both times. Fails if nothing
+   * is cached for path, or if path has no savepoint.
+   */
+  rollback(path: string): { ok: true } | { ok: false; reason: string } {
+    const entry = this.items.get(path);
+    if (!entry) return { ok: false, reason: "nothing cached for path" };
+    if (!entry.savepoint) return { ok: false, reason: "no savepoint set for path" };
+    entry.doc = FdxDocument.parse(entry.savepoint.xml, path);
+    entry.dirty = entry.savepoint.dirty;
+    this.touchOrder(path);
+    return { ok: true };
+  }
+
+  /** Whether path currently has a savepoint set. */
+  hasSavepoint(path: string): boolean {
+    return Boolean(this.items.get(path)?.savepoint);
+  }
+
+  /**
    * Removes the entry for `path` unless it is dirty and `force` is false. Returns whether the
    * path existed at all, whether it was dirty, and whether it was actually removed.
    */
@@ -97,7 +130,7 @@ export class LruCache {
 
   /** Snapshot of every cached entry, most-recently-used first. */
   entries(): CacheEntryInfo[] {
-    return [...this.items.entries()].reverse().map(([path, e]) => ({ path, dirty: e.dirty }));
+    return [...this.items.entries()].reverse().map(([path, e]) => ({ path, dirty: e.dirty, hasSavepoint: Boolean(e.savepoint) }));
   }
 }
 
