@@ -56,6 +56,7 @@ export interface ScriptStats {
   totalTextRuns: number;
   curlyQuoteCount: number;
   flaggedWordCount: number;
+  placeholderCount: number;
 }
 
 export interface CharacterArc {
@@ -87,6 +88,13 @@ export function getSceneProperties(p: XmlElement): { color: string; length: stri
     page: getAttr(sp, "Page") ?? "",
     title: getAttr(sp, "Title") ?? "",
   };
+}
+
+const PLACEHOLDER_RE = /^\[[\s\S]*\]$/;
+
+/** True when a paragraph's full trimmed text is entirely one [...] span, regardless of Type. */
+export function isPlaceholderParagraph(p: XmlElement): boolean {
+  return PLACEHOLDER_RE.test(paragraphText(p).trim());
 }
 
 /** The <SceneArcBeats><CharacterArcBeat> entries nested inside a paragraph's <SceneProperties>. */
@@ -477,12 +485,14 @@ export function buildScriptStats(doc: FdxDocument): ScriptStats {
     totalTextRuns: 0,
     curlyQuoteCount: 0,
     flaggedWordCount: 0,
+    placeholderCount: 0,
   };
   for (const p of paragraphs) {
     const type = getParagraphType(p);
     stats.byType[type] = (stats.byType[type] ?? 0) + 1;
     if (type.toLowerCase() === "scene heading") stats.sceneCount++;
     if (type.toLowerCase() === "act&scene break" || type.toLowerCase() === "act break") stats.actBreakCount++;
+    if (isPlaceholderParagraph(p)) stats.placeholderCount++;
     const sp = getSceneProperties(p);
     if (sp && sp.page !== "") {
       const page = parseInt(sp.page, 10);

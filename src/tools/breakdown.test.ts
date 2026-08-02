@@ -220,6 +220,22 @@ describe("buildScriptStats", () => {
     const stats = buildScriptStats(doc);
     expect(stats.curlyQuoteCount).toBe(2); // the “ and ” in paragraph text only
   });
+
+  test("placeholderCount counts whole-bracket paragraphs regardless of type", () => {
+    const source = `<?xml version="1.0"?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="General" id="p1"><Text>[FIX - move this scene earlier]</Text></Paragraph>
+    <Paragraph Type="Action" id="p2"><Text>[NOTE: check timing]</Text></Paragraph>
+    <Paragraph Type="Action" id="p3"><Text>INT. CAVE - DAY [FIX - check slug]</Text></Paragraph>
+    <Paragraph Type="Action" id="p4"><Text>Grog picks up a rock.</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const stats = buildScriptStats(doc);
+    expect(stats.placeholderCount).toBe(2); // p1 and p2 only; p3 has real text before the bracket
+    expect(stats.paragraphCount).toBe(4); // unaffected without excludePlaceholders
+  });
 });
 
 describe("buildPageMap", () => {
