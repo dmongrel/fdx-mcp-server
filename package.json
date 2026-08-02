@@ -1,6 +1,6 @@
 {
   "name": "fdx-mcp-server",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "A Model Context Protocol server — Bun-first, Deno-compatible.",
   "repository": {
     "type": "git",

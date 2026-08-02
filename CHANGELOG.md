@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.14] - 2026-08-02
+
+### Added
+
+- **`create_dialogue`** tool — creates a Character/[Parenthetical]/Dialogue group as one atomic, contiguous insertion, so a new speech no longer leaves the document in the invalid intermediate state two or three separate `edit_par` creates would (Dialogue is invalid unless immediately preceded by Character or Parenthetical). `character`'s text is added to the SmartType Characters list, same as `edit_par action=create type=Character`.
+- **`diff_fdx`** tool — diffs two documents' top-level body paragraphs by id: added, removed, and modified (type and/or text, reported before/after). Confirming what a versioned save actually changed no longer means external tooling or a paragraph-count comparison.
+
 ## [0.0.13] - 2026-08-02
 
 ### Added

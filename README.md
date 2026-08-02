@@ -123,7 +123,7 @@ Key capabilities exposed by `fdx-mcp-server`:
 - **Batch edits & savepoints** — apply an ordered list of edits atomically (all-or-nothing, with automatic rollback on failure), or take a manual savepoint around any sequence of edits and roll back to it on demand.
 - **Document integrity** — detect and repair paragraphs that silently share a duplicated id (a FinalDraft copy/paste artifact that otherwise makes id-addressed edits land on the wrong paragraph).
 - **Scene analysis** — parse scene headings (INT./EXT., location, time of day), extract scene index and properties, compute script stats and page maps.
-- **Character tracking** — retrieve character lists, extension metadata (V.O., O.S.), per-character scene appearance counts, and arc beats across scenes; rename or merge a character across every place its name is stored (cue paragraphs, dictionary, cast, arc beats, highlighting) in one call.
+- **Character tracking** — retrieve character lists, extension metadata (V.O., O.S.), per-character scene appearance counts, and arc beats across scenes; rename or merge a character across every place its name is stored (cue paragraphs, dictionary, cast, arc beats, highlighting) in one call; create a new Character/[Parenthetical]/Dialogue speech as one atomic insertion.
 - **Dual dialogue support** — read and create side-by-side dialogue blocks.
 - **SmartType dictionaries** — manage the FinalDraft autocomplete lists: characters, extensions, transitions, scene intros, times of day, spell-check lists, and paragraph types.
 - **Location usage** — see actual location usage parsed from Scene Heading text (not just the autocomplete dictionary) and rename a location across every scene that uses it in one call.
@@ -131,4 +131,4 @@ Key capabilities exposed by `fdx-mcp-server`:
 - **Title page management** — read and write title, author, contact block, copyright, and based-on credits.
 - **Script breakdowns** — generate full production breakdown reports (props, vehicles, camera, cast) as text or HTML/PDF.
 - **Macro system** — query macro aliases and their activation scopes.
-- **Search & navigation** — find paragraphs by text, list sections and section contents, retrieve revision colors and display board data.
+- **Search & navigation** — find paragraphs by text, list sections and section contents, retrieve revision colors and display board data; diff two documents' paragraphs by id (added/removed/modified) — useful for confirming what a versioned save actually changed.
