@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.18] - 2026-08-02
+
+### Fixed
+
+- **`rename_character`** no longer silently skips Character cues nested inside a `<DualDialogue>` block — it now descends into them for the cue-paragraph rename, and a nested-only match is found and renamed instead of reporting "not found". Previously this produced a script half-renamed with no warning.
+
+### Changed
+
+- **`get_par_runs`** (`id`, `ids`, and `sectionId` modes) and **`edit_par`** (`action=edit` only) can now read/edit paragraphs nested inside a `<DualDialogue>` block by id — previously these returned `"paragraph id not found"` even though the paragraph existed in the file, leaving no way to repair a dual-dialogue-related mistake without hand-editing the XML.
+
 ## [0.0.17] - 2026-08-02
 
 ### Changed

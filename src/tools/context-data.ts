@@ -124,7 +124,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "rename_character",
     description:
-      "Rename (or merge) a character across every place its name is stored: cue paragraphs, SmartType Characters, Cast, arc beats, and CharacterHighlighting. Returns a JSON report of what was touched in each location.",
+      "Rename (or merge) a character across every place its name is stored: cue paragraphs (including cues nested inside a DualDialogue block), SmartType Characters, Cast, arc beats, and CharacterHighlighting. Returns a JSON report of what was touched in each location.",
   },
   {
     name: "edit_dual_dialogue",
@@ -144,7 +144,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "edit_par",
     description:
-      "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper). After editing, call save_fdx to persist changes to disk.",
+      "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update — this also reaches a paragraph nested inside a <DualDialogue> block. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper); remove and create's beforeParId/afterParId anchoring do not reach paragraphs nested inside a DualDialogue. After editing, call save_fdx to persist changes to disk.",
   },
   {
     name: "create_dialogue",
@@ -254,7 +254,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "get_par_runs",
     description:
-      "Read-Only. Retrieve one or more paragraphs' <Text> runs with full attribute sets preserved (unlike get_par, which flattens to plain text). Pass exactly one of id (single), ids (array), or sectionId (whole section).",
+      "Read-Only. Retrieve one or more paragraphs' <Text> runs with full attribute sets preserved (unlike get_par, which flattens to plain text). Pass exactly one of id (single), ids (array), or sectionId (whole section). All three modes also reach paragraphs nested inside a DualDialogue block.",
   },
   {
     name: "get_smarttype_scene_intros",
