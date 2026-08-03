@@ -18,6 +18,7 @@ import { knownType } from "./list-types.ts";
 import { parseSlugline } from "./breakdown.ts";
 import {
   buildParagraphElement,
+  expandDualDialogue,
   getParagraphId,
   getParagraphType,
   paragraphText,
@@ -31,7 +32,7 @@ import { findChild, findChildren, type XmlElement } from "../fdx/xml.ts";
 export const editParTool: FdxTool = {
   name: "edit_par",
   description:
-    "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper). After editing, call save_fdx to persist changes to disk.",
+    "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update — this also reaches a paragraph nested inside a <DualDialogue> block. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper); remove and create's beforeParId/afterParId anchoring do not reach paragraphs nested inside a DualDialogue. After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -141,7 +142,8 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
 
   if (action === "edit") {
     if (!id) return errResult("failed to edit paragraph: id is required");
-    const matches = paragraphs.filter((p) => getParagraphId(p) === id);
+    const addressable = expandDualDialogue(paragraphs);
+    const matches = addressable.filter((p) => getParagraphId(p) === id);
     if (matches.length === 0) return errResult("failed to edit paragraph: paragraph not found");
     const para = matches[0]!;
     dupWarning = duplicateIdWarning(matches.length);

@@ -5,6 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { handleEditPar } from "./edit-par.ts";
+import { handleEditDualDialogue } from "./edit-dual-dialogue.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId } from "../fdx/paragraph.ts";
@@ -346,6 +347,64 @@ describe("edit_par", () => {
     const locations = doc.getSmartTypeList("Location")!;
     expect(intros.values).toContain("INT");
     expect(locations.values.some((v) => v.includes("ZZZ TEST BRIDGE"))).toBe(true);
+  });
+});
+
+describe("edit_par with nested DualDialogue paragraphs", () => {
+  const CHARACTER_ID = "a3049b85-f812-4aaa-9532-9f53f774f758";
+  const PARENTHETICAL_ID = "bbee1c41-6ca4-4ae2-bb0e-4c2769f23a16";
+  const DIALOGUE_ID = "b5437965-e39f-4236-a0c0-641860dcfb96";
+
+  async function withDualDialogue(key: string) {
+    const { path } = freshDoc(key);
+    await handleEditDualDialogue({
+      path,
+      action: "create",
+      ids: [CHARACTER_ID, PARENTHETICAL_ID, DIALOGUE_ID],
+    });
+    return path;
+  }
+
+  test("action=edit changes a nested paragraph's text, persisted in the tree", async () => {
+    const path = await withDualDialogue("nested-edit");
+    const result = await handleEditPar({
+      path,
+      action: "edit",
+      id: DIALOGUE_ID,
+      textRuns: [{ content: "Move it now!" }],
+    });
+    expect(result.isError).toBeFalsy();
+
+    const doc = documentCache.get(path)!;
+    const wrapper = doc
+      .getParagraphElements()
+      .find((p) => p.children.some((c) => c.type === "element" && c.name === "DualDialogue"))!;
+    const dd = wrapper.children.find((c) => c.type === "element" && c.name === "DualDialogue") as {
+      children: Array<{ attrs: Array<[string, string]>; children: Array<{ type: string; children?: Array<{ value?: string }> }> }>;
+    };
+    const nestedDialogue = dd.children.find((p) => p.attrs.some(([k, v]) => k === "id" && v === DIALOGUE_ID))!;
+    const textEl = nestedDialogue.children.find((c) => c.type === "element")!;
+    expect(textEl.children![0]!.value).toBe("Move it now!");
+  });
+
+  test("action=create with beforeParId pointing at a nested id still fails (anchor lookup stays top-level-only)", async () => {
+    const path = await withDualDialogue("nested-create-anchor");
+    const result = await handleEditPar({
+      path,
+      action: "create",
+      type: "Action",
+      beforeParId: DIALOGUE_ID,
+      textRuns: [{ content: "New action line." }],
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]!.text).toContain("anchor paragraph not found");
+  });
+
+  test("action=remove on a nested id still fails (removal stays top-level-only)", async () => {
+    const path = await withDualDialogue("nested-remove");
+    const result = await handleEditPar({ path, action: "remove", id: DIALOGUE_ID });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]!.text).toContain("paragraph not found");
   });
 });
 
