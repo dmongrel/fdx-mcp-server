@@ -13,14 +13,14 @@
 import type { FdxTool, ToolResult } from "./shared.ts";
 import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
-import { getParagraphId, getParagraphType, getParagraphRuns } from "../fdx/paragraph.ts";
+import { getParagraphId, getParagraphType, getParagraphRuns, expandDualDialogue } from "../fdx/paragraph.ts";
 import { findSectionIndex, findSectionEnd } from "../fdx/sections.ts";
 import type { XmlElement } from "../fdx/xml.ts";
 
 export const getParRunsTool: FdxTool = {
   name: "get_par_runs",
   description:
-    "Read-Only. Retrieve one or more paragraphs' <Text> runs, with each run's full attribute set (AdornmentStyle, Font, Color, Size, RevisionID, etc.) preserved — unlike get_par, which returns flattened plain text and discards run boundaries and attributes. Use this before edit_par when a paragraph may contain styled runs, so the attrs can be passed back unchanged. Pass exactly one of: id (single paragraph, returns one object), ids (array, returns an array in the given order — a missing id fails the whole call), or sectionId (every paragraph in that section, heading included, returns an array in document order) — useful for a pre-sweep audit of where styled runs are before running replace_text or edit_par across a scene.",
+    "Read-Only. Retrieve one or more paragraphs' <Text> runs, with each run's full attribute set (AdornmentStyle, Font, Color, Size, RevisionID, etc.) preserved — unlike get_par, which returns flattened plain text and discards run boundaries and attributes. Use this before edit_par when a paragraph may contain styled runs, so the attrs can be passed back unchanged. Pass exactly one of: id (single paragraph, returns one object), ids (array, returns an array in the given order — a missing id fails the whole call), or sectionId (every paragraph in that section, heading included, returns an array in document order) — useful for a pre-sweep audit of where styled runs are before running replace_text or edit_par across a scene. All three modes also reach paragraphs nested inside a <DualDialogue> block.",
   inputSchema: {
     type: "object",
     properties: {
@@ -67,15 +67,17 @@ export async function handleGetParRuns(args: Record<string, unknown> | undefined
   const paragraphs = doc.getParagraphElements();
 
   if (id !== undefined) {
-    const para = paragraphs.find((p) => getParagraphId(p) === id);
+    const addressable = expandDualDialogue(paragraphs);
+    const para = addressable.find((p) => getParagraphId(p) === id);
     if (!para) return errResult(`paragraph id not found: ${id}`);
     return pushCacheWarning(textResult(JSON.stringify(toBody(para), null, 2)), warning);
   }
 
   if (ids !== undefined) {
+    const addressable = expandDualDialogue(paragraphs);
     const bodies: ParRunsBody[] = [];
     for (const wantId of ids) {
-      const para = paragraphs.find((p) => getParagraphId(p) === wantId);
+      const para = addressable.find((p) => getParagraphId(p) === wantId);
       if (!para) return errResult(`paragraph id not found: ${wantId}`);
       bodies.push(toBody(para));
     }
@@ -85,6 +87,6 @@ export async function handleGetParRuns(args: Record<string, unknown> | undefined
   const idx = findSectionIndex(paragraphs, sectionId!);
   if (idx === -1) return errResult(`section id not found: ${sectionId}`);
   const end = findSectionEnd(paragraphs, idx);
-  const bodies = paragraphs.slice(idx, end).map(toBody);
+  const bodies = expandDualDialogue(paragraphs.slice(idx, end)).map(toBody);
   return pushCacheWarning(textResult(JSON.stringify(bodies)), warning);
 }

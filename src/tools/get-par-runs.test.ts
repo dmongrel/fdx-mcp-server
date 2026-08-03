@@ -6,9 +6,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { handleGetParRuns } from "./get-par-runs.ts";
 import { handleEditPar } from "./edit-par.ts";
+import { handleEditDualDialogue } from "./edit-dual-dialogue.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId } from "../fdx/paragraph.ts";
+import { findContainingSectionIndex } from "../fdx/sections.ts";
 
 const FIXTURE_PATH = join(import.meta.dir, "..", "..", "examples", "Grog The Caveman.fdx");
 const FIXTURE_SOURCE = readFileSync(FIXTURE_PATH, "utf-8");
@@ -132,5 +134,58 @@ describe("get_par_runs", () => {
     const result = await handleGetParRuns({ path, sectionId: "nope" });
     expect(result.isError).toBe(true);
     expect(result.content[0]!.text).toContain("section id not found");
+  });
+});
+
+describe("get_par_runs with nested DualDialogue paragraphs", () => {
+  const CHARACTER_ID = "a3049b85-f812-4aaa-9532-9f53f774f758";
+  const PARENTHETICAL_ID = "bbee1c41-6ca4-4ae2-bb0e-4c2769f23a16";
+  const DIALOGUE_ID = "b5437965-e39f-4236-a0c0-641860dcfb96";
+
+  async function withDualDialogue(key: string) {
+    const { path } = freshDoc(key);
+    await handleEditDualDialogue({
+      path,
+      action: "create",
+      ids: [CHARACTER_ID, PARENTHETICAL_ID, DIALOGUE_ID],
+    });
+    return path;
+  }
+
+  test("id resolves a nested paragraph instead of failing", async () => {
+    const path = await withDualDialogue("nested-id");
+    const result = await handleGetParRuns({ path, id: CHARACTER_ID });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse(result.content[0]!.text);
+    expect(body.id).toBe(CHARACTER_ID);
+    expect(body.type).toBe("Character");
+  });
+
+  test("ids mixing a top-level and a nested id returns both, in order", async () => {
+    const path = await withDualDialogue("nested-ids");
+    const doc = documentCache.get(path)!;
+    const topLevelId = getParagraphId(doc.getParagraphElements()[0]!);
+    const result = await handleGetParRuns({ path, ids: [topLevelId, DIALOGUE_ID] });
+    expect(result.isError).toBeFalsy();
+    const bodies = JSON.parse(result.content[0]!.text);
+    expect(bodies.map((b: { id: string }) => b.id)).toEqual([topLevelId, DIALOGUE_ID]);
+  });
+
+  test("sectionId spanning a DualDialogue includes its nested paragraphs", async () => {
+    const path = await withDualDialogue("nested-section");
+    const doc = documentCache.get(path)!;
+    const paragraphs = doc.getParagraphElements();
+    const wrapperIdx = paragraphs.findIndex((p) =>
+      p.children.some((c) => c.type === "element" && c.name === "DualDialogue"),
+    );
+    const sectionIdx = findContainingSectionIndex(paragraphs, wrapperIdx);
+    const sectionId = getParagraphId(paragraphs[sectionIdx]!);
+    const result = await handleGetParRuns({ path, sectionId });
+    expect(result.isError).toBeFalsy();
+    const bodies = JSON.parse(result.content[0]!.text) as Array<{ id: string }>;
+    const ids = bodies.map((b) => b.id);
+    expect(ids).toContain(CHARACTER_ID);
+    expect(ids).toContain(PARENTHETICAL_ID);
+    expect(ids).toContain(DIALOGUE_ID);
   });
 });
