@@ -69,6 +69,22 @@ describe("renderBreakdownText", () => {
       expect(line.length).toBeLessThanOrEqual(80);
     }
   });
+
+  test("guarantees a space between a long character name and its appearance count", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1"><Text>INT. BRIDGE - DAY</Text></Paragraph>
+    <Paragraph Type="Character" id="c1"><Text>CAPTAIN IRIKOV</Text></Paragraph>
+    <Paragraph Type="Dialogue" id="d1"><Text>Report.</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const data = buildBreakdownData(doc);
+    const text = renderBreakdownText(data);
+    expect(text).toContain("CAPTAIN IRIKOV 2 appearances");
+    expect(text).not.toContain("CAPTAIN IRIKOV2");
+  });
 });
 
 describe("renderBreakdownHtml", () => {

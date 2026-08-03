@@ -142,7 +142,7 @@ function wrapJoined(indent: string, s: string, maxWidth: number): string {
 }
 
 function pad(s: string, width: number): string {
-  return s.length >= width ? s : s + " ".repeat(width - s.length);
+  return s.length >= width ? s + " " : s + " ".repeat(width - s.length);
 }
 
 /** Formats like Go's %.3g — up to 3 significant digits, trimming trailing zeros. */
