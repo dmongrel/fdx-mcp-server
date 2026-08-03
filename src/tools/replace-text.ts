@@ -18,7 +18,7 @@ import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExten
 import { documentCache } from "../fdx/cache.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { findChildren, textContent, setTextContent } from "../fdx/xml.ts";
-import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
+import { getParagraphId, getParagraphType, paragraphText, expandDualDialogue } from "../fdx/paragraph.ts";
 import { findSectionIndex, findSectionEnd } from "../fdx/sections.ts";
 
 export const replaceTextTool: FdxTool = {
@@ -85,6 +85,7 @@ export interface RunPreservingReplaceOptions {
   startIndex?: number;
   endIndex?: number;
   preview?: boolean;
+  includeNested?: boolean;
 }
 
 export interface PreviewMatch {
@@ -110,8 +111,8 @@ export interface RunPreservingReplaceResult {
  * When `preview` is true, nothing is mutated — `previewMatches` reports what would happen instead.
  */
 export function runPreservingReplace(doc: FdxDocument, opts: RunPreservingReplaceOptions): RunPreservingReplaceResult {
-  const { find, replace, caseSensitive, parType, preview } = opts;
-  const paragraphs = doc.getParagraphElements();
+  const { find, replace, caseSensitive, parType, preview, includeNested } = opts;
+  const paragraphs = includeNested ? expandDualDialogue(doc.getParagraphElements()) : doc.getParagraphElements();
   const startIndex = opts.startIndex ?? 0;
   const endIndex = opts.endIndex ?? paragraphs.length;
 

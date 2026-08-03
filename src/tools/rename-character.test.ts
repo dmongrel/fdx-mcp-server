@@ -56,6 +56,18 @@ const CUE_CONTENT = `
   <Paragraph Type="Dialogue" id="d2"><Text>Voice over line.</Text></Paragraph>
 `;
 
+const NESTED_CUE_CONTENT = `
+  <Paragraph Type="Action" id="a1"><Text>Setup.</Text></Paragraph>
+  <Paragraph Type="General" id="wrap1">
+    <DualDialogue>
+      <Paragraph Type="Character" id="c1"><Text>OLD NAME</Text></Paragraph>
+      <Paragraph Type="Dialogue" id="d1"><Text>Line one.</Text></Paragraph>
+      <Paragraph Type="Character" id="c2"><Text>OTHER PERSON</Text></Paragraph>
+      <Paragraph Type="Dialogue" id="d2"><Text>Line two.</Text></Paragraph>
+    </DualDialogue>
+  </Paragraph>
+`;
+
 describe("rename_character", () => {
   test("path/from/to are required", async () => {
     expect((await handleRenameCharacter({ from: "A", to: "B" })).isError).toBe(true);
@@ -93,6 +105,27 @@ describe("rename_character", () => {
     expect(doc.serialize()).toContain("NEW NAME");
     expect(doc.serialize()).toContain("NEW NAME (V.O.)");
     expect(doc.serialize()).not.toContain("OLD NAME");
+  });
+
+  test("renames a Character cue nested inside a DualDialogue block", async () => {
+    const path = fixture({ content: NESTED_CUE_CONTENT });
+    const result = await rename(path, "OLD NAME", "NEW NAME");
+    expect(result.isError).toBeFalsy();
+    const b = body(result) as { cueParagraphs: { paragraphsTouched: number; occurrencesReplaced: number } };
+    expect(b.cueParagraphs.paragraphsTouched).toBe(1);
+    expect(b.cueParagraphs.occurrencesReplaced).toBe(1);
+
+    const doc = documentCache.get(path)!;
+    expect(doc.serialize()).toContain("NEW NAME");
+    expect(doc.serialize()).not.toContain("OLD NAME");
+  });
+
+  test("a name that exists only inside a DualDialogue is found and renamed (the original handoff repro)", async () => {
+    const path = fixture({ content: NESTED_CUE_CONTENT });
+    const result = await rename(path, "OTHER PERSON", "SOMEONE NEW");
+    expect(result.isError).toBeFalsy();
+    const b = body(result) as { cueParagraphs: { paragraphsTouched: number } };
+    expect(b.cueParagraphs.paragraphsTouched).toBe(1);
   });
 
   test("renames the SmartType Characters entry when to is not already present", async () => {

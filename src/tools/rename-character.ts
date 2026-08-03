@@ -23,7 +23,7 @@ import { runPreservingReplace } from "./replace-text.ts";
 export const renameCharacterTool: FdxTool = {
   name: "rename_character",
   description:
-    "Rename (or merge) a character across every place its name is stored: Character-cue paragraphs (run-preserving substring replace, like replace_text), the SmartType Characters dictionary, Cast Member rows, CharacterArcBeat entries in every scene's SceneProperties, and CharacterHighlighting. A merge (to already exists somewhere) drops from's entry there rather than creating a duplicate — except a scene where both from and to already have separate arc beats, which is left untouched (with a warning) since arc beats carry authored notes that a drop would destroy. Errors if from isn't found in any of the five locations. Returns a JSON report of what was touched in each location, plus any warnings. Never touches <Actors>. After editing, call save_fdx to persist changes to disk.",
+    "Rename (or merge) a character across every place its name is stored: Character-cue paragraphs (run-preserving substring replace, like replace_text, including cues nested inside a DualDialogue block), the SmartType Characters dictionary, Cast Member rows, CharacterArcBeat entries in every scene's SceneProperties, and CharacterHighlighting. A merge (to already exists somewhere) drops from's entry there rather than creating a duplicate — except a scene where both from and to already have separate arc beats, which is left untouched (with a warning) since arc beats carry authored notes that a drop would destroy. Errors if from isn't found in any of the five locations. Returns a JSON report of what was touched in each location, plus any warnings. Never touches <Actors>. After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -68,7 +68,13 @@ export async function handleRenameCharacter(args: Record<string, unknown> | unde
   let anyTouched = false;
 
   // Location 1: Character-cue paragraphs.
-  const replaceResult = runPreservingReplace(doc, { find: from, replace: to, caseSensitive: cs, parType: "Character" });
+  const replaceResult = runPreservingReplace(doc, {
+    find: from,
+    replace: to,
+    caseSensitive: cs,
+    parType: "Character",
+    includeNested: true,
+  });
   if (replaceResult.touched) anyTouched = true;
 
   // Location 2: SmartType Characters list.
