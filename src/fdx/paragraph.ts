@@ -7,7 +7,7 @@
  * and the get_section* tools (Phase 2/3).
  */
 
-import { type XmlElement, type XmlNode, createElement, findChildren, getAttr, setAttr, setTextContent, textContent } from "./xml.ts";
+import { type XmlElement, type XmlNode, createElement, findChild, findChildren, getAttr, setAttr, setTextContent, textContent } from "./xml.ts";
 
 export interface TextRunInput {
   content: string;
@@ -33,6 +33,21 @@ export function getParagraphRuns(el: XmlElement): TextRun[] {
     content: textContent(child),
     attrs: Object.fromEntries(child.attrs),
   }));
+}
+
+/**
+ * Expands each paragraph in `paragraphs` that wraps a <DualDialogue> into itself followed by its
+ * nested Paragraph children, in order. Paragraphs without a DualDialogue pass through unchanged.
+ * Final Draft's format never nests a DualDialogue inside another, so this only descends one level.
+ */
+export function expandDualDialogue(paragraphs: XmlElement[]): XmlElement[] {
+  const result: XmlElement[] = [];
+  for (const p of paragraphs) {
+    result.push(p);
+    const dd = findChild(p, "DualDialogue");
+    if (dd) result.push(...findChildren(dd, "Paragraph"));
+  }
+  return result;
 }
 
 /** Builds the <Text> attrs for a run: attrs map first, then `style` overriding Style if given. */

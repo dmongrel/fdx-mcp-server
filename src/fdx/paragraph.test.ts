@@ -3,7 +3,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { FdxDocument } from "./document.ts";
-import { spliceParagraphText } from "./paragraph.ts";
+import { spliceParagraphText, expandDualDialogue } from "./paragraph.ts";
 import { findChildren, textContent } from "./xml.ts";
 
 function docWithParagraph(paragraphXml: string): FdxDocument {
@@ -57,5 +57,47 @@ describe("spliceParagraphText", () => {
     expect(runs).toHaveLength(1);
     expect(textContent(runs[0]!)).toBe("INT. CAVERN - NIGHT");
     expect(runs[0]!.attrs).toEqual([]);
+  });
+});
+
+describe("expandDualDialogue", () => {
+  test("expands a wrapper into itself followed by its nested paragraphs", () => {
+    const doc = docWithParagraph(`
+      <Paragraph Type="Action" id="a1"><Text>Before.</Text></Paragraph>
+      <Paragraph Type="General" id="wrap1">
+        <DualDialogue>
+          <Paragraph Type="Character" id="c1"><Text>ALICE</Text></Paragraph>
+          <Paragraph Type="Dialogue" id="d1"><Text>Hi.</Text></Paragraph>
+        </DualDialogue>
+      </Paragraph>
+      <Paragraph Type="Action" id="a2"><Text>After.</Text></Paragraph>
+    `);
+    const top = doc.getParagraphElements();
+    const expanded = expandDualDialogue(top);
+    expect(expanded.map((p) => p.attrs.find(([k]) => k === "id")?.[1])).toEqual([
+      "a1",
+      "wrap1",
+      "c1",
+      "d1",
+      "a2",
+    ]);
+  });
+
+  test("a paragraph list with no wrapper passes through unchanged", () => {
+    const doc = docWithParagraph(`
+      <Paragraph Type="Action" id="a1"><Text>Only.</Text></Paragraph>
+    `);
+    const top = doc.getParagraphElements();
+    expect(expandDualDialogue(top)).toEqual(top);
+  });
+
+  test("a wrapper with no nested paragraphs contributes just itself", () => {
+    const doc = docWithParagraph(`
+      <Paragraph Type="General" id="wrap1"><DualDialogue/></Paragraph>
+    `);
+    const top = doc.getParagraphElements();
+    const expanded = expandDualDialogue(top);
+    expect(expanded).toHaveLength(1);
+    expect(expanded[0]!.attrs.find(([k]) => k === "id")?.[1]).toBe("wrap1");
   });
 });
