@@ -9,7 +9,8 @@
  */
 
 import type { FdxDocument } from "../fdx/document.ts";
-import { paragraphText } from "../fdx/paragraph.ts";
+import { paragraphText, countNestedParagraphs } from "../fdx/paragraph.ts";
+import { skippedNestedWarning } from "./shared.ts";
 import {
   buildArcBeatData,
   buildCharacterAppearances,
@@ -42,6 +43,7 @@ export interface BreakdownData {
   overOnePage: number;
   missingTime: number;
   noArcChars: string[];
+  skippedNestedCount: number;
 }
 
 function isActType(type: string): boolean {
@@ -89,6 +91,7 @@ export function buildBreakdownData(doc: FdxDocument): BreakdownData {
     overOnePage: 0,
     missingTime: 0,
     noArcChars: [],
+    skippedNestedCount: countNestedParagraphs(doc.getParagraphElements()),
   };
 
   scenes.forEach((s, i) => {
@@ -191,6 +194,9 @@ export function renderBreakdownText(d: BreakdownData): string {
   lines.push("");
 
   lines.push("CHARACTER FREQUENCY (top 10)");
+  if (d.skippedNestedCount > 0) {
+    lines.push(`  ${skippedNestedWarning(d.skippedNestedCount)}`);
+  }
   for (const c of d.rankedChars.slice(0, 10)) {
     lines.push(`  ${pad(c.name, 14)}${c.total} appearances in ${c.sceneCount} scenes`);
   }
@@ -296,8 +302,12 @@ th,td{border-color:#333}
   });
   parts.push(`</table></section>`);
 
+  parts.push(`<section id="characters"><h2>Character Frequency</h2>`);
+  if (d.skippedNestedCount > 0) {
+    parts.push(`<p>${escapeHtml(skippedNestedWarning(d.skippedNestedCount))}</p>`);
+  }
   parts.push(
-    `<section id="characters"><h2>Character Frequency</h2><table><tr><th>#</th><th>Character</th><th>Appearances</th><th>Scenes</th></tr>`,
+    `<table><tr><th>#</th><th>Character</th><th>Appearances</th><th>Scenes</th></tr>`,
   );
   d.rankedChars.forEach((c, i) => {
     parts.push(`<tr><td>${i + 1}</td><td>${escapeHtml(c.name)}</td><td>${c.total}</td><td>${c.sceneCount}</td></tr>`);

@@ -116,5 +116,33 @@ describe("get_fdx_breakdown", () => {
     const html = await Bun.file(targetPath).text();
     expect(html).toStartWith("<!doctype html>");
   });
+
+  test("the skip warning appears in the tool result and the text report when a DualDialogue is present", async () => {
+    const dir = await makeTmpDir();
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Character" id="wrap">
+      <Text>ALICE</Text>
+      <DualDialogue>
+        <Paragraph Type="Character" id="c1"><Text>ALICE</Text></Paragraph>
+        <Paragraph Type="Dialogue" id="d1"><Text>Hi.</Text></Paragraph>
+      </DualDialogue>
+    </Paragraph>
+  </Content>
+</FinalDraft>`;
+    const path = join(dir, "dual.fdx");
+    await Bun.write(path, source);
+    await handleReadFdx({ path });
+
+    const targetPath = join(dir, "breakdown.txt");
+    const result = await handleGetFdxBreakdown({ path, targetPath });
+    expect(result.isError).toBeFalsy();
+    const resultText = result.content.map((c) => c.text).join("\n");
+    expect(resultText).toContain("2 paragraph(s) nested inside a DualDialogue block were not scanned by this call.");
+
+    const text = await Bun.file(targetPath).text();
+    expect(text).toContain("2 paragraph(s) nested inside a DualDialogue block were not scanned by this call.");
+  });
 });
 

@@ -82,3 +82,81 @@ describe("renderBreakdownHtml", () => {
   });
 });
 
+describe("buildBreakdownData: skippedNestedCount", () => {
+  test("counts paragraphs nested inside a DualDialogue block", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1"><Text>INT. ROOM - DAY</Text></Paragraph>
+    <Paragraph Type="Character" id="wrap">
+      <Text>ALICE</Text>
+      <DualDialogue>
+        <Paragraph Type="Character" id="c1"><Text>ALICE</Text></Paragraph>
+        <Paragraph Type="Dialogue" id="d1"><Text>Hi.</Text></Paragraph>
+        <Paragraph Type="Character" id="c2"><Text>BOB</Text></Paragraph>
+        <Paragraph Type="Dialogue" id="d2"><Text>Hey.</Text></Paragraph>
+      </DualDialogue>
+    </Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const data = buildBreakdownData(doc);
+    expect(data.skippedNestedCount).toBe(4);
+  });
+
+  test("zero when there's no DualDialogue block", async () => {
+    const { doc } = await getCachedFdx(FIXTURE_PATH);
+    const data = buildBreakdownData(doc);
+    expect(data.skippedNestedCount).toBe(0);
+  });
+});
+
+describe("renderBreakdownText: skip warning", () => {
+  test("reports the skip count under CHARACTER FREQUENCY when present", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Character" id="wrap">
+      <Text>ALICE</Text>
+      <DualDialogue>
+        <Paragraph Type="Character" id="c1"><Text>ALICE</Text></Paragraph>
+        <Paragraph Type="Dialogue" id="d1"><Text>Hi.</Text></Paragraph>
+      </DualDialogue>
+    </Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const data = buildBreakdownData(doc);
+    const text = renderBreakdownText(data);
+    expect(text).toContain("2 paragraph(s) nested inside a DualDialogue block were not scanned by this call.");
+  });
+
+  test("no skip line when skippedNestedCount is 0", async () => {
+    const { doc } = await getCachedFdx(FIXTURE_PATH);
+    const data = buildBreakdownData(doc);
+    const text = renderBreakdownText(data);
+    expect(text).not.toContain("nested inside a DualDialogue");
+  });
+});
+
+describe("renderBreakdownHtml: skip warning", () => {
+  test("reports the skip count in the characters section when present", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Character" id="wrap">
+      <Text>ALICE</Text>
+      <DualDialogue>
+        <Paragraph Type="Character" id="c1"><Text>ALICE</Text></Paragraph>
+        <Paragraph Type="Dialogue" id="d1"><Text>Hi.</Text></Paragraph>
+      </DualDialogue>
+    </Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const data = buildBreakdownData(doc);
+    const html = renderBreakdownHtml(data);
+    expect(html).toContain("2 paragraph(s) nested inside a DualDialogue block were not scanned by this call.");
+  });
+});
+

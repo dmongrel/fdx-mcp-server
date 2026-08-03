@@ -10,7 +10,7 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import { arg, getCachedFdx, pushCacheWarning, pushWarning, skippedNestedWarning, textResult, errResult } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { buildBreakdownData, renderBreakdownHtml, renderBreakdownText } from "./breakdown-report.ts";
 import { renderBreakdownPdf } from "./breakdown-pdf.ts";
@@ -81,6 +81,6 @@ export async function handleGetFdxBreakdown(args: Record<string, unknown> | unde
   }
 
   const result = textResult(`Wrote ${asType || "text"} breakdown report to ${targetPath}.`);
-  return pushCacheWarning(result, warning);
+  return pushCacheWarning(pushWarning(result, skippedNestedWarning(data.skippedNestedCount)), warning);
 }
 
