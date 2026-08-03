@@ -10,7 +10,7 @@
  */
 
 import type { FdxDocument } from "../fdx/document.ts";
-import { findChild, findChildren, getAttr, type XmlElement, type XmlNode } from "../fdx/xml.ts";
+import { createElement, findChild, findChildren, getAttr, type XmlElement, type XmlNode } from "../fdx/xml.ts";
 import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
 import { isSectionType } from "../fdx/sections.ts";
 
@@ -88,6 +88,16 @@ export function getSceneProperties(p: XmlElement): { color: string; length: stri
     page: getAttr(sp, "Page") ?? "",
     title: getAttr(sp, "Title") ?? "",
   };
+}
+
+/** Returns a paragraph's <SceneProperties> element, creating an empty one if absent. */
+export function getOrCreateSceneProperties(p: XmlElement): XmlElement {
+  let sp = findChild(p, "SceneProperties");
+  if (!sp) {
+    sp = createElement("SceneProperties");
+    p.children.push(sp);
+  }
+  return sp;
 }
 
 const PLACEHOLDER_RE = /^\[[\s\S]*\]$/;

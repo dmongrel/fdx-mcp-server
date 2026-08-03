@@ -5,6 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { FdxDocument } from "../fdx/document.ts";
 import { readTextFile } from "../fdx/runtime.ts";
+import { findChild } from "../fdx/xml.ts";
 import {
   parseSceneLength,
   parseSlugline,
@@ -15,6 +16,7 @@ import {
   rankCharacters,
   buildArcBeatData,
   getScenePropertiesById,
+  getOrCreateSceneProperties,
   locateSluglineLocation,
   buildLocationAppearances,
   rankLocations,
@@ -381,6 +383,57 @@ describe("getScenePropertiesById", () => {
     // The Action paragraph right after the first Scene Heading has no SceneProperties.
     const result = getScenePropertiesById(doc, "f2a08a18-1655-41ec-8597-c744149ffcee");
     expect(result).toBeUndefined();
+  });
+});
+
+describe("getOrCreateSceneProperties", () => {
+  test("returns the existing SceneProperties element unchanged", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1">
+      <Text>EXT. BRIDGE - DAY</Text>
+      <SceneProperties Color="#C0C0C0C0C0C0" Length="4/8" Page="1"/>
+    </Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const para = doc.getParagraphElements()[0]!;
+    const sp = getOrCreateSceneProperties(para);
+    expect(sp.name).toBe("SceneProperties");
+    expect(sp.attrs).toContainEqual(["Color", "#C0C0C0C0C0C0"]);
+    expect(sp.attrs).toContainEqual(["Length", "4/8"]);
+  });
+
+  test("creates an empty SceneProperties element when absent", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1"><Text>EXT. BRIDGE - DAY</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const para = doc.getParagraphElements()[0]!;
+    expect(findChild(para, "SceneProperties")).toBeUndefined();
+    const sp = getOrCreateSceneProperties(para);
+    expect(sp.name).toBe("SceneProperties");
+    expect(sp.attrs).toEqual([]);
+    expect(findChild(para, "SceneProperties")).toBe(sp);
+  });
+
+  test("calling it twice on the same paragraph doesn't create a second element", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Scene Heading" id="sh1"><Text>EXT. BRIDGE - DAY</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const para = doc.getParagraphElements()[0]!;
+    const first = getOrCreateSceneProperties(para);
+    const second = getOrCreateSceneProperties(para);
+    expect(first).toBe(second);
+    expect(para.children.filter((c) => c.type === "element" && c.name === "SceneProperties")).toHaveLength(1);
   });
 });
 
