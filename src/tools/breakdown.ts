@@ -446,11 +446,11 @@ interface IntegrityCounts {
 
 /**
  * Walks the whole document tree once, counting every <Text> run (styled or not), how many carry an
- * AdornmentStyle attribute at all, how many are specifically "-1" (Final Draft's unknown-word
- * marker), and curly-quote characters in text-node content. Scoped to the whole tree (not just
- * top-level body paragraphs) since a raw-regex sweep isn't scoped that way either. Never inspects
- * attribute values for curly quotes, so <Actors>' WinVoice/MacVoice blobs are excluded by
- * construction, not by special-casing them.
+ * AdornmentStyle attribute at all, how many are specifically "-1" (Final Draft's proofing flag,
+ * covering spelling and grammar both), and curly-quote characters in text-node content. Scoped to
+ * the whole tree (not just top-level body paragraphs) since a raw-regex sweep isn't scoped that way
+ * either. Never inspects attribute values for curly quotes, so <Actors>' WinVoice/MacVoice blobs
+ * are excluded by construction, not by special-casing them.
  */
 function walkIntegrityCounts(node: XmlNode, acc: IntegrityCounts): void {
   if (node.type === "text") {

@@ -3,9 +3,10 @@
 
 /**
  * get_flagged_words — Read-Only. Surfaces every <Text> run carrying AdornmentStyle="-1" (Final
- * Draft's unknown-word marker, the on-screen squiggle) as a ready-made typo index — every
- * misspelling in a script is already marked in the file, this just asks for the list instead of
- * calling get_par_runs on every paragraph one at a time.
+ * Draft's proofing flag, covering spelling and grammar both — repeated-word and spacing hits
+ * appear alongside genuine typos) as a ready-made typo index — every flagged word in a script is
+ * already marked in the file, this just asks for the list instead of calling get_par_runs on every
+ * paragraph one at a time.
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
@@ -18,7 +19,7 @@ import { getSceneProperties } from "./breakdown.ts";
 export const getFlaggedWordsTool: FdxTool = {
   name: "get_flagged_words",
   description:
-    'Read-Only. Surfaces every <Text> run carrying AdornmentStyle="-1" — Final Draft\'s unknown-word marker — as {word, paragraphId, paragraphType, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/replace_text — a warning is prepended reporting how many were skipped when the document contains any). Pass excludeIgnoreList=true to filter out words already in the spell-check ignore list.',
+    'Read-Only. Surfaces every <Text> run carrying AdornmentStyle="-1" — Final Draft\'s proofing flag (spelling and grammar both, so expect repeated-word and spacing hits alongside genuine typos) — as {word, paragraphId, paragraphType, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/replace_text — a warning is prepended reporting how many were skipped when the document contains any). Pass excludeIgnoreList=true to filter out words already in the spell-check ignore list.',
   inputSchema: {
     type: "object",
     properties: {
