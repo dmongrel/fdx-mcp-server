@@ -14,9 +14,15 @@ import type { FdxDocument } from "../fdx/document.ts";
  * arc-beat rows pointing at it — those are orphaned the moment this removal lands, silently,
  * unless something says so here. */
 function crossRefCheck(doc: FdxDocument, name: string, cs: boolean): string {
-  const { cast, arcBeats, highlighting } = countCharacterReferences(doc, name, cs);
-  if (cast === 0 && arcBeats === 0 && highlighting === 0) return "";
-  return `Warning: ${cast} Cast member(s), ${arcBeats} arc beat(s), and ${highlighting} CharacterHighlighting entry(ies) still reference this name.`;
+  const { cast, arcBeats, highlighting, cueParagraphsExact, cueParagraphsSubstringOnly } = countCharacterReferences(doc, name, cs);
+  if (cast === 0 && arcBeats === 0 && highlighting === 0 && cueParagraphsExact === 0 && cueParagraphsSubstringOnly === 0) {
+    return "";
+  }
+  const substringClause =
+    cueParagraphsSubstringOnly > 0
+      ? ` (plus ${cueParagraphsSubstringOnly} more containing the name as part of a longer cue, e.g. with an extension)`
+      : "";
+  return `Warning: ${cast} Cast member(s), ${arcBeats} arc beat(s), ${highlighting} CharacterHighlighting entry(ies), and ${cueParagraphsExact} cue paragraph(s)${substringClause} still reference this name.`;
 }
 
 const { tool, handler } = makeSmartListEditTool(

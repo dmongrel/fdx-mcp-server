@@ -90,16 +90,50 @@ describe("edit_smarttype_characters", () => {
     const result = await handleEditSmarttypeCharacters({ path, action: "remove", find: "DANAERIAN COMMANDER" });
     expect(result.isError).toBeFalsy();
     expect(result.content[0]!.text).toContain(
-      "Warning: 1 Cast member(s), 1 arc beat(s), and 1 CharacterHighlighting entry(ies) still reference this name.",
+      "Warning: 1 Cast member(s), 1 arc beat(s), 1 CharacterHighlighting entry(ies), and 0 cue paragraph(s) still reference this name.",
     );
   });
 
   test("remove does not warn when nothing else references the removed name", async () => {
     const path = freshCopy();
     await handleReadFdx({ path });
-    const result = await handleEditSmarttypeCharacters({ path, action: "remove", find: "OOK" });
+    await handleEditSmarttypeCharacters({ path, action: "create", value: "ZZZ_NO_REFERENCES" });
+    const result = await handleEditSmarttypeCharacters({ path, action: "remove", find: "ZZZ_NO_REFERENCES" });
     expect(result.isError).toBeFalsy();
     expect(result.content[0]!.text).not.toContain("Warning:");
+  });
+
+  test("remove warns citing cue paragraphs even when nothing else references the name", async () => {
+    const path = freshCopy();
+    await handleReadFdx({ path });
+    const result = await handleEditSmarttypeCharacters({ path, action: "remove", find: "OOK" });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).toContain(
+      "Warning: 0 Cast member(s), 0 arc beat(s), 0 CharacterHighlighting entry(ies), and 3 cue paragraph(s) still reference this name.",
+    );
+  });
+
+  test("remove's warning appends a substring-only clause when a cue carries an extension", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fdx-edit-characters-ext-"));
+    const path = join(dir, "script.fdx");
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Character" id="c1"><Text>ETHNEN (V.O.)</Text></Paragraph>
+  </Content>
+  <SmartType>
+    <Characters>
+      <Character>ETHNEN</Character>
+    </Characters>
+  </SmartType>
+</FinalDraft>`;
+    writeFileSync(path, source, "utf-8");
+    await handleReadFdx({ path });
+    const result = await handleEditSmarttypeCharacters({ path, action: "remove", find: "ETHNEN" });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).toContain(
+      "Warning: 0 Cast member(s), 0 arc beat(s), 0 CharacterHighlighting entry(ies), and 0 cue paragraph(s) (plus 1 more containing the name as part of a longer cue, e.g. with an extension) still reference this name.",
+    );
   });
 
   test("fix with uppercase+dedup cleans the list", async () => {
