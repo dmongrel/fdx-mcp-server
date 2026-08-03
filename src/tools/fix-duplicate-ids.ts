@@ -10,15 +10,16 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, pushWarning, skippedNestedWarning, hasFdxExtension } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { applyDuplicateIdFixes, planDuplicateIdFixes } from "../fdx/duplicate-ids.ts";
+import { countNestedParagraphs } from "../fdx/paragraph.ts";
 
 export const fixDuplicateIdsTool: FdxTool = {
   name: "fix_duplicate_ids",
   description:
-    "Repairs top-level body paragraphs that share the same id (see find_duplicate_ids). action=report previews the repair without changing anything; action=fix applies it: the first occurrence of each duplicated id (document order) keeps its id, every later occurrence gets a freshly minted uuid. After action=fix, call save_fdx to persist changes to disk.",
+    "Repairs top-level body paragraphs that share the same id (see find_duplicate_ids). action=report previews which paragraphs would be reassigned without changing anything or minting ids yet (ids are freshly minted at action=fix time, so report's preview has no newId to show); action=fix applies it: the first occurrence of each duplicated id (document order) keeps its id, every later occurrence gets a freshly minted uuid. After action=fix, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -45,17 +46,24 @@ export async function handleFixDuplicateIds(args: Record<string, unknown> | unde
     return errResult(`read error: ${message}`);
   }
 
+  const skipWarning = skippedNestedWarning(countNestedParagraphs(doc.getParagraphElements()));
+
   const plan = planDuplicateIdFixes(doc);
   if (plan.length === 0) {
-    return pushCacheWarning(textResult("No duplicate paragraph ids found; nothing to fix."), warning);
+    return pushCacheWarning(pushWarning(textResult("No duplicate paragraph ids found; nothing to fix."), skipWarning), warning);
   }
 
   if (action === "report") {
-    return pushCacheWarning(textResult(JSON.stringify(plan, null, 2)), warning);
+    const preview = plan.map((g) => ({
+      id: g.id,
+      keptIndex: g.keptIndex,
+      reassigned: g.reassigned.map(({ newId, ...rest }) => rest),
+    }));
+    return pushCacheWarning(pushWarning(textResult(JSON.stringify(preview, null, 2)), skipWarning), warning);
   }
 
   applyDuplicateIdFixes(doc, plan);
   const dirtyWarning = documentCache.touchDirty(path, doc);
   const msg = `Reassigned ids for ${plan.reduce((n, g) => n + g.reassigned.length, 0)} duplicate paragraph(s) across ${plan.length} id(s). File updated in cache — call save_fdx to persist changes to disk.\n${JSON.stringify(plan, null, 2)}`;
-  return pushCacheWarning(pushCacheWarning(textResult(msg), dirtyWarning), warning);
+  return pushCacheWarning(pushCacheWarning(pushWarning(textResult(msg), skipWarning), dirtyWarning), warning);
 }

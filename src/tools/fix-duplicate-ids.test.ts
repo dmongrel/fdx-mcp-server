@@ -4,6 +4,7 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleFixDuplicateIds } from "./fix-duplicate-ids.ts";
+import { handleEditDualDialogue } from "./edit-dual-dialogue.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { findParagraphIdAttr } from "../fdx/paragraph.ts";
@@ -79,5 +80,64 @@ describe("fix_duplicate_ids", () => {
     expect(report.content[0]!.text).toBe("No duplicate paragraph ids found; nothing to fix.");
     const fix = await handleFixDuplicateIds({ path, action: "fix" });
     expect(fix.content[0]!.text).toBe("No duplicate paragraph ids found; nothing to fix.");
+  });
+});
+
+const SOURCE_WITH_DUPES_AND_DUAL_DIALOGUE = `<?xml version="1.0"?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Action" id="dup"><Text>first</Text></Paragraph>
+    <Paragraph Type="Character" id="char1"><Text>ALICE</Text></Paragraph>
+    <Paragraph Type="Dialogue" id="dlg1"><Text>Hi.</Text></Paragraph>
+    <Paragraph Type="Dialogue" id="dup"><Text>second</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+
+describe("fix_duplicate_ids with a DualDialogue in the document", () => {
+  async function withDualDialogue(key: string) {
+    const { path } = freshDoc(key, SOURCE_WITH_DUPES_AND_DUAL_DIALOGUE);
+    await handleEditDualDialogue({ path, action: "create", ids: ["char1", "dlg1"] });
+    return path;
+  }
+
+  test("action=report reports the skipped-nested count", async () => {
+    const path = await withDualDialogue("skip-report");
+    const result = await handleFixDuplicateIds({ path, action: "report" });
+    const text = result.content.map((c) => c.text).join("\n");
+    expect(text).toContain("2 paragraph(s) nested inside a DualDialogue block were not scanned by this call.");
+  });
+
+  test("action=fix reports the skipped-nested count", async () => {
+    const path = await withDualDialogue("skip-fix");
+    const result = await handleFixDuplicateIds({ path, action: "fix" });
+    const text = result.content.map((c) => c.text).join("\n");
+    expect(text).toContain("2 paragraph(s) nested inside a DualDialogue block were not scanned by this call.");
+  });
+
+  test("no DualDialogue means no skip warning", async () => {
+    const { path } = freshDoc("no-dual-dialogue", SOURCE_CLEAN);
+    const result = await handleFixDuplicateIds({ path, action: "report" });
+    expect(result.content[0]!.text).not.toContain("nested inside a DualDialogue");
+  });
+});
+
+describe("fix_duplicate_ids action=report's newId omission", () => {
+  test("report does not include newId in reassigned entries", async () => {
+    const { path } = freshDoc("report-no-newid", SOURCE_WITH_DUPES);
+    const result = await handleFixDuplicateIds({ path, action: "report" });
+    const plan = JSON.parse(result.content[result.content.length - 1]!.text);
+    expect(plan[0].reassigned[0]).not.toHaveProperty("newId");
+    expect(plan[0].reassigned[0]).toHaveProperty("oldId", "dup");
+    expect(plan[0].reassigned[0]).toHaveProperty("index");
+    expect(plan[0].reassigned[0]).toHaveProperty("type");
+  });
+
+  test("fix still reports real newIds, unaffected by report's omission", async () => {
+    const { path } = freshDoc("fix-still-has-newid", SOURCE_WITH_DUPES);
+    const result = await handleFixDuplicateIds({ path, action: "fix" });
+    const combined = result.content.map((c) => c.text).join("\n");
+    const plan = JSON.parse(combined.slice(combined.indexOf("[")));
+    expect(typeof plan[0].reassigned[0].newId).toBe("string");
+    expect(plan[0].reassigned[0].newId.length).toBeGreaterThan(0);
   });
 });
