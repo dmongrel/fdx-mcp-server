@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.24] - 2026-08-03
+
+### Fixed
+
+- **`find_duplicate_ids`** and **`fix_duplicate_ids`** now report how many paragraphs nested inside a `DualDialogue` block were out of scope for the call, matching the warning `find_par`/`replace_text`/`get_flagged_words`/`get_placeholders`/`get_character_appearances` already carry.
+- **`fix_duplicate_ids action=report`**'s preview no longer includes a `newId` per reassignment — it was freshly re-minted (and different) on the following `action=fix` call, so a caller comparing the two would never see a match. Ids are now documented as minted only at `action=fix` time.
+- **`get_context`**'s Dual Dialogue rule no longer claims a wrapper paragraph always carries `Type='General'` — that's only true of wrappers `edit_dual_dialogue action=create` builds; a wrapper Final Draft's own UI authors may carry the first contained paragraph's type instead.
+- **`get_fdx_breakdown`**'s Character Frequency section (text, HTML, and PDF) now carries the same DualDialogue skip-count warning `get_character_appearances` already has, both in the rendered report and in the tool's own response — previously the warning was computed but never surfaced.
+- **`get_fdx_breakdown`**'s text report no longer runs a character name into its appearance count when the name is at or past the name column's width (e.g. `CAPTAIN IRIKOV121 appearances`) — a minimum one-space gap is now guaranteed regardless of name length.
+
 ## [0.0.23] - 2026-08-02
 
 ### Fixed
