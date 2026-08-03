@@ -7,14 +7,15 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, getCachedFdx, pushCacheWarning, textResult, errResult } from "./shared.ts";
+import { arg, getCachedFdx, pushCacheWarning, pushWarning, textResult, errResult, skippedNestedWarning } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { buildCharacterAppearances, rankCharacters } from "./breakdown.ts";
+import { countNestedParagraphs } from "../fdx/paragraph.ts";
 
 export const getCharacterAppearancesTool: FdxTool = {
   name: "get_character_appearances",
   description:
-    "Read-Only. Retrieve, as JSON, each character's scene-by-scene appearance counts (Character/Parenthetical/Dialogue paragraphs attributed to that speaker). Pass character to filter to one name (case-insensitive); omit for every character sorted by total count descending.",
+    "Read-Only. Retrieve, as JSON, each character's scene-by-scene appearance counts (Character/Parenthetical/Dialogue paragraphs attributed to that speaker). Pass character to filter to one name (case-insensitive); omit for every character sorted by total count descending. Scoped to top-level body paragraphs — a warning is prepended reporting how many nested inside a DualDialogue block were not scanned when the document contains any; speaker attribution around a DualDialogue interruption may also be inaccurate.",
   inputSchema: {
     type: "object",
     properties: {
@@ -42,15 +43,20 @@ export async function handleGetCharacterAppearances(args: Record<string, unknown
 
   const appearances = buildCharacterAppearances(doc);
   const ranked = rankCharacters(appearances);
+  const skippedWarning = skippedNestedWarning(countNestedParagraphs(doc.getParagraphElements()));
 
   const want = ((arg<string>(args, "character")) ?? "").trim();
   if (want !== "") {
     const hit = ranked.find((r) => r.name.toLowerCase() === want.toLowerCase());
     if (!hit) {
-      return pushCacheWarning(textResult(`no appearances found for character: ${want}`), warning);
+      let notFoundResult = textResult(`no appearances found for character: ${want}`);
+      notFoundResult = pushWarning(notFoundResult, skippedWarning);
+      return pushCacheWarning(notFoundResult, warning);
     }
     const entry = { character: hit.name, total: hit.total, appearances: appearances.get(hit.name) ?? [] };
-    return pushCacheWarning(textResult(JSON.stringify(entry)), warning);
+    let oneResult = textResult(JSON.stringify(entry));
+    oneResult = pushWarning(oneResult, skippedWarning);
+    return pushCacheWarning(oneResult, warning);
   }
 
   const ordered = ranked.map((r) => ({
@@ -58,6 +64,8 @@ export async function handleGetCharacterAppearances(args: Record<string, unknown
     total: r.total,
     appearances: appearances.get(r.name) ?? [],
   }));
-  return pushCacheWarning(textResult(JSON.stringify(ordered)), warning);
+  let allResult = textResult(JSON.stringify(ordered));
+  allResult = pushWarning(allResult, skippedWarning);
+  return pushCacheWarning(allResult, warning);
 }
 
