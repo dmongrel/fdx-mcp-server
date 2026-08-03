@@ -9,9 +9,10 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, pushWarning, skippedNestedWarning } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { findDuplicateParagraphIds } from "../fdx/duplicate-ids.ts";
+import { countNestedParagraphs } from "../fdx/paragraph.ts";
 
 export const findDuplicateIdsTool: FdxTool = {
   name: "find_duplicate_ids",
@@ -39,11 +40,13 @@ export async function handleFindDuplicateIds(args: Record<string, unknown> | und
     return errResult(`read error: ${message}`);
   }
 
+  const skipWarning = skippedNestedWarning(countNestedParagraphs(doc.getParagraphElements()));
+
   const groups = findDuplicateParagraphIds(doc);
   const msg =
     groups.length === 0
       ? "No duplicate paragraph ids found."
       : JSON.stringify(groups, null, 2);
 
-  return pushCacheWarning(textResult(msg), warning);
+  return pushCacheWarning(pushWarning(textResult(msg), skipWarning), warning);
 }

@@ -4,6 +4,7 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { handleFindDuplicateIds } from "./find-duplicate-ids.ts";
+import { handleEditDualDialogue } from "./edit-dual-dialogue.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 
@@ -50,5 +51,37 @@ describe("find_duplicate_ids", () => {
     const result = await handleFindDuplicateIds({ path });
     expect(result.isError).toBeFalsy();
     expect(result.content[0]!.text).toBe("No duplicate paragraph ids found.");
+  });
+});
+
+const SOURCE_WITH_DUPES_AND_DUAL_DIALOGUE = `<?xml version="1.0"?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Action" id="dup"><Text>first</Text></Paragraph>
+    <Paragraph Type="Character" id="char1"><Text>ALICE</Text></Paragraph>
+    <Paragraph Type="Dialogue" id="dlg1"><Text>Hi.</Text></Paragraph>
+    <Paragraph Type="Dialogue" id="dup"><Text>second</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+
+describe("find_duplicate_ids with a DualDialogue in the document", () => {
+  async function withDualDialogue(key: string) {
+    const path = freshDoc(key, SOURCE_WITH_DUPES_AND_DUAL_DIALOGUE);
+    await handleEditDualDialogue({ path, action: "create", ids: ["char1", "dlg1"] });
+    return path;
+  }
+
+  test("reports the skipped-nested count alongside the duplicate groups", async () => {
+    const path = await withDualDialogue("skip-warning");
+    const result = await handleFindDuplicateIds({ path });
+    expect(result.isError).toBeFalsy();
+    const text = result.content.map((c) => c.text).join("\n");
+    expect(text).toContain("2 paragraph(s) nested inside a DualDialogue block were not scanned by this call.");
+  });
+
+  test("no DualDialogue means no skip warning", async () => {
+    const path = freshDoc("no-dual-dialogue", SOURCE_CLEAN);
+    const result = await handleFindDuplicateIds({ path });
+    expect(result.content[0]!.text).not.toContain("nested inside a DualDialogue");
   });
 });
