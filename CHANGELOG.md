@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.21] - 2026-08-02
+
+### Fixed
+
+- **`get_flagged_words`**, **`get_script_stats`**, and `get_context`'s formatting rules no longer call `AdornmentStyle="-1"` an "unknown-word marker" — it's Final Draft's proofing flag, covering spelling and grammar both, so repeated-word and spacing hits appear alongside genuine typos.
+
+### Changed
+
+- **`edit_smarttype_characters`**'s cross-reference warning (on `action=remove`) now also counts Character-cue paragraphs still referencing the removed name — previously it named Cast rows, arc beats, and CharacterHighlighting entries but not the fifth and most numerous location a name lives.
+- **`batch_edit`** adds `edit_scene_properties` to its allowlist of tools it can run as one step in an atomic batch.
+
 ## [0.0.20] - 2026-08-02
 
 ### Added
