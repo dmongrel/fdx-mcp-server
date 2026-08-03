@@ -22,7 +22,7 @@ function fmt3g(n: number): string {
   return parseFloat(n.toPrecision(3)).toString();
 }
 
-class Layout {
+export class Layout {
   page: PDFPage;
   y: number;
   pageNo = 0;
@@ -34,7 +34,6 @@ class Layout {
     private title: string,
   ) {
     this.page = this.addPage();
-    this.y = 0;
   }
 
   private addPage(): PDFPage {

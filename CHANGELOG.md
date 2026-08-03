@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.22] - 2026-08-02
+
+### Fixed
+
+- **`get_fdx_breakdown`**'s `asType="pdf"` output no longer wastes page 1 on just the header — a constructor bug in the PDF renderer's layout cursor overwrote the correct content-start position with `0` right after it was set, forcing a spurious page break before any content was drawn. The Document Overview and Paragraph Breakdown sections now render starting on page 1 as intended.
+
 ## [0.0.21] - 2026-08-02
 
 ### Fixed
