@@ -53,6 +53,14 @@ export function pushWarning(result: ToolResult, warning: string): ToolResult {
   };
 }
 
+/** The warning text for a countNestedParagraphs result, or "" when there's nothing to report
+ *  (pushWarning no-ops on an empty string). */
+export function skippedNestedWarning(count: number): string {
+  return count > 0
+    ? `${count} paragraph(s) nested inside a DualDialogue block were not scanned by this call.`
+    : "";
+}
+
 export const RE_VERSION = /_v(\d+)\.fdx$/i;
 export const RE_DOT_FDX = /\.fdx$/i;
 

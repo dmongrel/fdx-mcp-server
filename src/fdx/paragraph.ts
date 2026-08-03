@@ -50,6 +50,12 @@ export function expandDualDialogue(paragraphs: XmlElement[]): XmlElement[] {
   return result;
 }
 
+/** Counts paragraphs expandDualDialogue would add to `paragraphs` — i.e. how many nested
+ *  paragraphs are out of scope for a caller that only looks at the given (unexpanded) list. */
+export function countNestedParagraphs(paragraphs: XmlElement[]): number {
+  return expandDualDialogue(paragraphs).length - paragraphs.length;
+}
+
 /** Builds the <Text> attrs for a run: attrs map first, then `style` overriding Style if given. */
 function buildTextAttrs(tr: TextRunInput): Array<[string, string]> {
   const attrs: Array<[string, string]> = tr.attrs ? Object.entries(tr.attrs) : [];

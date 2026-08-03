@@ -3,7 +3,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { FdxDocument } from "./document.ts";
-import { spliceParagraphText, expandDualDialogue } from "./paragraph.ts";
+import { spliceParagraphText, expandDualDialogue, countNestedParagraphs } from "./paragraph.ts";
 import { findChildren, textContent } from "./xml.ts";
 
 function docWithParagraph(paragraphXml: string): FdxDocument {
@@ -99,5 +99,27 @@ describe("expandDualDialogue", () => {
     const expanded = expandDualDialogue(top);
     expect(expanded).toHaveLength(1);
     expect(expanded[0]!.attrs.find(([k]) => k === "id")?.[1]).toBe("wrap1");
+  });
+});
+
+describe("countNestedParagraphs", () => {
+  test("counts nested paragraphs inside a wrapper", () => {
+    const doc = docWithParagraph(`
+      <Paragraph Type="Action" id="a1"><Text>Before.</Text></Paragraph>
+      <Paragraph Type="General" id="wrap1">
+        <DualDialogue>
+          <Paragraph Type="Character" id="c1"><Text>ALICE</Text></Paragraph>
+          <Paragraph Type="Dialogue" id="d1"><Text>Hi.</Text></Paragraph>
+        </DualDialogue>
+      </Paragraph>
+    `);
+    const top = doc.getParagraphElements();
+    expect(countNestedParagraphs(top)).toBe(2);
+  });
+
+  test("returns 0 for a list with no wrapper", () => {
+    const doc = docWithParagraph(`<Paragraph Type="Action" id="a1"><Text>Only.</Text></Paragraph>`);
+    const top = doc.getParagraphElements();
+    expect(countNestedParagraphs(top)).toBe(0);
   });
 });
