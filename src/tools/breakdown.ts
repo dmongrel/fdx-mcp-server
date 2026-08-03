@@ -549,8 +549,9 @@ export function buildArcBeatData(doc: FdxDocument): ArcBeatData[] {
  * `name`, case-insensitively unless `cs`. Used to warn a caller removing a SmartType Characters
  * entry that Cast/arc-beat data still references the name they're about to orphan.
  */
-export function countCharacterReferences(doc: FdxDocument, name: string, cs: boolean): { cast: number; arcBeats: number; highlighting: number } {
+export function countCharacterReferences(doc: FdxDocument, name: string, cs: boolean): { cast: number; arcBeats: number; highlighting: number; cueParagraphsExact: number; cueParagraphsSubstringOnly: number } {
   const match = (v: string) => (cs ? v === name : v.toLowerCase() === name.toLowerCase());
+  const contains = (v: string) => (cs ? v.includes(name) : v.toLowerCase().includes(name.toLowerCase()));
 
   const cast = doc.getCastMembers().filter((m) => match(getAttr(m, "Character") ?? "")).length;
 
@@ -564,7 +565,16 @@ export function countCharacterReferences(doc: FdxDocument, name: string, cs: boo
 
   const highlighting = doc.getHighlightedCharacters().filter((c) => match(getAttr(c, "Name") ?? "")).length;
 
-  return { cast, arcBeats, highlighting };
+  let cueParagraphsExact = 0;
+  let cueParagraphsSubstringOnly = 0;
+  for (const p of doc.getParagraphElements()) {
+    if (getParagraphType(p) !== "Character") continue;
+    const text = paragraphText(p);
+    if (match(text)) cueParagraphsExact++;
+    else if (contains(text)) cueParagraphsSubstringOnly++;
+  }
+
+  return { cast, arcBeats, highlighting, cueParagraphsExact, cueParagraphsSubstringOnly };
 }
 
 /** Retrieves one paragraph's SceneProperties by id, parsed into the get_scene_properties JSON shape. */

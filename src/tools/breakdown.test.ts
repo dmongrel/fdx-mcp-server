@@ -17,6 +17,7 @@ import {
   buildArcBeatData,
   getScenePropertiesById,
   getOrCreateSceneProperties,
+  countCharacterReferences,
   locateSluglineLocation,
   buildLocationAppearances,
   rankLocations,
@@ -434,6 +435,75 @@ describe("getOrCreateSceneProperties", () => {
     const second = getOrCreateSceneProperties(para);
     expect(first).toBe(second);
     expect(para.children.filter((c) => c.type === "element" && c.name === "SceneProperties")).toHaveLength(1);
+  });
+});
+
+describe("countCharacterReferences", () => {
+  test("counts an exact-match cue paragraph", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Character" id="c1"><Text>ETHNEN</Text></Paragraph>
+    <Paragraph Type="Dialogue" id="d1"><Text>Hello.</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const result = countCharacterReferences(doc, "ETHNEN", false);
+    expect(result.cueParagraphsExact).toBe(1);
+    expect(result.cueParagraphsSubstringOnly).toBe(0);
+  });
+
+  test("counts a substring-only cue paragraph (e.g. with an extension) separately", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Character" id="c1"><Text>ETHNEN (V.O.)</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const result = countCharacterReferences(doc, "ETHNEN", false);
+    expect(result.cueParagraphsExact).toBe(0);
+    expect(result.cueParagraphsSubstringOnly).toBe(1);
+  });
+
+  test("counts exact and substring-only cues together without double-counting", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Character" id="c1"><Text>ETHNEN</Text></Paragraph>
+    <Paragraph Type="Character" id="c2"><Text>ETHNEN (V.O.)</Text></Paragraph>
+    <Paragraph Type="Character" id="c3"><Text>ETHNEN</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const result = countCharacterReferences(doc, "ETHNEN", false);
+    expect(result.cueParagraphsExact).toBe(2);
+    expect(result.cueParagraphsSubstringOnly).toBe(1);
+  });
+
+  test("a Dialogue paragraph containing the name is not counted as a cue", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Dialogue" id="d1"><Text>Tell ETHNEN I said hello.</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    const result = countCharacterReferences(doc, "ETHNEN", false);
+    expect(result.cueParagraphsExact).toBe(0);
+    expect(result.cueParagraphsSubstringOnly).toBe(0);
+  });
+
+  test("respects the cs case-sensitivity flag for exact matches", () => {
+    const source = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft Version="6">
+  <Content>
+    <Paragraph Type="Character" id="c1"><Text>ethnen</Text></Paragraph>
+  </Content>
+</FinalDraft>`;
+    const doc = FdxDocument.parse(source);
+    expect(countCharacterReferences(doc, "ETHNEN", false).cueParagraphsExact).toBe(1);
+    expect(countCharacterReferences(doc, "ETHNEN", true).cueParagraphsExact).toBe(0);
   });
 });
 
