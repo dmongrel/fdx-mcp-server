@@ -8,16 +8,16 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, pushWarning, skippedNestedWarning } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
-import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
+import { getParagraphId, getParagraphType, paragraphText, countNestedParagraphs } from "../fdx/paragraph.ts";
 import { findContainingSectionIndex } from "../fdx/sections.ts";
 import { getSceneProperties, isPlaceholderParagraph } from "./breakdown.ts";
 
 export const getPlaceholdersTool: FdxTool = {
   name: "get_placeholders",
   description:
-    'Read-Only. Lists every paragraph whose full text (trimmed) is entirely one [...] span — a drafting placeholder like "[FIX - ...]" — regardless of paragraph type, as {id, type, text, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/get_flagged_words). Combine with batch_edit and edit_par action=remove to bulk-clear placeholders once applied; see also get_script_stats\'s placeholderCount and excludePlaceholders.',
+    'Read-Only. Lists every paragraph whose full text (trimmed) is entirely one [...] span — a drafting placeholder like "[FIX - ...]" — regardless of paragraph type, as {id, type, text, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/get_flagged_words — a warning is prepended reporting how many were skipped when the document contains any). Combine with batch_edit and edit_par action=remove to bulk-clear placeholders once applied; see also get_script_stats\'s placeholderCount and excludePlaceholders.',
   inputSchema: {
     type: "object",
     properties: {
@@ -70,5 +70,7 @@ export async function handleGetPlaceholders(args: Record<string, unknown> | unde
   }
 
   const body = { placeholders, count: placeholders.length };
-  return pushCacheWarning(textResult(JSON.stringify(body, null, 2)), warning);
+  let result = textResult(JSON.stringify(body, null, 2));
+  result = pushWarning(result, skippedNestedWarning(countNestedParagraphs(paragraphs)));
+  return pushCacheWarning(result, warning);
 }
