@@ -12,6 +12,7 @@
 
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import type { BreakdownData } from "./breakdown-report.ts";
+import { skippedNestedWarning } from "./shared.ts";
 
 const PAGE_WIDTH = 595.28; // A4 at 72dpi (pdf-lib uses points)
 const PAGE_HEIGHT = 841.89;
@@ -144,6 +145,9 @@ export async function renderBreakdownPdf(d: BreakdownData): Promise<Uint8Array> 
   // Character frequency as horizontal bars.
   l.newPage();
   l.heading("Character Frequency");
+  if (d.skippedNestedCount > 0) {
+    l.line(skippedNestedWarning(d.skippedNestedCount));
+  }
   const maxTotal = d.rankedChars.reduce((m, c) => Math.max(m, c.total), 0);
   const barMaxWidth = 260;
   for (const c of d.rankedChars) {
