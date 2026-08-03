@@ -73,6 +73,7 @@ import { getSceneIndexTool, handleGetSceneIndex } from "./tools/get-scene-index.
 import { getCharacterAppearancesTool, handleGetCharacterAppearances } from "./tools/get-character-appearances.ts";
 import { getPageMapTool, handleGetPageMap } from "./tools/get-page-map.ts";
 import { getScenePropertiesTool, handleGetSceneProperties } from "./tools/get-scene-properties.ts";
+import { editScenePropertiesTool, handleEditSceneProperties } from "./tools/edit-scene-properties.ts";
 import { getSceneArcBeatsTool, handleGetSceneArcBeats } from "./tools/get-scene-arc-beats.ts";
 import { editSceneArcBeatsTool, handleEditSceneArcBeats } from "./tools/edit-scene-arc-beats.ts";
 import { getRevisionsTool, handleGetRevisions } from "./tools/get-revisions.ts";
@@ -199,6 +200,7 @@ const tools: FdxTool[] = [
   getCharacterAppearancesTool,
   getPageMapTool,
   getScenePropertiesTool,
+  editScenePropertiesTool,
   getSceneArcBeatsTool,
   editSceneArcBeatsTool,
   getRevisionsTool,
@@ -321,6 +323,7 @@ const toolHandlers: Record<
   get_character_appearances: (args) => handleGetCharacterAppearances(args),
   get_page_map: (args) => handleGetPageMap(args),
   get_scene_properties: (args) => handleGetSceneProperties(args),
+  edit_scene_properties: (args) => handleEditSceneProperties(args),
   get_scene_arc_beats: (args) => handleGetSceneArcBeats(args),
   edit_scene_arc_beats: (args) => handleEditSceneArcBeats(args),
   get_revisions: (args) => handleGetRevisions(args),

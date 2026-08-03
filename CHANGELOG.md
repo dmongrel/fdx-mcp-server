@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.20] - 2026-08-02
+
+### Added
+
+- **`edit_scene_properties`** tool — sets `Color` and/or `Title` on a paragraph's `SceneProperties` block, creating the block if it doesn't exist yet (a paragraph created through `edit_par` previously had no route to acquire one). Neither value is format-validated; `get_context` now documents Final Draft's actual `#RRRRGGGGBBBB` color format.
+
+### Changed
+
+- **`edit_par action=create`** accepts an optional `color` parameter, setting `SceneProperties.Color` on the newly created paragraph in the same call instead of a create-then-`edit_scene_properties` sequence.
+
 ## [0.0.19] - 2026-08-02
 
 ### Changed

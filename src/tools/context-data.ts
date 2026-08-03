@@ -99,6 +99,11 @@ export const contextRules: ContextRule[] = [
       "A 'section' starts at any section-heading paragraph (Scene Heading, Act Break, etc.) and extends until the next section heading. Use get_section to retrieve a section's heading and all following paragraphs.",
   },
   {
+    title: "Scene Color",
+    content:
+      "Final Draft's scene color is a 12-hex-digit value, #RRRRGGGGBBBB — each RGB channel doubled to 4 hex digits (e.g. #6363A7A7EFEF), not the usual 6-digit web format. edit_scene_properties(id, color=...) sets it on an existing paragraph, creating its SceneProperties block if needed; edit_par action=create also accepts a color parameter for a new Scene Heading. Neither tool validates the format — send it in Final Draft's own form.",
+  },
+  {
     title: "UUID Generation",
     content:
       "New paragraphs created by edit_par or edit_dual_dialogue receive fresh UUIDs via generateUUID(), returned directly in the create response ({id, ...} as JSON) — no separate lookup needed. Existing paragraph IDs must be preserved when editing or moving content.",
@@ -144,7 +149,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "edit_par",
     description:
-      "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update — this also reaches a paragraph nested inside a <DualDialogue> block. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper); remove and create's beforeParId/afterParId anchoring do not reach paragraphs nested inside a DualDialogue. After editing, call save_fdx to persist changes to disk.",
+      "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append); pass color to set SceneProperties.Color on the new paragraph in the same call (creates the block; see edit_scene_properties to set it on an existing paragraph, or to set Title). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update — this also reaches a paragraph nested inside a <DualDialogue> block. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper); remove and create's beforeParId/afterParId anchoring do not reach paragraphs nested inside a DualDialogue. After editing, call save_fdx to persist changes to disk.",
   },
   {
     name: "create_dialogue",
@@ -370,6 +375,11 @@ export const contextTools: ToolInfo[] = [
     name: "get_scene_properties",
     description:
       "Read-Only. Retrieve one paragraph's SceneProperties as JSON — Color, Length (raw and parsed eighths-of-a-page), Page, and Title. Errors if the paragraph has no SceneProperties block.",
+  },
+  {
+    name: "edit_scene_properties",
+    description:
+      "Set Color and/or Title on a paragraph's SceneProperties block, creating the block if it doesn't exist yet — a paragraph created through edit_par has no SceneProperties at all until this is called. At least one of color or title is required. Neither value is format-validated; see get_context for Final Draft's actual color format. Length and Page are Final Draft's own derived pagination values and are never written by this tool. After editing, call save_fdx to persist changes to disk.",
   },
   {
     name: "get_scene_arc_beats",
