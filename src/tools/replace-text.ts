@@ -14,17 +14,17 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, hasFdxExtension } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, pushWarning, hasFdxExtension, skippedNestedWarning } from "./shared.ts";
 import { documentCache } from "../fdx/cache.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { findChildren, textContent, setTextContent } from "../fdx/xml.ts";
-import { getParagraphId, getParagraphType, paragraphText, expandDualDialogue } from "../fdx/paragraph.ts";
+import { getParagraphId, getParagraphType, paragraphText, expandDualDialogue, countNestedParagraphs } from "../fdx/paragraph.ts";
 import { findSectionIndex, findSectionEnd } from "../fdx/sections.ts";
 
 export const replaceTextTool: FdxTool = {
   name: "replace_text",
   description:
-    "Find and replace text across paragraphs in a loaded screenplay, substituting inside each <Text> run's own content so run boundaries and every run attribute (AdornmentStyle, Font, Color, Size, RevisionID, ...) are preserved. A match that only exists by spanning two runs is left unreplaced and reported as skipped. Optionally scope to a section (id) and/or a paragraph type (parType). Pass preview=true to see what would be matched — each occurrence marked with «...» in its paragraph's text, original document casing preserved — without changing anything; call again with preview omitted (or false) to apply. After editing, call save_fdx to persist changes to disk.",
+    "Find and replace text across paragraphs in a loaded screenplay, substituting inside each <Text> run's own content so run boundaries and every run attribute (AdornmentStyle, Font, Color, Size, RevisionID, ...) are preserved. A match that only exists by spanning two runs is left unreplaced and reported as skipped. Optionally scope to a section (id) and/or a paragraph type (parType). Pass preview=true to see what would be matched — each occurrence marked with «...» in its paragraph's text, original document casing preserved — without changing anything; call again with preview omitted (or false) to apply. When the scope contains a DualDialogue block, a warning is prepended reporting how many nested paragraphs were not scanned. After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -203,6 +203,7 @@ export async function handleReplaceText(args: Record<string, unknown> | undefine
   }
 
   const result = runPreservingReplace(doc, { find, replace, caseSensitive, parType, startIndex, endIndex, preview });
+  const skippedNested = countNestedParagraphs(paragraphs.slice(startIndex, endIndex));
 
   if (preview) {
     const matches = result.previewMatches ?? [];
@@ -219,7 +220,9 @@ export async function handleReplaceText(args: Record<string, unknown> | undefine
       totalSkipped,
       message: `Preview: ${totalMatches} occurrence(s) across ${paragraphsWithReplacements} paragraph(s) would be replaced${skipNote}. Nothing was changed — call again with preview=false (or omit preview) to apply.`,
     };
-    return pushCacheWarning(textResult(JSON.stringify(body, null, 2)), warning);
+    let previewResult = textResult(JSON.stringify(body, null, 2));
+    previewResult = pushWarning(previewResult, skippedNestedWarning(skippedNested));
+    return pushCacheWarning(previewResult, warning);
   }
 
   let msg = `Replaced ${result.totalReplaced} occurrence(s) of "${find}" with "${replace}".`;
@@ -235,5 +238,7 @@ export async function handleReplaceText(args: Record<string, unknown> | undefine
     msg += " File updated in cache — call save_fdx to persist changes to disk.";
   }
 
-  return pushCacheWarning(pushCacheWarning(textResult(msg), dirtyWarning), warning);
+  let finalResult = textResult(msg);
+  finalResult = pushWarning(finalResult, skippedNestedWarning(skippedNested));
+  return pushCacheWarning(pushCacheWarning(finalResult, dirtyWarning), warning);
 }

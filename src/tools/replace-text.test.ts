@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { handleReplaceText } from "./replace-text.ts";
 import { handleEditPar } from "./edit-par.ts";
+import { handleEditDualDialogue } from "./edit-dual-dialogue.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId, paragraphText } from "../fdx/paragraph.ts";
@@ -256,5 +257,52 @@ describe("replace_text", () => {
     const badScope = await handleReplaceText({ path, find: "Zog", replace: "x", id: "does-not-exist", preview: true });
     expect(badScope.isError).toBe(true);
     expect(badScope.content[0]!.text).toContain("section id not found");
+  });
+});
+
+describe("replace_text with a DualDialogue in the document", () => {
+  const CHARACTER_ID = "a3049b85-f812-4aaa-9532-9f53f774f758";
+  const PARENTHETICAL_ID = "bbee1c41-6ca4-4ae2-bb0e-4c2769f23a16";
+  const DIALOGUE_ID = "b5437965-e39f-4236-a0c0-641860dcfb96";
+  const FIRST_SCENE_ID = "6e39d99f-6972-42f8-bdc8-3f0dbe546280";
+
+  async function withDualDialogue(key: string) {
+    const { path } = freshDoc(key);
+    await handleEditDualDialogue({
+      path,
+      action: "create",
+      ids: [CHARACTER_ID, PARENTHETICAL_ID, DIALOGUE_ID],
+    });
+    return path;
+  }
+
+  test("whole-document call reports the skipped-nested count", async () => {
+    const path = await withDualDialogue("skip-warning");
+    const result = await handleReplaceText({ path, find: "zzz-not-present-zzz", replace: "y" });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).toContain(
+      "3 paragraph(s) nested inside a DualDialogue block were not scanned by this call.",
+    );
+  });
+
+  test("preview mode also reports the skipped-nested count", async () => {
+    const path = await withDualDialogue("skip-warning-preview");
+    const result = await handleReplaceText({ path, find: "zzz-not-present-zzz", replace: "y", preview: true });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).toContain(
+      "3 paragraph(s) nested inside a DualDialogue block were not scanned by this call.",
+    );
+  });
+
+  test("a scene-scoped call that does not include the DualDialogue reports no skip", async () => {
+    const path = await withDualDialogue("skip-scoped-out");
+    const result = await handleReplaceText({
+      path,
+      find: "zzz-not-present-zzz",
+      replace: "y",
+      id: FIRST_SCENE_ID,
+    });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).not.toContain("nested inside a DualDialogue");
   });
 });
