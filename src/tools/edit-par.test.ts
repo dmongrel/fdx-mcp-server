@@ -348,6 +348,42 @@ describe("edit_par", () => {
     expect(intros.values).toContain("INT");
     expect(locations.values.some((v) => v.includes("ZZZ TEST BRIDGE"))).toBe(true);
   });
+
+  test("create with color sets SceneProperties.Color on the new paragraph", async () => {
+    const { path, doc } = freshDoc("create-with-color");
+    const result = await handleEditPar({
+      path,
+      action: "create",
+      type: "Scene Heading",
+      color: "#6363A7A7EFEF",
+      textRuns: [{ content: "INT. ZZZ TEST BRIDGE - DAY" }],
+    });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse(result.content[0]!.text);
+
+    const created = doc.getParagraphElements().find((p) => getParagraphId(p) === body.id)!;
+    const sp = created.children.find((c) => c.type === "element" && c.name === "SceneProperties") as
+      | { attrs: Array<[string, string]> }
+      | undefined;
+    expect(sp).toBeDefined();
+    expect(sp!.attrs).toContainEqual(["Color", "#6363A7A7EFEF"]);
+  });
+
+  test("create without color behaves exactly as before — no SceneProperties created", async () => {
+    const { path, doc } = freshDoc("create-without-color");
+    const result = await handleEditPar({
+      path,
+      action: "create",
+      type: "Action",
+      textRuns: [{ content: "Grog stands up." }],
+    });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse(result.content[0]!.text);
+
+    const created = doc.getParagraphElements().find((p) => getParagraphId(p) === body.id)!;
+    const sp = created.children.find((c) => c.type === "element" && c.name === "SceneProperties");
+    expect(sp).toBeUndefined();
+  });
 });
 
 describe("edit_par with nested DualDialogue paragraphs", () => {

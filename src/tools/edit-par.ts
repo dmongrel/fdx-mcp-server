@@ -15,7 +15,7 @@ import { documentCache } from "../fdx/cache.ts";
 import type { FdxDocument } from "../fdx/document.ts";
 import { generateUuid } from "../fdx/uuid.ts";
 import { knownType } from "./list-types.ts";
-import { parseSlugline } from "./breakdown.ts";
+import { parseSlugline, getOrCreateSceneProperties } from "./breakdown.ts";
 import {
   buildParagraphElement,
   expandDualDialogue,
@@ -27,12 +27,12 @@ import {
   setParagraphType,
   type TextRunInput,
 } from "../fdx/paragraph.ts";
-import { findChild, findChildren, type XmlElement } from "../fdx/xml.ts";
+import { findChild, findChildren, setAttr, type XmlElement } from "../fdx/xml.ts";
 
 export const editParTool: FdxTool = {
   name: "edit_par",
   description:
-    "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update — this also reaches a paragraph nested inside a <DualDialogue> block. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper); remove and create's beforeParId/afterParId anchoring do not reach paragraphs nested inside a DualDialogue. After editing, call save_fdx to persist changes to disk.",
+    "Create a new paragraph, edit an existing one, or remove one in a loaded screenplay. For create, use beforeParId or afterParId (each a paragraph id) to control insertion position (falls back to append); pass color to set SceneProperties.Color on the new paragraph in the same call (creates the block; see edit_scene_properties to set it on an existing paragraph, or to set Title). Returns {id, type, message} as JSON on success, so the new paragraph is immediately addressable without a follow-up lookup. For edit, provide id (the paragraph id) and the fields to update — this also reaches a paragraph nested inside a <DualDialogue> block. For remove, provide id and the paragraph is deleted; the response reports its type so a caller can confirm what was removed. remove refuses a dual-dialogue wrapper paragraph (one holding a <DualDialogue> block) rather than silently deleting every paragraph nested inside it — use edit_dual_dialogue action=remove instead (extract=true keeps the nested paragraphs, extract=false discards them along with the wrapper); remove and create's beforeParId/afterParId anchoring do not reach paragraphs nested inside a DualDialogue. After editing, call save_fdx to persist changes to disk.",
   inputSchema: {
     type: "object",
     properties: {
@@ -41,6 +41,11 @@ export const editParTool: FdxTool = {
       id: { type: "string", description: "id is the paragraph id to edit or remove (required for edit and remove)" },
       type: { type: "string", description: "paragraph type (e.g., Scene Heading, Action, Dialogue)" },
       alignment: { type: "string", description: "alignment setting" },
+      color: {
+        type: "string",
+        description:
+          "(create) sets SceneProperties.Color on the new paragraph, creating the block. Meaningful for Scene Heading and similarly-classed section paragraphs; written verbatim, not format-validated — see get_context for Final Draft's actual color format.",
+      },
       textRuns: {
         type: "array",
         description:
@@ -106,6 +111,7 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
   const id = arg<string>(args, "id");
   const typeArg = arg<string>(args, "type");
   const alignment = arg<string>(args, "alignment");
+  const color = arg<string>(args, "color");
   const textRuns = (arg<TextRunInput[]>(args, "textRuns") ?? []).map((tr) => ({
     content: tr.content,
     style: tr.style,
@@ -182,6 +188,10 @@ export async function handleEditPar(args: Record<string, unknown> | undefined): 
     const type = typeArg ?? "";
     const newId = generateUuid();
     const newPara = buildParagraphElement(type, newId, alignment, textRuns);
+    if (color !== undefined) {
+      const sp = getOrCreateSceneProperties(newPara);
+      setAttr(sp, "Color", color);
+    }
     if (beforeParId) {
       const idx = paragraphs.findIndex((p) => getParagraphId(p) === beforeParId);
       if (idx === -1) return errResult("failed to create paragraph: anchor paragraph not found");
