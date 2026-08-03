@@ -9,16 +9,16 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, pushWarning, skippedNestedWarning } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
-import { getParagraphId, getParagraphType, getParagraphRuns } from "../fdx/paragraph.ts";
+import { getParagraphId, getParagraphType, getParagraphRuns, countNestedParagraphs } from "../fdx/paragraph.ts";
 import { findContainingSectionIndex } from "../fdx/sections.ts";
 import { getSceneProperties } from "./breakdown.ts";
 
 export const getFlaggedWordsTool: FdxTool = {
   name: "get_flagged_words",
   description:
-    'Read-Only. Surfaces every <Text> run carrying AdornmentStyle="-1" — Final Draft\'s unknown-word marker — as {word, paragraphId, paragraphType, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/replace_text). Pass excludeIgnoreList=true to filter out words already in the spell-check ignore list.',
+    'Read-Only. Surfaces every <Text> run carrying AdornmentStyle="-1" — Final Draft\'s unknown-word marker — as {word, paragraphId, paragraphType, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/replace_text — a warning is prepended reporting how many were skipped when the document contains any). Pass excludeIgnoreList=true to filter out words already in the spell-check ignore list.',
   inputSchema: {
     type: "object",
     properties: {
@@ -80,5 +80,7 @@ export async function handleGetFlaggedWords(args: Record<string, unknown> | unde
   }
 
   const body = { flaggedWords, count: flaggedWords.length };
-  return pushCacheWarning(textResult(JSON.stringify(body, null, 2)), warning);
+  let result = textResult(JSON.stringify(body, null, 2));
+  result = pushWarning(result, skippedNestedWarning(countNestedParagraphs(paragraphs)));
+  return pushCacheWarning(result, warning);
 }

@@ -82,3 +82,30 @@ describe("get_flagged_words", () => {
     expect((without.flaggedWords as unknown[]).length).toBe(1);
   });
 });
+
+describe("get_flagged_words with a DualDialogue in the document", () => {
+  test("reports the skipped-nested count", async () => {
+    const path = fixture(`
+      <Paragraph Type="Action" id="a1"><Text>Setup.</Text></Paragraph>
+      <Paragraph Type="General" id="wrap1">
+        <DualDialogue>
+          <Paragraph Type="Character" id="c1"><Text>ALICE</Text></Paragraph>
+          <Paragraph Type="Dialogue" id="d1"><Text>Hi.</Text></Paragraph>
+        </DualDialogue>
+      </Paragraph>
+    `);
+    await handleReadFdx({ path });
+    const result = await handleGetFlaggedWords({ path });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).toContain(
+      "2 paragraph(s) nested inside a DualDialogue block were not scanned by this call.",
+    );
+  });
+
+  test("no DualDialogue means no warning", async () => {
+    const path = fixture(`<Paragraph Type="Action" id="a1"><Text>Plain.</Text></Paragraph>`);
+    await handleReadFdx({ path });
+    const result = await handleGetFlaggedWords({ path });
+    expect(result.content[0]!.text).not.toContain("nested inside a DualDialogue");
+  });
+});
