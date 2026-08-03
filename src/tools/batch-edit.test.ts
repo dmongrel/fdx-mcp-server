@@ -5,6 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { handleBatchEdit } from "./batch-edit.ts";
+import { handleGetSceneProperties } from "./get-scene-properties.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 import { getParagraphId, paragraphText } from "../fdx/paragraph.ts";
@@ -138,6 +139,37 @@ describe("batch_edit", () => {
 
     const secondRollback = documentCache.rollback(path);
     expect(secondRollback).toEqual({ ok: true });
+    expect(documentCache.get(path)!.serialize()).toBe(before);
+  });
+
+  test("runs edit_scene_properties as one step in a batch", async () => {
+    const { path } = freshDoc("scene-properties-success");
+    const sceneId = "6e39d99f-6972-42f8-bdc8-3f0dbe546280";
+
+    const result = await handleBatchEdit({
+      path,
+      operations: [{ tool: "edit_scene_properties", args: { id: sceneId, color: "#6363A7A7EFEF" } }],
+    });
+    expect(result.isError).toBeFalsy();
+
+    const getResult = await handleGetSceneProperties({ path, id: sceneId });
+    const props = JSON.parse(getResult.content[getResult.content.length - 1]!.text);
+    expect(props.color).toBe("#6363A7A7EFEF");
+  });
+
+  test("rolls back edit_scene_properties when a later operation in the batch fails", async () => {
+    const { path, doc } = freshDoc("scene-properties-rollback");
+    const sceneId = "6e39d99f-6972-42f8-bdc8-3f0dbe546280";
+    const before = doc.serialize();
+
+    const result = await handleBatchEdit({
+      path,
+      operations: [
+        { tool: "edit_scene_properties", args: { id: sceneId, color: "#6363A7A7EFEF" } },
+        { tool: "edit_par", args: { action: "edit", id: "does-not-exist", type: "Action" } },
+      ],
+    });
+    expect(result.isError).toBe(true);
     expect(documentCache.get(path)!.serialize()).toBe(before);
   });
 });

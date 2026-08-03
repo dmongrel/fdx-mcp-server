@@ -20,6 +20,7 @@ import { handleEditPar } from "./edit-par.ts";
 import { handleEditDualDialogue } from "./edit-dual-dialogue.ts";
 import { handleEditCast } from "./edit-cast.ts";
 import { handleEditSceneArcBeats } from "./edit-scene-arc-beats.ts";
+import { handleEditSceneProperties } from "./edit-scene-properties.ts";
 import { handleEditSmarttypeCharacters } from "./edit-smarttype-characters.ts";
 import { handleEditSmarttypeExtensions } from "./edit-smarttype-extensions.ts";
 import { handleEditSmarttypeLocations } from "./edit-smarttype-locations.ts";
@@ -42,6 +43,7 @@ const ALLOWED_OPERATIONS: Record<string, OperationHandler> = {
   edit_dual_dialogue: handleEditDualDialogue,
   edit_cast: handleEditCast,
   edit_scene_arc_beats: handleEditSceneArcBeats,
+  edit_scene_properties: handleEditSceneProperties,
   edit_smarttype_characters: handleEditSmarttypeCharacters,
   edit_smarttype_extensions: handleEditSmarttypeExtensions,
   edit_smarttype_locations: handleEditSmarttypeLocations,
