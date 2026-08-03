@@ -194,7 +194,12 @@ export const contextTools: ToolInfo[] = [
   {
     name: "find_par",
     description:
-      "Read-Only. Search for a paragraph by text content. Returns a JSON array of hits, each carrying id, type, text, and the containing section's sceneId/sceneHeading/page.",
+      "Read-Only. Search for a paragraph by text content. Returns a JSON array of hits, each carrying id, type, text, and the containing section's sceneId/sceneHeading/page. Scoped to top-level body paragraphs — a warning is prepended reporting how many nested inside a DualDialogue block were not scanned, when the searched scope contains any.",
+  },
+  {
+    name: "replace_text",
+    description:
+      "Find and replace text across paragraphs, substituting inside each <Text> run's own content so run boundaries and attributes are preserved. A match spanning two runs is left unreplaced and reported as skipped. Pass preview=true to see matches without changing anything. Scoped to top-level body paragraphs — a warning is prepended reporting how many nested inside a DualDialogue block were not scanned, when the scope contains any.",
   },
   {
     name: "get_smarttype_characters",
@@ -339,12 +344,12 @@ export const contextTools: ToolInfo[] = [
   {
     name: "get_flagged_words",
     description:
-      'Read-Only. Surfaces every <Text> run carrying AdornmentStyle="-1" — Final Draft\'s unknown-word marker — as {word, paragraphId, paragraphType, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/replace_text). Pass excludeIgnoreList=true to filter out words already in the spell-check ignore list.',
+      'Read-Only. Surfaces every <Text> run carrying AdornmentStyle="-1" — Final Draft\'s unknown-word marker — as {word, paragraphId, paragraphType, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/replace_text — a warning is prepended reporting how many were skipped when the document contains any). Pass excludeIgnoreList=true to filter out words already in the spell-check ignore list.',
   },
   {
     name: "get_placeholders",
     description:
-      'Read-Only. Lists every paragraph whose full text (trimmed) is entirely one [...] span — a drafting placeholder like "[FIX - ...]" — regardless of paragraph type, as {id, type, text, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/get_flagged_words). Combine with batch_edit and edit_par action=remove to bulk-clear placeholders once applied; see also get_script_stats\'s placeholderCount and excludePlaceholders.',
+      'Read-Only. Lists every paragraph whose full text (trimmed) is entirely one [...] span — a drafting placeholder like "[FIX - ...]" — regardless of paragraph type, as {id, type, text, page} per hit. Scoped to top-level body paragraphs (nested DualDialogue paragraphs are out of scope, same as find_par/get_flagged_words — a warning is prepended reporting how many were skipped when the document contains any). Combine with batch_edit and edit_par action=remove to bulk-clear placeholders once applied; see also get_script_stats\'s placeholderCount and excludePlaceholders.',
   },
   {
     name: "get_scene_index",
@@ -354,7 +359,7 @@ export const contextTools: ToolInfo[] = [
   {
     name: "get_character_appearances",
     description:
-      "Read-Only. Retrieve, as JSON, each character's scene-by-scene appearance counts (Character/Parenthetical/Dialogue paragraphs attributed to that speaker). Pass character to filter to one name (case-insensitive); omit for every character sorted by total count descending.",
+      "Read-Only. Retrieve, as JSON, each character's scene-by-scene appearance counts (Character/Parenthetical/Dialogue paragraphs attributed to that speaker). Pass character to filter to one name (case-insensitive); omit for every character sorted by total count descending. Scoped to top-level body paragraphs — a warning is prepended reporting how many nested inside a DualDialogue block were not scanned when the document contains any; speaker attribution around a DualDialogue interruption may also be inaccurate.",
   },
   {
     name: "get_page_map",

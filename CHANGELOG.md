@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.19] - 2026-08-02
+
+### Changed
+
+- **`find_par`**, **`replace_text`**, **`get_flagged_words`**, **`get_placeholders`**, and **`get_character_appearances`** now prepend a warning reporting how many paragraphs nested inside a `<DualDialogue>` block were out of scope for that call, when the queried scope contains any. None of these tools descend into `DualDialogue` blocks — this makes the existing blind spot visible in the output instead of only in documentation.
+
 ## [0.0.18] - 2026-08-02
 
 ### Fixed
