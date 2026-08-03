@@ -93,7 +93,7 @@ export const contextRules: ContextRule[] = [
   {
     title: "Dual Dialogue",
     content:
-      "Side-by-side dialogue is nested inside a Type='General' wrapper paragraph with a <DualDialogue> child. Use edit_dual_dialogue to create (move paragraphs into wrapper) or remove (delete wrapper, optionally extract contents).",
+      "Side-by-side dialogue is nested inside a wrapper paragraph with a <DualDialogue> child; edit_dual_dialogue action=create always builds this wrapper with Type='General', but a wrapper Final Draft's own UI authors may instead carry the first contained paragraph's type (e.g. Type='Character') — don't filter on wrapper type to find dual-dialogue blocks. Use edit_dual_dialogue to create (move paragraphs into wrapper) or remove (delete wrapper, optionally extract contents).",
   },
   {
     title: "Section Boundaries",
