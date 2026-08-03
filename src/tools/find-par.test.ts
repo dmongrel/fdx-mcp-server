@@ -5,6 +5,7 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { readFileSync } from "node:fs";
 import { handleFindPar } from "./find-par.ts";
+import { handleEditDualDialogue } from "./edit-dual-dialogue.ts";
 import { documentCache } from "../fdx/cache.ts";
 import { FdxDocument } from "../fdx/document.ts";
 
@@ -104,5 +105,44 @@ describe("find_par", () => {
     expect(hit!.sceneId).toBeNull();
     expect(hit!.sceneHeading).toBeNull();
     expect(hit!.page).toBeNull();
+  });
+});
+
+describe("find_par with a DualDialogue in the document", () => {
+  const CHARACTER_ID = "a3049b85-f812-4aaa-9532-9f53f774f758";
+  const PARENTHETICAL_ID = "bbee1c41-6ca4-4ae2-bb0e-4c2769f23a16";
+  const DIALOGUE_ID = "b5437965-e39f-4236-a0c0-641860dcfb96";
+  const FIRST_SCENE_ID = "6e39d99f-6972-42f8-bdc8-3f0dbe546280";
+
+  async function withDualDialogue(key: string) {
+    const { path } = freshDoc(key);
+    await handleEditDualDialogue({
+      path,
+      action: "create",
+      ids: [CHARACTER_ID, PARENTHETICAL_ID, DIALOGUE_ID],
+    });
+    return path;
+  }
+
+  test("whole-document search reports the skipped-nested count", async () => {
+    const path = await withDualDialogue("skip-warning");
+    const result = await handleFindPar({ path, textContent: "does not matter" });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).toContain(
+      "3 paragraph(s) nested inside a DualDialogue block were not scanned by this call.",
+    );
+  });
+
+  test("a scene-scoped search that does not include the DualDialogue reports no skip", async () => {
+    const path = await withDualDialogue("skip-scoped-out");
+    const result = await handleFindPar({ path, textContent: "does not matter", id: FIRST_SCENE_ID });
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0]!.text).not.toContain("nested inside a DualDialogue");
+  });
+
+  test("no DualDialogue in scope means no warning", async () => {
+    const { path } = freshDoc("no-dual-dialogue");
+    const result = await handleFindPar({ path, textContent: "does not matter" });
+    expect(result.content[0]!.text).not.toContain("nested inside a DualDialogue");
   });
 });

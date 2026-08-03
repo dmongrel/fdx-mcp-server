@@ -10,16 +10,16 @@
  */
 
 import type { FdxTool, ToolResult } from "./shared.ts";
-import { arg, textResult, errResult, getCachedFdx, pushCacheWarning } from "./shared.ts";
+import { arg, textResult, errResult, getCachedFdx, pushCacheWarning, pushWarning, skippedNestedWarning } from "./shared.ts";
 import type { FdxDocument } from "../fdx/document.ts";
-import { getParagraphId, getParagraphType, paragraphText } from "../fdx/paragraph.ts";
+import { getParagraphId, getParagraphType, paragraphText, countNestedParagraphs } from "../fdx/paragraph.ts";
 import { findSectionIndex, findSectionEnd, findContainingSectionIndex } from "../fdx/sections.ts";
 import { getSceneProperties } from "./breakdown.ts";
 
 export const findParTool: FdxTool = {
   name: "find_par",
   description:
-    "Read-Only. Search for a paragraph by text content. Returns a JSON array of hits, each carrying id, type, text, and the containing section's sceneId/sceneHeading/page (all null when the hit is before any section heading) — no separate lookup needed to place a match in the document.",
+    "Read-Only. Search for a paragraph by text content. Returns a JSON array of hits, each carrying id, type, text, and the containing section's sceneId/sceneHeading/page (all null when the hit is before any section heading) — no separate lookup needed to place a match in the document. When the searched scope contains a DualDialogue block, a warning is prepended reporting how many nested paragraphs were not scanned.",
   inputSchema: {
     type: "object",
     properties: {
@@ -108,5 +108,8 @@ export async function handleFindPar(args: Record<string, unknown> | undefined): 
     });
   }
 
-  return pushCacheWarning(textResult(JSON.stringify(hits)), warning);
+  const skipped = countNestedParagraphs(paragraphs.slice(startIndex, endIndex));
+  let result = textResult(JSON.stringify(hits));
+  result = pushWarning(result, skippedNestedWarning(skipped));
+  return pushCacheWarning(result, warning);
 }
