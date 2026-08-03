@@ -11,76 +11,77 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
-import { getContextTool, handleGetContext } from "./tools/get-context.ts";
-import { searchActionsTool, handleSearchActions } from "./tools/search-actions.ts";
-import { readFdxTool, handleReadFdx } from "./tools/read-fdx.ts";
-import { saveFdxTool, handleSaveFdx } from "./tools/save-fdx.ts";
-import { newFileTool, handleNewFile } from "./tools/new-file.ts";
-import { getCacheStatusTool, handleGetCacheStatus } from "./tools/get-cache-status.ts";
-import { closeFdxTool, handleCloseFdx } from "./tools/close-fdx.ts";
-import { reloadFdxTool, handleReloadFdx } from "./tools/reload-fdx.ts";
-import { savepointTool, handleSavepoint } from "./tools/savepoint.ts";
-import { rollbackTool, handleRollback } from "./tools/rollback.ts";
-import { batchEditTool, handleBatchEdit } from "./tools/batch-edit.ts";
-import { getParTool, handleGetPar } from "./tools/get-par.ts";
-import { findDuplicateIdsTool, handleFindDuplicateIds } from "./tools/find-duplicate-ids.ts";
-import { fixDuplicateIdsTool, handleFixDuplicateIds } from "./tools/fix-duplicate-ids.ts";
-import { getParRunsTool, handleGetParRuns } from "./tools/get-par-runs.ts";
-import { editParTool, handleEditPar } from "./tools/edit-par.ts";
-import { createDialogueTool, handleCreateDialogue } from "./tools/create-dialogue.ts";
-import { diffFdxTool, handleDiffFdx } from "./tools/diff-fdx.ts";
-import { findParTool, handleFindPar } from "./tools/find-par.ts";
-import { replaceTextTool, handleReplaceText } from "./tools/replace-text.ts";
-import { readFullFileTool, handleReadFullFile } from "./tools/read-full-file.ts";
-import { listTypesTool, handleListTypes } from "./tools/list-types.ts";
-import { getSmarttypeCharactersTool, handleGetSmarttypeCharacters } from "./tools/get-smarttype-characters.ts";
-import { editSmarttypeCharactersTool, handleEditSmarttypeCharacters } from "./tools/edit-smarttype-characters.ts";
-import { renameCharacterTool, handleRenameCharacter } from "./tools/rename-character.ts";
-import { getCastTool, handleGetCast } from "./tools/get-cast.ts";
-import { editCastTool, handleEditCast } from "./tools/edit-cast.ts";
-import { getSmarttypeExtensionsTool, handleGetSmarttypeExtensions } from "./tools/get-smarttype-extensions.ts";
-import { editSmarttypeExtensionsTool, handleEditSmarttypeExtensions } from "./tools/edit-smarttype-extensions.ts";
-import { getSmarttypeLocationsTool, handleGetSmarttypeLocations } from "./tools/get-smarttype-locations.ts";
-import { editSmarttypeLocationsTool, handleEditSmarttypeLocations } from "./tools/edit-smarttype-locations.ts";
-import { getLocationsTool, handleGetLocations } from "./tools/get-locations.ts";
-import { editLocationsTool, handleEditLocations } from "./tools/edit-locations.ts";
-import { getSmarttypeSceneIntrosTool, handleGetSmarttypeSceneIntros } from "./tools/get-smarttype-scene-intros.ts";
-import { editSmarttypeSceneIntrosTool, handleEditSmarttypeSceneIntros } from "./tools/edit-smarttype-scene-intros.ts";
-import { getSmarttypeTimesOfDayTool, handleGetSmarttypeTimesOfDay } from "./tools/get-smarttype-times-of-day.ts";
-import { editSmarttypeTimesOfDayTool, handleEditSmarttypeTimesOfDay } from "./tools/edit-smarttype-times-of-day.ts";
-import { getSmarttypeTransitionsTool, handleGetSmarttypeTransitions } from "./tools/get-smarttype-transitions.ts";
-import { editSmarttypeTransitionsTool, handleEditSmarttypeTransitions } from "./tools/edit-smarttype-transitions.ts";
-import { getSpellCheckListsTool, handleGetSpellCheckLists } from "./tools/get-spell-check-lists.ts";
-import { editSpellCheckTool, handleEditSpellCheck } from "./tools/edit-spell-check.ts";
-import { getSectionTool, handleGetSection } from "./tools/get-section.ts";
-import { getSectionListTool, handleGetSectionList } from "./tools/get-section-list.ts";
-import { getDualDialogueTool, handleGetDualDialogue } from "./tools/get-dual-dialogue.ts";
-import { editDualDialogueTool, handleEditDualDialogue } from "./tools/edit-dual-dialogue.ts";
-import { getTitlePageTool, handleGetTitlePage } from "./tools/get-title-page.ts";
-import { editTitlePageTool, handleEditTitlePage } from "./tools/edit-title-page.ts";
-import { getCopyrightTool, handleGetCopyright } from "./tools/get-copyright.ts";
-import { editCopyrightTool, handleEditCopyright } from "./tools/edit-copyright.ts";
-import { getMacroAliasListTool, handleGetMacroAliasList } from "./tools/get-macro-alias-list.ts";
-import { getMacroAliasTool, handleGetMacroAlias } from "./tools/get-macro-alias.ts";
-import { getElementSettingsTool, handleGetElementSettings } from "./tools/get-element-settings.ts";
-import { editElementSettingsTool, handleEditElementSettings } from "./tools/edit-element-settings.ts";
-import { getHeaderAndFooterTool, handleGetHeaderAndFooter } from "./tools/get-header-and-footer.ts";
-import { editHeaderAndFooterTool, handleEditHeaderAndFooter } from "./tools/edit-header-and-footer.ts";
-import { getScriptStatsTool, handleGetScriptStats } from "./tools/get-script-stats.ts";
-import { getFlaggedWordsTool, handleGetFlaggedWords } from "./tools/get-flagged-words.ts";
-import { getPlaceholdersTool, handleGetPlaceholders } from "./tools/get-placeholders.ts";
-import { getSceneIndexTool, handleGetSceneIndex } from "./tools/get-scene-index.ts";
-import { getCharacterAppearancesTool, handleGetCharacterAppearances } from "./tools/get-character-appearances.ts";
-import { getPageMapTool, handleGetPageMap } from "./tools/get-page-map.ts";
-import { getScenePropertiesTool, handleGetSceneProperties } from "./tools/get-scene-properties.ts";
-import { editScenePropertiesTool, handleEditSceneProperties } from "./tools/edit-scene-properties.ts";
-import { getSceneArcBeatsTool, handleGetSceneArcBeats } from "./tools/get-scene-arc-beats.ts";
-import { editSceneArcBeatsTool, handleEditSceneArcBeats } from "./tools/edit-scene-arc-beats.ts";
-import { getRevisionsTool, handleGetRevisions } from "./tools/get-revisions.ts";
-import { getTagDataTool, handleGetTagData } from "./tools/get-tag-data.ts";
-import { getDisplayBoardsTool, handleGetDisplayBoards } from "./tools/get-display-boards.ts";
-import { getFdxBreakdownTool, handleGetFdxBreakdown } from "./tools/get-fdx-breakdown.ts";
-import { convertToPdfTool, handleConvertToPdf } from "./tools/convert-to-pdf.ts";
+import { tools } from "./tools/registry.ts";
+import { handleGetContext } from "./tools/get-context.ts";
+import { handleSearchActions } from "./tools/search-actions.ts";
+import { handleReadFdx } from "./tools/read-fdx.ts";
+import { handleSaveFdx } from "./tools/save-fdx.ts";
+import { handleNewFile } from "./tools/new-file.ts";
+import { handleGetCacheStatus } from "./tools/get-cache-status.ts";
+import { handleCloseFdx } from "./tools/close-fdx.ts";
+import { handleReloadFdx } from "./tools/reload-fdx.ts";
+import { handleSavepoint } from "./tools/savepoint.ts";
+import { handleRollback } from "./tools/rollback.ts";
+import { handleBatchEdit } from "./tools/batch-edit.ts";
+import { handleGetPar } from "./tools/get-par.ts";
+import { handleFindDuplicateIds } from "./tools/find-duplicate-ids.ts";
+import { handleFixDuplicateIds } from "./tools/fix-duplicate-ids.ts";
+import { handleGetParRuns } from "./tools/get-par-runs.ts";
+import { handleEditPar } from "./tools/edit-par.ts";
+import { handleCreateDialogue } from "./tools/create-dialogue.ts";
+import { handleDiffFdx } from "./tools/diff-fdx.ts";
+import { handleFindPar } from "./tools/find-par.ts";
+import { handleReplaceText } from "./tools/replace-text.ts";
+import { handleReadFullFile } from "./tools/read-full-file.ts";
+import { handleListTypes } from "./tools/list-types.ts";
+import { handleGetSmarttypeCharacters } from "./tools/get-smarttype-characters.ts";
+import { handleEditSmarttypeCharacters } from "./tools/edit-smarttype-characters.ts";
+import { handleRenameCharacter } from "./tools/rename-character.ts";
+import { handleGetCast } from "./tools/get-cast.ts";
+import { handleEditCast } from "./tools/edit-cast.ts";
+import { handleGetSmarttypeExtensions } from "./tools/get-smarttype-extensions.ts";
+import { handleEditSmarttypeExtensions } from "./tools/edit-smarttype-extensions.ts";
+import { handleGetSmarttypeLocations } from "./tools/get-smarttype-locations.ts";
+import { handleEditSmarttypeLocations } from "./tools/edit-smarttype-locations.ts";
+import { handleGetLocations } from "./tools/get-locations.ts";
+import { handleEditLocations } from "./tools/edit-locations.ts";
+import { handleGetSmarttypeSceneIntros } from "./tools/get-smarttype-scene-intros.ts";
+import { handleEditSmarttypeSceneIntros } from "./tools/edit-smarttype-scene-intros.ts";
+import { handleGetSmarttypeTimesOfDay } from "./tools/get-smarttype-times-of-day.ts";
+import { handleEditSmarttypeTimesOfDay } from "./tools/edit-smarttype-times-of-day.ts";
+import { handleGetSmarttypeTransitions } from "./tools/get-smarttype-transitions.ts";
+import { handleEditSmarttypeTransitions } from "./tools/edit-smarttype-transitions.ts";
+import { handleGetSpellCheckLists } from "./tools/get-spell-check-lists.ts";
+import { handleEditSpellCheck } from "./tools/edit-spell-check.ts";
+import { handleGetSection } from "./tools/get-section.ts";
+import { handleGetSectionList } from "./tools/get-section-list.ts";
+import { handleGetDualDialogue } from "./tools/get-dual-dialogue.ts";
+import { handleEditDualDialogue } from "./tools/edit-dual-dialogue.ts";
+import { handleGetTitlePage } from "./tools/get-title-page.ts";
+import { handleEditTitlePage } from "./tools/edit-title-page.ts";
+import { handleGetCopyright } from "./tools/get-copyright.ts";
+import { handleEditCopyright } from "./tools/edit-copyright.ts";
+import { handleGetMacroAliasList } from "./tools/get-macro-alias-list.ts";
+import { handleGetMacroAlias } from "./tools/get-macro-alias.ts";
+import { handleGetElementSettings } from "./tools/get-element-settings.ts";
+import { handleEditElementSettings } from "./tools/edit-element-settings.ts";
+import { handleGetHeaderAndFooter } from "./tools/get-header-and-footer.ts";
+import { handleEditHeaderAndFooter } from "./tools/edit-header-and-footer.ts";
+import { handleGetScriptStats } from "./tools/get-script-stats.ts";
+import { handleGetFlaggedWords } from "./tools/get-flagged-words.ts";
+import { handleGetPlaceholders } from "./tools/get-placeholders.ts";
+import { handleGetSceneIndex } from "./tools/get-scene-index.ts";
+import { handleGetCharacterAppearances } from "./tools/get-character-appearances.ts";
+import { handleGetPageMap } from "./tools/get-page-map.ts";
+import { handleGetSceneProperties } from "./tools/get-scene-properties.ts";
+import { handleEditSceneProperties } from "./tools/edit-scene-properties.ts";
+import { handleGetSceneArcBeats } from "./tools/get-scene-arc-beats.ts";
+import { handleEditSceneArcBeats } from "./tools/edit-scene-arc-beats.ts";
+import { handleGetRevisions } from "./tools/get-revisions.ts";
+import { handleGetTagData } from "./tools/get-tag-data.ts";
+import { handleGetDisplayBoards } from "./tools/get-display-boards.ts";
+import { handleGetFdxBreakdown } from "./tools/get-fdx-breakdown.ts";
+import { handleConvertToPdf } from "./tools/convert-to-pdf.ts";
 
 /* ------------------------------------------------------------------ */
 /*  MCP Server instance                                               */
@@ -126,121 +127,6 @@ async function writeFile(path: string, content: string): Promise<void> {
   const { writeFile: writeFileNode } = await import("node:fs/promises");
   await writeFileNode(path, content, "utf8");
 }
-
-/* ------------------------------------------------------------------ */
-/*  Tool definitions                                                  */
-/* ------------------------------------------------------------------ */
-
-interface FdxTool {
-  name: string;
-  description: string;
-  inputSchema: object;
-}
-
-const tools: FdxTool[] = [
-  getContextTool,
-  searchActionsTool,
-  readFdxTool,
-  saveFdxTool,
-  newFileTool,
-  getCacheStatusTool,
-  closeFdxTool,
-  reloadFdxTool,
-  savepointTool,
-  rollbackTool,
-  batchEditTool,
-  getParTool,
-  findDuplicateIdsTool,
-  fixDuplicateIdsTool,
-  getParRunsTool,
-  editParTool,
-  createDialogueTool,
-  diffFdxTool,
-  findParTool,
-  replaceTextTool,
-  readFullFileTool,
-  listTypesTool,
-  getSmarttypeCharactersTool,
-  editSmarttypeCharactersTool,
-  renameCharacterTool,
-  getCastTool,
-  editCastTool,
-  getSmarttypeExtensionsTool,
-  editSmarttypeExtensionsTool,
-  getSmarttypeLocationsTool,
-  editSmarttypeLocationsTool,
-  getLocationsTool,
-  editLocationsTool,
-  getSmarttypeSceneIntrosTool,
-  editSmarttypeSceneIntrosTool,
-  getSmarttypeTimesOfDayTool,
-  editSmarttypeTimesOfDayTool,
-  getSmarttypeTransitionsTool,
-  editSmarttypeTransitionsTool,
-  getSpellCheckListsTool,
-  editSpellCheckTool,
-  getSectionTool,
-  getSectionListTool,
-  getDualDialogueTool,
-  editDualDialogueTool,
-  getTitlePageTool,
-  editTitlePageTool,
-  getCopyrightTool,
-  editCopyrightTool,
-  getMacroAliasListTool,
-  getMacroAliasTool,
-  getElementSettingsTool,
-  editElementSettingsTool,
-  getHeaderAndFooterTool,
-  editHeaderAndFooterTool,
-  getScriptStatsTool,
-  getFlaggedWordsTool,
-  getPlaceholdersTool,
-  getSceneIndexTool,
-  getCharacterAppearancesTool,
-  getPageMapTool,
-  getScenePropertiesTool,
-  editScenePropertiesTool,
-  getSceneArcBeatsTool,
-  editSceneArcBeatsTool,
-  getRevisionsTool,
-  getTagDataTool,
-  getDisplayBoardsTool,
-  getFdxBreakdownTool,
-  convertToPdfTool,
-  {
-    name: "read_file",
-    description: "Read the contents of a file at the given path.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        path: {
-          type: "string",
-          description: "Absolute or relative path to the file.",
-        },
-      },
-      required: ["path"],
-    },
-  },
-  {
-    name: "write_file",
-    description: "Write content to a file, creating it if it does not exist.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        path: {
-          type: "string",
-          description: "Absolute or relative path for the output file.",
-        },
-        content: {
-          type: "string",
-          description: "Text content to write.",
-        },
-      },
-      required: ["path", "content"],
-    },
-  },
-];
 
 /* ------------------------------------------------------------------ */
 /*  Request handlers                                                  */

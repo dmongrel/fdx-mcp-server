@@ -6,25 +6,16 @@
  * constraints, and the full list of available tools with their descriptions.
  */
 
-import type { FdxTool, ToolResult } from "./shared.ts";
+import type { ToolResult } from "./shared.ts";
 import { getContextText } from "./context-data.ts";
 import { checkForUpdate } from "./check-update.ts";
+import { baseDescription, getContextTool } from "./get-context-tool.ts";
 
 /* ------------------------------------------------------------------ */
 /*  Tool definition                                                   */
 /* ------------------------------------------------------------------ */
 
-const baseDescription =
-  "Read-Only. Call this tool before processing any file to get the exact formatting rules, constraints, and structural requirements. Returns a list of all available tools with their full descriptions. Calling it also checks for updates to fdx-mcp-server.";
-
-export const getContextTool: FdxTool = {
-  name: "get_context",
-  description: baseDescription,
-  inputSchema: {
-    type: "object",
-    properties: {},
-  },
-};
+export { getContextTool };
 
 /* ------------------------------------------------------------------ */
 /*  Update notice (injected at server start)                          */

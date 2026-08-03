@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.0.23] - 2026-08-02
+
+### Fixed
+
+- **`get_context`** and **`search_actions`** now list all 72 tools the server actually registers over MCP — previously they read from a separately hand-maintained roster (`contextTools` in `context-data.ts`) that had drifted to 64 entries, silently omitting `get_cast`, `edit_cast`, `edit_scene_arc_beats`, `find_duplicate_ids`, `fix_duplicate_ids`, `convert_to_pdf`, `read_file`, and `write_file`. The same drift had also left 35 of the 64 listed entries with stale descriptions that no longer matched the tool's actual behavior. The roster is now derived directly from the same registry (`src/tools/registry.ts`) that builds the server's MCP tool list, so the two can no longer diverge. `TOOLS.md` had the same drift (missing 5 of these tools and 2 stale descriptions) and is corrected too.
+- **`read_file`** and **`write_file`**'s descriptions now warn they are not for `.fdx` content, pointing to `read_fdx`/`edit_par` and the other `fdx_*` tools instead — previously a one-line description gave no indication that hand-editing screenplay XML through them risks merging runs and destroying attributes like `AdornmentStyle`.
+
 ## [0.0.22] - 2026-08-02
 
 ### Fixed
